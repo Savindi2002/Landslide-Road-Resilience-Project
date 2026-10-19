@@ -1,0 +1,1 @@
+The main runnable workflow is provided as Python scripts under `src/`. In Colab, upload/clone the repository and run the scripts in order. Keep all output from synthetic demonstration runs clearly labelled as synthetic.
