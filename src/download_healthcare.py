@@ -4,6 +4,7 @@ import time
 
 import osmnx as ox
 import pandas as pd
+import geopandas as gpd
 
 
 def main():
@@ -19,14 +20,15 @@ def main():
             "Run the original download script first."
         )
 
-    # Use the boundary already downloaded.
-    boundary = ox.io._get_crs  # Not used; boundary is read below.
-    import geopandas as gpd
-
+    # Read the previously downloaded study-area boundary.
     boundary = gpd.read_file(boundary_file)
+
+    if boundary.empty:
+        raise ValueError("The study-area boundary file is empty.")
+
     polygon = boundary.geometry.union_all()
 
-    # Try alternative public Overpass servers.
+    # Alternative public Overpass servers.
     endpoints = [
         "https://overpass.private.coffee/api",
         "https://maps.mail.ru/osm/tools/overpass/api",
@@ -34,25 +36,28 @@ def main():
 
     tags = {"amenity": ["hospital", "clinic"]}
 
+    ox.settings.requests_timeout = 180
+    ox.settings.use_cache = True
+
     for endpoint in endpoints:
         try:
             print(f"\nTrying Overpass server: {endpoint}")
 
             ox.settings.overpass_url = endpoint
-            ox.settings.requests_timeout = 180
-            ox.settings.use_cache = True
 
-            facilities = ox.features_from_polygon(polygon, tags)
+            facilities = ox.features_from_polygon(
+                polygon, tags
+            )
 
             if facilities.empty:
                 print("No matching facilities found on this server.")
                 continue
 
-            # Save the full geographic data.
+            # Save the geographic data.
             gpkg_path = data_dir / "healthcare_facilities.gpkg"
             facilities.to_file(gpkg_path, driver="GPKG")
 
-            # Save a table with representative coordinates.
+            # Create a CSV with representative coordinates.
             points = facilities.geometry.representative_point()
             table = facilities.drop(columns="geometry").copy()
             table["longitude"] = points.x
@@ -73,12 +78,12 @@ def main():
             time.sleep(3)
 
     print(
-        "\nBoth servers failed. Your previously downloaded road "
-        "files are not being downloaded again or deleted."
+        "\nBoth servers failed. Existing road files "
+        "will not be downloaded again or deleted."
     )
     print(
-        "Try again later, or use a smaller study area / an official "
-        "downloaded healthcare dataset."
+        "Try again later, or use a smaller study area "
+        "or an official healthcare dataset."
     )
 
 
