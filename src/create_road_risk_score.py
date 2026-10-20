@@ -10,7 +10,7 @@ ROAD_FILE = ROOT / "data/processed/road_terrain_clean.gpkg"
 LANDSLIDE_FILE = ROOT / "data/raw/landslide_inventory.gpkg"
 OUTPUT_FILE = ROOT / "data/processed/road_risk_scores.gpkg"
 OUTPUT_CSV = ROOT / "data/processed/road_risk_scores.csv"
-
+STUDY_AREA_FILE = ROOT / "data/raw/study_area.gpkg"
 print("Loading road and landslide data...")
 
 roads = gpd.read_file(ROAD_FILE)
