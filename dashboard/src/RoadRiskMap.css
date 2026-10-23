@@ -1,0 +1,69 @@
+
+.road-map-wrapper {
+  width: 100%;
+}
+
+.road-map {
+  width: 100%;
+  height: 520px;
+  border-radius: 12px;
+  z-index: 1;
+  background: #e2e8f0;
+}
+
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 16px 0;
+  font-size: 13px;
+  color: #475569;
+}
+
+.map-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.legend-dot.low {
+  background: #16a34a;
+}
+
+.legend-dot.medium {
+  background: #f59e0b;
+}
+
+.legend-dot.high {
+  background: #dc2626;
+}
+
+.map-disclaimer {
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #64748b;
+}
+
+.map-message {
+  padding: 24px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.road-popup {
+  min-width: 190px;
+  line-height: 1.5;
+}
+
+.road-popup p {
+  margin: 6px 0;
+}
