@@ -201,7 +201,7 @@ function HospitalRoute({
 
         onRouteStatus({
           type: 'success',
-          message: 'Route found. Verify current road conditions before travelling.',
+          message: `Route found: ${(route.distance / 1000).toFixed(1)} km, approximately ${Math.round(route.duration / 60)} minutes driving. Verify current road conditions before travelling.`,
         })
 
         if (coordinates.length > 0) {
