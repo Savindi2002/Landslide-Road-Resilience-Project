@@ -4,6 +4,7 @@ import {
   MapContainer,
   TileLayer,
   GeoJSON,
+  Marker,
   Polyline,
   useMap,
 } from 'react-leaflet'
@@ -11,289 +12,213 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import './RoadRiskMap.css'
 
-const DATA_URL = '/data/roads.geojson'
+const MAP_CENTER = [6.68, 80.4]
+const MAP_ZOOM = 10
+
+const ROADS_URL = '/data/roads.geojson'
 const HOSPITALS_URL = '/data/hospitals.geojson'
 
-const hospitalIcon = L.divIcon({
-  className: 'hospital-marker',
-  html: '<span>✚</span>',
-  iconSize: [32, 32],
-  iconAnchor: [16, 16],
-  popupAnchor: [0, -16],
-})
+const ROUTING_URL = 'https://router.project-osrm.org/route/v1/driving'
 
-function riskColor(score) {
-  if (score >= 0.65) return '#dc2626'
-  if (score >= 0.45) return '#f59e0b'
+function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+  const toRadians = (degrees) => (degrees * Math.PI) / 180
+  const earthRadiusKm = 6371
+
+  const dLat = toRadians(lat2 - lat1)
+  const dLon = toRadians(lon2 - lon1)
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) ** 2
+
+  return (
+    2 *
+    earthRadiusKm *
+    Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  )
+}
+
+function getFacilityName(feature, index = 0) {
+  const properties = feature?.properties || {}
+
+  return (
+    properties.name ||
+    properties.operator ||
+    `Healthcare facility ${properties.facility_id || index + 1}`
+  )
+}
+
+function getRoadRisk(feature) {
+  const properties = feature?.properties || {}
+  const value = Number(properties.risk_proxy_score)
+
+  return Number.isFinite(value) ? value : null
+}
+
+function getRoadColor(feature) {
+  const risk = getRoadRisk(feature)
+
+  if (risk === null) return '#7b8794'
+  if (risk >= 0.65) return '#dc2626'
+  if (risk >= 0.45) return '#f59e0b'
+
   return '#16a34a'
 }
 
-function MapContents({ data }) {
+function roadStyle(feature) {
+  return {
+    color: getRoadColor(feature),
+    weight: 3,
+    opacity: 0.8,
+  }
+}
+
+function createHospitalIcon() {
+  return L.divIcon({
+    className: 'hospital-marker-container',
+    html: '<div class="hospital-marker">✚</div>',
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
+    popupAnchor: [0, -13],
+  })
+}
+
+function getValidPoint(feature) {
+  if (feature?.geometry?.type !== 'Point') return null
+
+  const coordinates = feature.geometry.coordinates
+
+  if (
+    !Array.isArray(coordinates) ||
+    coordinates.length < 2 ||
+    !Number.isFinite(Number(coordinates[0])) ||
+    !Number.isFinite(Number(coordinates[1]))
+  ) {
+    return null
+  }
+
+  const [lng, lat] = coordinates.map(Number)
+
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    return null
+  }
+
+  return { lat, lng }
+}
+
+function CurrentLocationMarker({ position }) {
   const map = useMap()
 
   useEffect(() => {
-    if (!data?.features?.length) return
-
-    const layer = L.geoJSON(data)
-    const bounds = layer.getBounds()
-
-    if (bounds.isValid()) {
-      map.fitBounds(bounds, {
-        padding: [20, 20],
-        maxZoom: 12,
+    if (position) {
+      map.flyTo([position.lat, position.lng], 13, {
+        duration: 0.8,
       })
     }
-  }, [data, map])
+  }, [position, map])
 
-  function onEachRoad(feature, layer) {
-    const p = feature.properties || {}
-
-    const popup = document.createElement('div')
-    popup.className = 'road-popup'
-
-    const heading = document.createElement('strong')
-    heading.textContent =
-      p.name || `Road segment ${p.u ?? ''}–${p.v ?? ''}`
-
-    const score = Number(p.risk_proxy_score)
-    const risk = document.createElement('p')
-
-    risk.textContent =
-      `Estimated risk score: ${
-        p.risk_proxy_score != null &&
-        p.risk_proxy_score !== '' &&
-        Number.isFinite(score)
-          ? score.toFixed(3)
-          : 'Unavailable'
-      }`
-
-    const slopeValue = Number(p.slope_mean_deg)
-    const slope = document.createElement('p')
-
-    slope.textContent =
-      `Mean slope: ${
-        p.slope_mean_deg != null &&
-        p.slope_mean_deg !== '' &&
-        Number.isFinite(slopeValue)
-          ? `${slopeValue.toFixed(2)}°`
-          : 'Unavailable'
-      }`
-
-    const distanceValue = Number(p.nearest_landslide_m)
-    const distance = document.createElement('p')
-
-    distance.textContent =
-      `Nearest mapped landslide: ${
-        p.nearest_landslide_m != null &&
-        p.nearest_landslide_m !== '' &&
-        Number.isFinite(distanceValue)
-          ? `${distanceValue.toFixed(0)} m`
-          : 'Unavailable'
-      }`
-
-    const note = document.createElement('small')
-    note.textContent =
-      'Research estimate only. Not a live warning or safety guarantee.'
-
-    popup.append(heading, risk, slope, distance, note)
-    layer.bindPopup(popup)
-  }
+  if (!position) return null
 
   return (
-    <GeoJSON
-      data={data}
-      style={(feature) => {
-        const value = feature?.properties?.risk_proxy_score
-        const score = Number(value)
-
-        const valid =
-          value != null &&
-          value !== '' &&
-          Number.isFinite(score)
-
-        return {
-          color: valid ? riskColor(score) : '#64748b',
-          weight: valid && score >= 0.65 ? 3 : 2,
-          opacity: 0.85,
-        }
-      }}
-      onEachFeature={onEachRoad}
+    <Marker
+      position={[position.lat, position.lng]}
+      icon={L.divIcon({
+        className: 'current-location-container',
+        html: '<div class="current-location-dot"></div>',
+        iconSize: [22, 22],
+        iconAnchor: [11, 11],
+      })}
     />
   )
 }
 
-function HospitalMarkers({ hospitals, selectedHospital }) {
+function HospitalRoute({
+  origin,
+  destination,
+  onRouteStatus,
+}) {
   const map = useMap()
-
-  useEffect(() => {
-    if (!selectedHospital) return
-
-    const coordinates = selectedHospital.geometry?.coordinates
-
-    if (
-      selectedHospital.geometry?.type !== 'Point' ||
-      !Array.isArray(coordinates) ||
-      coordinates.length < 2
-    ) {
-      return
-    }
-
-    const [longitude, latitude] = coordinates
-
-    if (
-      !Number.isFinite(latitude) ||
-      !Number.isFinite(longitude)
-    ) {
-      return
-    }
-
-    map.flyTo([latitude, longitude], 15, {
-      duration: 0.8,
-    })
-
-    const timer = window.setTimeout(() => {
-      map.eachLayer((layer) => {
-        if (
-          layer instanceof L.Marker &&
-          layer.options.icon === hospitalIcon
-        ) {
-          const position = layer.getLatLng()
-
-          if (
-            Math.abs(position.lat - latitude) < 0.000001 &&
-            Math.abs(position.lng - longitude) < 0.000001
-          ) {
-            layer.openPopup()
-          }
-        }
-      })
-    }, 900)
-
-    return () => window.clearTimeout(timer)
-  }, [selectedHospital, map])
-
-  function onEachHospital(feature, layer) {
-    const p = feature.properties || {}
-
-    const popup = document.createElement('div')
-    popup.className = 'hospital-popup'
-
-    const title = document.createElement('strong')
-    title.textContent = p.name || 'Unnamed healthcare facility'
-    popup.append(title)
-
-    if (p.phone) {
-      const phone = document.createElement('p')
-      phone.textContent = `Phone: ${p.phone}`
-      popup.append(phone)
-    }
-
-    if (p.website) {
-      try {
-        const url = new URL(p.website)
-
-        if (
-          url.protocol === 'http:' ||
-          url.protocol === 'https:'
-        ) {
-          const link = document.createElement('a')
-          link.href = url.href
-          link.target = '_blank'
-          link.rel = 'noopener noreferrer'
-          link.textContent = 'Healthcare facility website'
-          popup.append(link)
-        }
-      } catch {
-        // Ignore invalid website values.
-      }
-    }
-
-    const note = document.createElement('p')
-    note.textContent =
-      'Facility information may be incomplete. Confirm details before travelling.'
-    popup.append(note)
-
-    layer.bindPopup(popup)
-  }
-
-  return (
-    <GeoJSON
-      key="hospital-markers"
-      data={hospitals}
-      pointToLayer={(_feature, latlng) =>
-        L.marker(latlng, { icon: hospitalIcon })
-      }
-      onEachFeature={onEachHospital}
-    />
-  )
-}
-
-function HospitalRoute({ origin, destination }) {
-  const map = useMap()
-
-  const [route, setRoute] = useState(null)
-  const [routeError, setRouteError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [routeCoordinates, setRouteCoordinates] = useState([])
+  const [routeInfo, setRouteInfo] = useState(null)
 
   useEffect(() => {
     let cancelled = false
+    const controller = new AbortController()
 
     async function loadRoute() {
+      setRouteCoordinates([])
+      setRouteInfo(null)
+
       if (!origin || !destination) {
-        setRoute(null)
-        setRouteError('')
-        setLoading(false)
+        onRouteStatus({
+          type: 'idle',
+          message: '',
+        })
         return
       }
 
-      setRoute(null)
-      setRouteError('')
-      setLoading(true)
+      onRouteStatus({
+        type: 'loading',
+        message: 'Finding a route...',
+      })
 
       try {
         const url =
-          'https://router.project-osrm.org/route/v1/driving/' +
+          `${ROUTING_URL}/` +
           `${origin.lng},${origin.lat};` +
           `${destination.lng},${destination.lat}` +
           '?overview=full&geometries=geojson'
 
-        const response = await fetch(url)
+        const response = await fetch(url, {
+          signal: controller.signal,
+        })
 
         if (!response.ok) {
-          throw new Error('Route request failed.')
+          throw new Error('The routing service could not be reached.')
         }
 
-        const result = await response.json()
+        const data = await response.json()
 
-        if (result.code !== 'Ok' || !result.routes?.length) {
-          throw new Error('No route found.')
+        if (data.code !== 'Ok' || !data.routes?.length) {
+          throw new Error('No route was returned for this destination.')
         }
 
-        const coordinates =
-          result.routes[0].geometry.coordinates.map(
-            ([lng, lat]) => [lat, lng]
-          )
+        const route = data.routes[0]
 
-        if (!cancelled) {
-          setRoute(coordinates)
+        const coordinates = route.geometry.coordinates.map(
+          ([lng, lat]) => [lat, lng]
+        )
 
-          const bounds = L.latLngBounds(coordinates)
+        if (cancelled) return
 
-          map.fitBounds(bounds, {
-            padding: [35, 35],
-            maxZoom: 15,
+        setRouteCoordinates(coordinates)
+        setRouteInfo({
+          distanceKm: route.distance / 1000,
+          durationMinutes: route.duration / 60,
+        })
+
+        onRouteStatus({
+          type: 'success',
+          message: 'Route found. Verify current road conditions before travelling.',
+        })
+
+        if (coordinates.length > 0) {
+          map.fitBounds(coordinates, {
+            padding: [40, 40],
+            maxZoom: 14,
           })
         }
-      } catch {
-        if (!cancelled) {
-          setRouteError(
-            'Unable to find a route. Check your internet connection and try again.'
-          )
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false)
-        }
+      } catch (error) {
+        if (error.name === 'AbortError' || cancelled) return
+
+        onRouteStatus({
+          type: 'error',
+          message:
+            error.message ||
+            'Could not calculate the route. Please try again.',
+        })
       }
     }
 
@@ -301,182 +226,354 @@ function HospitalRoute({ origin, destination }) {
 
     return () => {
       cancelled = true
+      controller.abort()
     }
-  }, [origin, destination, map])
+  }, [
+    origin,
+    destination,
+    map,
+    onRouteStatus,
+  ])
 
   return (
     <>
-      {route && (
+      {routeCoordinates.length > 0 && (
         <Polyline
-          positions={route}
+          positions={routeCoordinates}
           pathOptions={{
             color: '#2563eb',
-            weight: 5,
+            weight: 6,
             opacity: 0.9,
           }}
         />
       )}
 
-      {loading && (
-        <div className="route-status">
-          Finding route...
-        </div>
-      )}
-
-      {routeError && (
-        <div className="route-status route-error">
-          {routeError}
-        </div>
+      {routeInfo && (
+        <></>
       )}
     </>
   )
 }
 
 export default function RoadRiskMap() {
-  const [data, setData] = useState(null)
-  const [error, setError] = useState('')
-
+  const [roads, setRoads] = useState(null)
   const [hospitals, setHospitals] = useState(null)
-  const [hospitalError, setHospitalError] = useState('')
-  const [hospitalSearch, setHospitalSearch] = useState('')
-  const [selectedHospital, setSelectedHospital] = useState(null)
+
+  const [loading, setLoading] = useState(true)
+  const [dataError, setDataError] = useState('')
 
   const [origin, setOrigin] = useState(null)
-  const [routeMessage, setRouteMessage] = useState('')
+  const [locationStatus, setLocationStatus] = useState('')
+  const [locationError, setLocationError] = useState('')
+
+  const [selectedHospital, setSelectedHospital] = useState(null)
+  const [searchText, setSearchText] = useState('')
+  const [showNearest, setShowNearest] = useState(true)
+
+  const [routeStatus, setRouteStatus] = useState({
+    type: 'idle',
+    message: '',
+  })
 
   useEffect(() => {
     let cancelled = false
 
-    fetch(DATA_URL)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Road data error (${response.status})`)
+    async function loadMapData() {
+      setLoading(true)
+      setDataError('')
+
+      try {
+        const [roadsResponse, hospitalsResponse] = await Promise.all([
+          fetch(ROADS_URL),
+          fetch(HOSPITALS_URL),
+        ])
+
+        if (!roadsResponse.ok) {
+          throw new Error('Could not load roads.geojson.')
         }
 
-        return response.json()
-      })
-      .then((geojson) => {
-        if (!cancelled) setData(geojson)
-      })
-      .catch((err) => {
-        if (!cancelled) setError(err.message)
-      })
+        if (!hospitalsResponse.ok) {
+          throw new Error('Could not load hospitals.geojson.')
+        }
 
-    return () => {
-      cancelled = true
-    }
-  }, [])
+        const [roadsData, hospitalsData] = await Promise.all([
+          roadsResponse.json(),
+          hospitalsResponse.json(),
+        ])
 
-  useEffect(() => {
-    let cancelled = false
+        if (cancelled) return
 
-    fetch(HOSPITALS_URL)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(
-            `Healthcare data error (${response.status})`
+        setRoads(roadsData)
+        setHospitals(hospitalsData)
+      } catch (error) {
+        if (!cancelled) {
+          setDataError(
+            `${error.message} Check the files in dashboard/public/data/.`
           )
         }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
 
-        return response.json()
-      })
-      .then((geojson) => {
-        if (!cancelled) setHospitals(geojson)
-      })
-      .catch((err) => {
-        if (!cancelled) setHospitalError(err.message)
-      })
+    loadMapData()
 
     return () => {
       cancelled = true
     }
   }, [])
 
-  const hospitalResults = useMemo(() => {
+  const validFacilities = useMemo(() => {
     if (!hospitals?.features) return []
 
-    const search = hospitalSearch.trim().toLowerCase()
-
     return hospitals.features
-      .filter((feature) => {
-        const p = feature.properties || {}
+      .map((feature, index) => {
+        const point = getValidPoint(feature)
+
+        if (!point) return null
+
+        return {
+          feature,
+          index,
+          ...point,
+          name: getFacilityName(feature, index),
+        }
+      })
+      .filter(Boolean)
+  }, [hospitals])
+
+  const nearestHospitals = useMemo(() => {
+    if (!origin) return []
+
+    return validFacilities
+      .map((facility) => ({
+        ...facility,
+        distanceKm: calculateDistanceKm(
+          origin.lat,
+          origin.lng,
+          facility.lat,
+          facility.lng
+        ),
+      }))
+      .sort((a, b) => a.distanceKm - b.distanceKm)
+      .slice(0, 5)
+  }, [origin, validFacilities])
+
+  const filteredHospitals = useMemo(() => {
+    const query = searchText.trim().toLowerCase()
+
+    if (!query) return validFacilities.slice(0, 8)
+
+    return validFacilities
+      .filter(({ feature, name }) => {
+        const properties = feature.properties || ''
 
         const searchableText = [
-          p.name,
-          p.facility_id,
-          p.amenity,
-          p.healthcare,
-          p.emergency,
+          name,
+          properties.facility_id,
+          properties.amenity,
+          properties.healthcare,
+          properties.emergency,
+          properties.operator,
         ]
           .filter(Boolean)
           .join(' ')
           .toLowerCase()
 
-        return searchableText.includes(search)
+        return searchableText.includes(query)
       })
-      .slice(0, 8)
-  }, [hospitals, hospitalSearch])
+      .slice(0, 10)
+  }, [validFacilities, searchText])
+
+  const selectedPoint = useMemo(() => {
+    return selectedHospital ? getValidPoint(selectedHospital) : null
+  }, [selectedHospital])
+
+  const handleRouteStatus = useMemo(
+    () => (status) => setRouteStatus(status),
+    []
+  )
 
   function useCurrentLocation() {
+    setLocationError('')
+    setLocationStatus('Requesting your location...')
+
     if (!navigator.geolocation) {
-      setRouteMessage(
+      setLocationStatus('')
+      setLocationError(
         'Your browser does not support location access.'
       )
       return
     }
 
-    setRouteMessage('Getting your current location...')
-
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setOrigin({
+        const newOrigin = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
-        })
+        }
 
-        setRouteMessage(
-          'Location saved. Select a healthcare facility.'
-        )
+        setOrigin(newOrigin)
+        setLocationStatus('Your current location is ready.')
+        setLocationError('')
       },
-      () => {
-        setRouteMessage(
-          'Could not get your location. Allow location access and try again.'
+      (error) => {
+        setLocationStatus('')
+
+        const messages = {
+          1: 'Location permission was denied. Allow location access in your browser settings.',
+          2: 'Your location could not be determined. Check your device location settings.',
+          3: 'Location request timed out. Please try again.',
+        }
+
+        setLocationError(
+          messages[error.code] ||
+            'Unable to get your current location.'
         )
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
+        timeout: 15000,
         maximumAge: 60000,
       }
     )
   }
 
+  function chooseFacility(feature) {
+    setSelectedHospital(feature)
+    setRouteStatus({
+      type: 'idle',
+      message: '',
+    })
+  }
+
   function clearRoute() {
-    setOrigin(null)
     setSelectedHospital(null)
-    setRouteMessage('Route cleared.')
+    setRouteStatus({
+      type: 'idle',
+      message: '',
+    })
   }
 
-  if (error) {
-    return <div className="map-message">Map error: {error}</div>
+  function openFacilityInMap(facility) {
+    chooseFacility(facility.feature)
   }
 
-  if (!data) {
+  function hospitalPointToLayer(feature, latlng) {
+    const marker = L.marker(latlng, {
+      icon: createHospitalIcon(),
+    })
+
+    const name = getFacilityName(feature)
+    const properties = feature.properties || {}
+
+    const popup = document.createElement('div')
+    popup.className = 'hospital-popup'
+
+    const title = document.createElement('strong')
+    title.textContent = name
+    popup.appendChild(title)
+
+    const type = properties.healthcare || properties.amenity
+    if (type) {
+      const typeLine = document.createElement('p')
+      typeLine.textContent = `Type: ${type}`
+      popup.appendChild(typeLine)
+    }
+
+    if (properties.phone) {
+      const phoneLine = document.createElement('p')
+      phoneLine.textContent = `Phone: ${properties.phone}`
+      popup.appendChild(phoneLine)
+    }
+
+    const note = document.createElement('p')
+    note.textContent =
+      'Verify the facility services and availability before travelling.'
+    popup.appendChild(note)
+
+    marker.bindPopup(popup)
+
+    return marker
+  }
+
+  function roadOnEachFeature(feature, layer) {
+    const properties = feature.properties || {}
+    const risk = getRoadRisk(feature)
+
+    const popup = document.createElement('div')
+    popup.className = 'road-popup'
+
+    const title = document.createElement('strong')
+    title.textContent =
+      properties.name ||
+      `Road segment ${properties.u ?? properties.osm_id ?? ''}`
+    popup.appendChild(title)
+
+    const riskLine = document.createElement('p')
+    riskLine.textContent =
+      risk === null
+        ? 'Risk proxy score: unavailable'
+        : `Risk proxy score: ${risk.toFixed(3)}`
+    popup.appendChild(riskLine)
+
+    if (Number.isFinite(Number(properties.slope_mean_deg))) {
+      const slopeLine = document.createElement('p')
+      slopeLine.textContent =
+        `Mean slope: ${Number(properties.slope_mean_deg).toFixed(2)}°`
+      popup.appendChild(slopeLine)
+    }
+
+    if (Number.isFinite(Number(properties.nearest_landslide_m))) {
+      const landslideLine = document.createElement('p')
+      landslideLine.textContent =
+        `Nearest mapped landslide: ${Number(properties.nearest_landslide_m).toFixed(0)} m`
+      popup.appendChild(landslideLine)
+    }
+
+    const disclaimer = document.createElement('p')
+    disclaimer.textContent =
+      'This is a research risk estimate, not an official warning or live road-closure status.'
+    popup.appendChild(disclaimer)
+
+    layer.bindPopup(popup)
+  }
+
+  if (loading) {
     return (
       <div className="map-message">
-        Loading Ratnapura road data...
+        Loading LANDSAFE map data...
+      </div>
+    )
+  }
+
+  if (dataError) {
+    return (
+      <div className="map-message map-error">
+        <strong>Unable to load map data</strong>
+        <p>{dataError}</p>
+        <p>
+          Expected files: <code>public/data/roads.geojson</code> and{' '}
+          <code>public/data/hospitals.geojson</code>
+        </p>
       </div>
     )
   }
 
   return (
     <div className="road-map-wrapper">
-      <section className="route-controls">
-        <h3>Find a route to a healthcare facility</h3>
+      <div className="route-controls">
+        <h2>LANDSAFE Road Risk & Healthcare Access</h2>
+
+        <p className="map-intro">
+          Explore estimated road-risk levels, locate mapped healthcare
+          facilities, and request a route from your current location.
+        </p>
 
         <div className="route-buttons">
           <button
             type="button"
+            className="location-button"
             onClick={useCurrentLocation}
           >
             Use My Current Location
@@ -484,146 +581,226 @@ export default function RoadRiskMap() {
 
           <button
             type="button"
+            className="clear-route-button"
             onClick={clearRoute}
           >
             Clear Route
           </button>
         </div>
 
-        {routeMessage && (
-          <p role="status">{routeMessage}</p>
+        {locationStatus && (
+          <p className="route-status">{locationStatus}</p>
         )}
 
-        <p className="route-note">
-          This prototype route may not reflect landslides,
-          road closures or current road conditions.
-        </p>
-      </section>
-
-      <section className="hospital-search">
-        <label htmlFor="hospital-search">
-          Find a hospital or healthcare facility
-        </label>
-
-        <input
-          id="hospital-search"
-          type="search"
-          value={hospitalSearch}
-          onChange={(event) =>
-            setHospitalSearch(event.target.value)
-          }
-          placeholder="Search by name or facility type..."
-        />
-
-        {hospitalError && (
-          <p className="map-message">
-            Healthcare data error: {hospitalError}
-          </p>
+        {locationError && (
+          <p className="route-error">{locationError}</p>
         )}
 
-        {hospitals && (
-          <div className="hospital-results">
-            {hospitalResults.length > 0 ? (
-              hospitalResults.map((feature, index) => (
+        <div className="hospital-search">
+          <label htmlFor="hospital-search-input">
+            Search healthcare facilities
+          </label>
+
+          <input
+            id="hospital-search-input"
+            type="search"
+            value={searchText}
+            onChange={(event) => setSearchText(event.target.value)}
+            placeholder="Search by name or facility type..."
+          />
+
+          {searchText.trim() && (
+            <div className="hospital-results">
+              {filteredHospitals.length === 0 && (
+                <p>No matching mapped facilities found.</p>
+              )}
+
+              {filteredHospitals.map((facility) => (
                 <button
                   type="button"
-                  key={
-                    feature.properties?.facility_id ??
-                    `${feature.properties?.name ?? 'facility'}-${index}`
-                  }
-                  onClick={() => {
-                    setSelectedHospital(feature)
-
-                    setRouteMessage(
-                      origin
-                        ? 'Requesting route to selected facility...'
-                        : 'Facility selected. Set your current location to request a route.'
-                    )
-                  }}
+                  className="hospital-result"
+                  key={`${facility.lat}-${facility.lng}-${facility.index}`}
+                  onClick={() => openFacilityInMap(facility)}
                 >
-                  ✚{' '}
-                  {feature.properties?.name ||
-                    `Healthcare facility ${
-                      feature.properties?.facility_id ?? index + 1
-                    }`}
+                  <span>{facility.name}</span>
+                  <small>
+                    {facility.feature.properties?.healthcare ||
+                      facility.feature.properties?.amenity ||
+                      'Healthcare facility'}
+                  </small>
                 </button>
-              ))
-            ) : (
-              <p>No matching facilities found.</p>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <section className="nearest-hospitals">
+          <button
+            type="button"
+            className="nearest-toggle"
+            onClick={() => setShowNearest((value) => !value)}
+            aria-expanded={showNearest}
+          >
+            <span>Nearest Healthcare Facilities</span>
+            <span>{showNearest ? '−' : '+'}</span>
+          </button>
+
+          {showNearest && (
+            <>
+              {!origin && (
+                <p>
+                  Share your location to rank mapped facilities by
+                  approximate distance.
+                </p>
+              )}
+
+              {origin && nearestHospitals.length === 0 && (
+                <p>No valid mapped healthcare points are available.</p>
+              )}
+
+              {origin && nearestHospitals.length > 0 && (
+                <div className="nearest-hospital-list">
+                  {nearestHospitals.map((facility, index) => (
+                    <div
+                      className="nearest-hospital-item"
+                      key={`${facility.lat}-${facility.lng}-${facility.index}`}
+                    >
+                      <div className="nearest-hospital-details">
+                        <strong>
+                          {index + 1}. {facility.name}
+                        </strong>
+
+                        <p>
+                          {facility.distanceKm.toFixed(2)} km away
+                          <span> · straight-line distance</span>
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => openFacilityInMap(facility)}
+                      >
+                        Get Route
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <p className="nearest-hospital-note">
+                Nearest by distance does not mean clinically suitable.
+                Facility names and services may be incomplete.
+              </p>
+            </>
+          )}
+        </section>
+
+        {selectedHospital && (
+          <div className="selected-facility">
+            <strong>Selected facility</strong>
+            <p>{getFacilityName(selectedHospital)}</p>
+
+            {!origin && (
+              <p>
+                Share your current location to request a route.
+              </p>
             )}
           </div>
         )}
-      </section>
 
-      <div className="map-legend">
-        <span>
-          <i className="legend-dot low" />
-          Lower estimated risk
-        </span>
-
-        <span>
-          <i className="legend-dot medium" />
-          Moderate estimated risk
-        </span>
-
-        <span>
-          <i className="legend-dot high" />
-          Higher estimated risk
-        </span>
-
-        <span>
-          <i className="legend-dot hospital" />
-          Healthcare facilities
-        </span>
-
-        <span>
-          <i className="legend-dot route-dot" />
-          Requested route
-        </span>
-      </div>
-
-      <MapContainer
-        center={[6.68, 80.4]}
-        zoom={10}
-        className="road-map"
-        scrollWheelZoom
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-
-        <MapContents data={data} />
-
-        {hospitals && (
-          <HospitalMarkers
-            hospitals={hospitals}
-            selectedHospital={selectedHospital}
-          />
+        {routeStatus.message && (
+          <p
+            className={
+              routeStatus.type === 'error'
+                ? 'route-error'
+                : 'route-status'
+            }
+            role="status"
+          >
+            {routeStatus.message}
+          </p>
         )}
 
-        {selectedHospital?.geometry?.type === 'Point' &&
-          Array.isArray(
-            selectedHospital.geometry.coordinates
-          ) &&
-          selectedHospital.geometry.coordinates.length >= 2 && (
-            <HospitalRoute
-              origin={origin}
-              destination={{
-                lng: selectedHospital.geometry.coordinates[0],
-                lat: selectedHospital.geometry.coordinates[1],
-              }}
+        <div className="map-legend">
+          <strong>Road risk proxy</strong>
+
+          <span>
+            <i className="legend-dot low" /> Lower estimate
+          </span>
+
+          <span>
+            <i className="legend-dot medium" /> Moderate estimate
+          </span>
+
+          <span>
+            <i className="legend-dot high" /> Higher estimate
+          </span>
+
+          <span>
+            <i className="legend-dot hospital" /> Healthcare facility
+          </span>
+
+          <span>
+            <i className="legend-dot route-dot" /> Requested route
+          </span>
+        </div>
+      </div>
+
+      <div className="road-map">
+        <MapContainer
+          center={MAP_CENTER}
+          zoom={MAP_ZOOM}
+          scrollWheelZoom
+          className="leaflet-map"
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+
+          {roads && (
+            <GeoJSON
+              key="road-risk-layer"
+              data={roads}
+              style={roadStyle}
+              onEachFeature={roadOnEachFeature}
             />
           )}
-      </MapContainer>
 
-      <p className="map-disclaimer">
-        Risk categories are preliminary thresholds applied to
-        research scores, not validated warning levels. Route
-        information does not verify road closures or current
-        landslide conditions. Facility information may be incomplete.
-        Confirm conditions with official sources before travelling.
-      </p>
+          {hospitals && (
+            <GeoJSON
+              key="healthcare-layer"
+              data={hospitals}
+              pointToLayer={hospitalPointToLayer}
+            />
+          )}
+
+          <CurrentLocationMarker position={origin} />
+
+          {origin && selectedPoint && (
+            <HospitalRoute
+              origin={origin}
+              destination={selectedPoint}
+              onRouteStatus={handleRouteStatus}
+            />
+          )}
+        </MapContainer>
+      </div>
+
+      <div className="map-disclaimer">
+        <strong>Important safety information</strong>
+        <p>
+          Road colours show a research risk proxy, not an official
+          landslide alert. The route service does not verify live
+          landslides, road closures, traffic, or hospital availability.
+          Confirm conditions with official sources before travelling.
+        </p>
+        <p>
+          Sri Lanka Disaster Management Centre: <strong>117</strong>
+          {' · '}
+          Suwa Seriya ambulance: <strong>1990</strong>
+        </p>
+      </div>
     </div>
   )
 }
