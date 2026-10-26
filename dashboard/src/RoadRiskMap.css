@@ -472,3 +472,144 @@
     font-size: 11px;
   }
 }
+
+.nearest-hospitals {
+  margin: 16px 0;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #dce3e8;
+  border-radius: 12px;
+}
+
+.nearest-toggle {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.nearest-hospital-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.nearest-hospital-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e3e8ed;
+  border-radius: 8px;
+}
+
+.nearest-hospital-details {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.nearest-hospital-item p {
+  margin: 5px 0 0;
+  color: #52606d;
+  font-size: 13px;
+}
+
+.nearest-hospital-item button,
+.location-button {
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 7px;
+  background: #1769aa;
+  color: #fff;
+  cursor: pointer;
+}
+
+.nearest-hospital-note {
+  margin-top: 12px;
+  color: #8a4b08;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.current-location-container,
+.hospital-marker-container {
+  background: transparent;
+  border: 0;
+}
+
+.current-location-dot {
+  width: 18px;
+  height: 18px;
+  border: 3px solid white;
+  border-radius: 50%;
+  background: #2563eb;
+  box-shadow: 0 0 0 5px #2563eb44;
+}
+
+.hospital-marker {
+  display: flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: #7c3aed;
+  color: white;
+  font-size: 17px;
+  box-shadow: 0 2px 6px #0004;
+}
+
+.leaflet-map {
+  width: 100%;
+  height: 540px;
+}
+
+.map-intro {
+  line-height: 1.5;
+  color: #52606d;
+}
+
+.selected-facility,
+.map-disclaimer {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 9px;
+  background: #f1f5f9;
+  line-height: 1.5;
+}
+
+.map-disclaimer {
+  background: #fff7ed;
+  color: #7c3e0b;
+}
+
+.map-disclaimer p {
+  margin-bottom: 8px;
+}
+
+.map-message {
+  padding: 24px;
+}
+
+.map-error,
+.route-error {
+  color: #b91c1c;
+}
+
+@media (max-width: 600px) {
+  .leaflet-map {
+    height: 400px;
+  }
+
+  .nearest-hospital-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
