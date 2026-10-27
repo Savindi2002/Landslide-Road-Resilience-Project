@@ -400,3 +400,2091 @@
     padding: 18px;
   }
 }
+
+.hospital-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.hospital-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.hospital-toolbar h2 {
+  margin: 0 0 6px;
+}
+
+.hospital-toolbar p {
+  margin: 0;
+  color: #667085;
+}
+
+.hospital-search {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.hospital-search input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #d0d5dd;
+  border-radius: 9px;
+  font: inherit;
+}
+
+.hospital-status {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f2f4f7;
+  line-height: 1.5;
+}
+
+.hospital-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 16px;
+}
+
+.hospital-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid #e4e7ec;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.hospital-card-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.hospital-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #e8f5ee;
+  color: #16794b;
+  font-size: 25px;
+  font-weight: 700;
+}
+
+.hospital-card h3 {
+  margin: 0 0 6px;
+  overflow-wrap: anywhere;
+}
+
+.hospital-card p {
+  margin: 0;
+  color: #667085;
+  overflow-wrap: anywhere;
+}
+
+.hospital-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.hospital-directions {
+  align-self: flex-start;
+  margin-top: auto;
+  text-decoration: none;
+}
+
+.hospital-safety-notice {
+  line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+  .hospital-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .hospital-toolbar .button {
+    align-self: flex-start;
+  }
+
+  .hospital-card {
+    padding: 14px;
+  }
+}
+
+.research-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.research-notice {
+  padding: 18px;
+  border: 1px solid #e7c98c;
+  border-radius: 12px;
+  background: #fff9e9;
+  color: #57431b;
+  line-height: 1.6;
+}
+
+.research-notice p {
+  margin: 8px 0 0;
+}
+
+.research-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+  gap: 14px;
+}
+
+.research-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  border: 1px solid #e4e7ec;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.research-stat span,
+.research-stat small {
+  color: #667085;
+  line-height: 1.5;
+}
+
+.research-stat strong {
+  font-size: 28px;
+  color: #173b32;
+}
+
+.research-panel {
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid #e4e7ec;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.research-panel h2 {
+  margin-top: 0;
+  font-size: 20px;
+}
+
+.research-panel > p {
+  color: #667085;
+  line-height: 1.65;
+}
+
+.research-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.research-table {
+  width: 100%;
+  margin-top: 16px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.research-table th,
+.research-table td {
+  padding: 13px 12px;
+  border-bottom: 1px solid #eaecf0;
+  white-space: nowrap;
+}
+
+.research-table th {
+  background: #f8fafc;
+  color: #475467;
+  font-size: 13px;
+}
+
+.research-table td {
+  font-size: 14px;
+}
+
+.strategy-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 9px;
+  border-radius: 50%;
+}
+
+.research-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin-top: 24px;
+}
+
+.research-bar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.research-bar-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  line-height: 1.5;
+}
+
+.research-bar-label strong {
+  white-space: nowrap;
+}
+
+.research-bar-track {
+  width: 100%;
+  height: 15px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #eef0f3;
+}
+
+
+.research-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: #21a68a;
+  transition: width 0.4s ease;
+}
+
+
+.research-footnote {
+  margin-top: 20px;
+  font-size: 13px;
+}
+
+.research-findings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 15px;
+  margin-top: 18px;
+}
+
+.finding-card {
+  padding: 18px;
+  border: 1px solid #e4e7ec;
+  border-radius: 12px;
+  background: #fcfcfd;
+}
+
+.finding-number {
+  color: #168264;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.finding-card h3 {
+  margin: 10px 0;
+}
+
+.finding-card p,
+.research-limitations {
+  color: #475467;
+  line-height: 1.7;
+}
+
+.research-limitations li {
+  margin-bottom: 10px;
+}
+
+@media (max-width: 600px) {
+  .research-panel {
+    padding: 15px;
+  }
+
+  .research-stat {
+    padding: 16px;
+  }
+
+  .research-table th,
+  .research-table td {
+    padding: 11px 9px;
+  }
+
+  .research-bar-label {
+    align-items: flex-start;
+  }
+}
+
+.research-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.research-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+}
+
+.research-table th,
+.research-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.research-table th {
+  font-weight: 700;
+}
+
+.research-chart {
+  width: 100%;
+  min-width: 0;
+  margin: 20px 0 28px;
+}
+
+.research-chart-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.research-chart-controls label {
+  font-weight: 600;
+}
+
+.research-chart-controls select {
+  padding: 9px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1f2937;
+}
+
+.research-chart .recharts-responsive-container {
+  min-width: 0;
+}
+
+@media (max-width: 600px) {
+  .research-chart-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .research-chart-controls select {
+    width: 100%;
+  }
+}
+
+function ResearchPage() {
+  const [results, setResults] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [selectedFailure, setSelectedFailure] = useState('5')
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadResults() {
+      try {
+        const response = await fetch('/data/research-results.json')
+
+        if (!response.ok) {
+          throw new Error('Could not load the research results file.')
+        }
+
+        const data = await response.json()
+
+        if (
+          !data.summary ||
+          !Array.isArray(data.strategies) ||
+          !Array.isArray(data.connectivity)
+        ) {
+          throw new Error('The research results file has an invalid format.')
+        }
+
+        if (!cancelled) {
+          setResults(data)
+          setError('')
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err.message || 'An unexpected error occurred.')
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadResults()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  if (loading) {
+    return (
+      <section className="research-dashboard">
+        <h1>Research &amp; Analysis</h1>
+        <p>Loading research results...</p>
+      </section>
+    )
+  }
+
+  if (error || !results) {
+    return (
+      <section className="research-dashboard">
+        <h1>Research &amp; Analysis</h1>
+        <p role="alert">
+          {error || 'Research results are unavailable.'}
+        </p>
+        <p>
+          Check that the file exists at{' '}
+          <code>dashboard/public/data/research-results.json</code>.
+        </p>
+      </section>
+    )
+  }
+
+  const {
+    summary,
+    strategies,
+    connectivity,
+    notes = {},
+    optimization,
+    randomTrialComparison = [],
+    sensitivity = [],
+  } = results
+
+  const formatPercent = (value, digits = 3) => {
+    if (
+      value == null ||
+      value === '' ||
+      !Number.isFinite(Number(value))
+    ) {
+      return '—'
+    }
+
+    return `${Number(value).toFixed(digits)}%`
+  }
+
+  const formatNumber = (value, digits = 2) => {
+    if (
+      value == null ||
+      value === '' ||
+      !Number.isFinite(Number(value))
+    ) {
+      return '—'
+    }
+
+    return Number(value).toFixed(digits)
+  }
+
+  const formatCount = (value) => {
+    if (
+      value == null ||
+      value === '' ||
+      !Number.isFinite(Number(value))
+    ) {
+      return '—'
+    }
+
+    return Number(value).toLocaleString()
+  }
+
+  // Identify strategies with comparable fixed-failure results.
+  const comparableStrategies = strategies.filter(
+    (strategy) =>
+      strategy.name !== 'No protection' &&
+      strategy.reachabilityPercent != null &&
+      strategy.reachabilityPercent !== '' &&
+      Number.isFinite(Number(strategy.reachabilityPercent))
+  )
+
+  const bestStrategy = comparableStrategies.reduce(
+    (best, strategy) =>
+      !best ||
+      Number(strategy.reachabilityPercent) >
+        Number(best.reachabilityPercent)
+        ? strategy
+        : best,
+    null
+  )
+
+  const designFailurePercent =
+    summary.designFailurePercent ?? summary.disruptionPercent
+
+  // Find all failure levels available in the random-trial dataset.
+  const failureLevels = [
+    ...new Set(
+      randomTrialComparison
+        .map((item) => Number(item.failurePercent))
+        .filter(Number.isFinite)
+    ),
+  ].sort((a, b) => a - b)
+
+  const activeFailure = failureLevels.some(
+    (level) => String(level) === selectedFailure
+  )
+    ? selectedFailure
+    : String(
+        failureLevels.includes(5)
+          ? 5
+          : failureLevels[0] ?? ''
+      )
+
+  // Group chart bars by strategy for the selected failure level.
+  const chartData = randomTrialComparison
+    .filter(
+      (item) => String(item.failurePercent) === activeFailure
+    )
+    .map((item) => ({
+      strategy: item.strategy,
+      meanReachablePercent: Number(item.meanReachablePercent),
+    }))
+    .filter((item) =>
+      Number.isFinite(item.meanReachablePercent)
+    )
+
+  return (
+    <section className="research-dashboard">
+      <PageHeader
+        eyebrow="GRAPH THEORY RESEARCH"
+        title="Research &amp; Analysis"
+        description="Compare road-protection strategies under modelled road-disruption scenarios."
+      />
+
+      <div className="research-notice">
+        <strong>Research prototype:</strong> these results represent
+        simulated scenarios, not live landslide warnings or guaranteed
+        road-access information.
+        <p>
+          {notes.interpretation ||
+            'Check official warnings and road conditions before travelling.'}
+        </p>
+      </div>
+
+      {/* Research summary */}
+      <section className="research-stat-grid">
+        <article className="research-stat">
+          <span>Unique road segments</span>
+          <strong>{formatCount(summary.roadSegments)}</strong>
+        </article>
+
+        <article className="research-stat">
+          <span>Mapped healthcare facilities</span>
+          <strong>{formatCount(summary.healthcareFacilities)}</strong>
+        </article>
+
+        <article className="research-stat">
+          <span>Road-length budget</span>
+          <strong>{formatPercent(summary.budgetPercent, 1)}</strong>
+          <p>{formatNumber(summary.budgetLengthKm, 1)} km</p>
+        </article>
+
+        <article className="research-stat">
+          <span>Optimization design-failure scenario</span>
+          <strong>{formatPercent(designFailurePercent, 1)}</strong>
+          <p>
+            {summary.designFailedRoadCount != null
+              ? `${formatCount(summary.designFailedRoadCount)} roads failed in the design scenario`
+              : 'Simulated road disruption'}
+          </p>
+        </article>
+      </section>
+
+      {/* Strategy comparison */}
+      <section className="research-panel">
+        <h2>Strategy comparison</h2>
+        <p>
+          Road selections are compared with the fixed-failure-set
+          evaluation where matching results are available. A dash means
+          that a comparable result is unavailable.
+        </p>
+
+        <div className="research-table-wrapper">
+          <table className="research-table">
+            <thead>
+              <tr>
+                <th>Strategy</th>
+                <th>Roads selected</th>
+                <th>Selected length</th>
+                <th>Mean risk</th>
+                <th>Centrality</th>
+                <th>Reachability</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {strategies.map((strategy) => (
+                <tr key={strategy.name}>
+                  <td>{strategy.name}</td>
+                  <td>{formatCount(strategy.roadsSelected)}</td>
+                  <td>{formatNumber(strategy.lengthKm)} km</td>
+                  <td>
+                    {strategy.meanRisk == null
+                      ? '—'
+                      : formatNumber(strategy.meanRisk, 3)}
+                  </td>
+                  <td>
+                    {strategy.centrality == null
+                      ? '—'
+                      : formatNumber(strategy.centrality, 3)}
+                  </td>
+                  <td>{formatPercent(strategy.reachabilityPercent)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <p className="research-footnote">
+          {notes.budgetDefinition ||
+            'The budget is measured by selected road length, not monetary cost.'}
+        </p>
+      </section>
+
+      {/* Fixed-failure-set connectivity */}
+      <section className="research-panel">
+        <h2>Healthcare-network reachability</h2>
+        <p>
+          The same initial failed-road set is used to compare strategies.
+          This is separate from the optimization design scenario.
+        </p>
+
+        <div className="research-bars">
+          {connectivity.map((item) => {
+            const value = Number(item.reachabilityPercent)
+            const valid =
+              item.reachabilityPercent != null &&
+              item.reachabilityPercent !== '' &&
+              Number.isFinite(value)
+
+            return (
+              <div className="research-bar-row" key={item.name}>
+                <div className="research-bar-label">
+                  <span>{item.name}</span>
+                  <strong>
+                    {valid ? formatPercent(value) : '—'}
+                  </strong>
+                </div>
+
+                <div
+                  className="research-bar-track"
+                  role="img"
+                  aria-label={`${item.name}: ${
+                    valid ? formatPercent(value) : 'unavailable'
+                  } reachability`}
+                >
+                  <div
+                    className="research-bar-fill"
+                    style={{
+                      width: `${
+                        valid ? Math.max(0, Math.min(100, value)) : 0
+                      }%`,
+                    }}
+                  />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        <p className="research-footnote">
+          {notes.fairComparison ||
+            'Reachability is a modelled network measure, not a live road-status indicator.'}
+        </p>
+      </section>
+
+      {/* Optimization experiment */}
+      {optimization && (
+        <section className="research-panel">
+          <h2>Hospital-access optimization</h2>
+          <p>
+            This optimization experiment uses its own design-failure
+            scenario. Its result should not be directly compared with
+            the fixed-failure-set percentages above.
+          </p>
+
+          <div className="research-stat-grid">
+            <article className="research-stat">
+              <span>Modelled node reachability</span>
+              <strong>
+                {formatPercent(optimization.reachablePercent)}
+              </strong>
+              <p>
+                {formatCount(optimization.reachableNodeCount)}
+                {' '}reachable nodes
+              </p>
+            </article>
+
+            <article className="research-stat">
+              <span>Roads selected</span>
+              <strong>
+                {formatCount(optimization.selectedRoadCount)}
+              </strong>
+              <p>Selected by the optimization model</p>
+            </article>
+
+            <article className="research-stat">
+              <span>Protected road length</span>
+              <strong>
+                {formatNumber(optimization.protectedLengthKm)} km
+              </strong>
+              <p>
+                {formatNumber(optimization.budgetRemainingKm)} km
+                {' '}of budget length remaining
+              </p>
+            </article>
+
+            <article className="research-stat">
+              <span>Solver status</span>
+              <strong>{optimization.status || 'Not available'}</strong>
+              <p>
+                {optimization.optimalityProven
+                  ? 'Optimality proven by solver'
+                  : 'Optimality not confirmed'}
+              </p>
+            </article>
+          </div>
+
+          {optimization.limitation && (
+            <p className="research-footnote">
+              Limitation: {optimization.limitation}
+            </p>
+          )}
+        </section>
+      )}
+
+      {/* Findings */}
+      <section className="research-panel">
+        <h2>Key findings</h2>
+
+        {comparableStrategies.length > 0 ? (
+          <>
+            <ul>
+              {comparableStrategies
+                .slice()
+                .sort(
+                  (a, b) =>
+                    Number(b.reachabilityPercent) -
+                    Number(a.reachabilityPercent)
+                )
+                .map((strategy) => (
+                  <li key={strategy.name}>
+                    <strong>{strategy.name}:</strong>{' '}
+                    {formatPercent(strategy.reachabilityPercent)}
+                    {' '}modelled reachability, selecting{' '}
+                    {formatCount(strategy.roadsSelected)}
+                    {' '}road segments.
+                  </li>
+                ))}
+            </ul>
+
+            {bestStrategy && (
+              <p>
+                In the fixed-failure-set comparison,{' '}
+                <strong>{bestStrategy.name}</strong> has the highest
+                reported reachability (
+                {formatPercent(bestStrategy.reachabilityPercent)}).
+                This does not guarantee real-world performance.
+              </p>
+            )}
+          </>
+        ) : (
+          <p>
+            No comparable strategy reachability results are available.
+          </p>
+        )}
+      </section>
+
+      {/* Random-trial chart and table */}
+      {randomTrialComparison.length > 0 && (
+        <section className="research-panel">
+          <h2>Random-trial comparison</h2>
+          <p>
+            Compare mean reachability across repeated simulations.
+            Select a failure level to compare strategies under the
+            same simulated disruption percentage.
+          </p>
+
+          <div className="research-chart-controls">
+            <label htmlFor="research-failure-level">
+              Simulated road-failure percentage
+            </label>
+
+            <select
+              id="research-failure-level"
+              value={activeFailure}
+              onChange={(event) =>
+                setSelectedFailure(event.target.value)
+              }
+            >
+              {failureLevels.map((level) => (
+                <option key={level} value={String(level)}>
+                  {level}% failure
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {chartData.length > 0 ? (
+            <div className="research-chart">
+              <ResponsiveContainer width="100%" height={340}>
+                <BarChart
+                  data={chartData}
+                  margin={{
+                    top: 15,
+                    right: 15,
+                    left: 5,
+                    bottom: 55,
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+
+                  <XAxis
+                    dataKey="strategy"
+                    angle={-20}
+                    textAnchor="end"
+                    interval={0}
+                    height={80}
+                    tick={{ fontSize: 11 }}
+                  />
+
+                  <YAxis
+                    domain={[0, 100]}
+                    tickFormatter={(value) => `${value}%`}
+                  />
+
+                  <Tooltip
+                    formatter={(value) => [
+                      `${Number(value).toFixed(2)}%`,
+                      'Mean reachability',
+                    ]}
+                  />
+
+                  <Legend />
+
+                  <Bar
+                    dataKey="meanReachablePercent"
+                    name="Mean reachability"
+                    fill="#21a68a"
+                    radius={[5, 5, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <p>
+              No valid chart results are available for this failure level.
+            </p>
+          )}
+
+          <p className="research-footnote">
+            The chart shows reported mean reachability for each strategy
+            at the selected failure level. It does not represent live
+            road conditions.
+          </p>
+
+          <div className="research-table-wrapper">
+            <table className="research-table">
+              <thead>
+                <tr>
+                  <th>Failure scenario</th>
+                  <th>Strategy</th>
+                  <th>Trials</th>
+                  <th>Mean reachability</th>
+                  <th>Standard deviation</th>
+                  <th>Mean distance</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {randomTrialComparison.map((item, index) => (
+                  <tr
+                    key={`${item.failurePercent}-${item.strategy}-${index}`}
+                  >
+                    <td>{item.failurePercent}%</td>
+                    <td>{item.strategy}</td>
+                    <td>{formatCount(item.trials)}</td>
+                    <td>{formatPercent(item.meanReachablePercent)}</td>
+                    <td>{formatNumber(item.sdReachablePercent, 3)}</td>
+                    <td>{formatNumber(item.meanDistanceKm)} km</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {/* Sensitivity analysis */}
+      {sensitivity.length > 0 && (
+        <section className="research-panel">
+          <h2>Sensitivity analysis</h2>
+          <p>
+            Examine how network reachability changes at different
+            simulated road-failure percentages.
+          </p>
+
+          <div className="research-table-wrapper">
+            <table className="research-table">
+              <thead>
+                <tr>
+                  <th>Failure scenario</th>
+                  <th>Strategy</th>
+                  <th>Roads closed</th>
+                  <th>Reachable nodes</th>
+                  <th>Reachability</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {sensitivity.map((item, index) => (
+                  <tr
+                    key={`${item.failurePercent}-${item.strategy}-${index}`}
+                  >
+                    <td>{item.failurePercent}%</td>
+                    <td>{item.strategy}</td>
+                    <td>{formatCount(item.closedRoads)}</td>
+                    <td>
+                      {formatCount(item.reachableNodes)}
+                      {' / '}
+                      {formatCount(item.totalNodes)}
+                    </td>
+                    <td>{formatPercent(item.reachabilityPercent)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {/* Data-driven recommendation */}
+      <section className="research-panel research-recommendation">
+        <h2>Research Recommendation</h2>
+
+        {bestStrategy ? (
+          <>
+            <p>
+              Based on the fixed-failure-set evaluation, the strategy
+              with the highest reported modelled reachability is:
+            </p>
+
+            <div className="recommendation-result">
+              <span>Best reported strategy</span>
+              <h3>{bestStrategy.name}</h3>
+              <strong>
+                {formatPercent(bestStrategy.reachabilityPercent)}
+              </strong>
+              <span>Modelled network reachability</span>
+            </div>
+
+            <p>
+              This result suggests that the selected strategy may help
+              preserve network access under the evaluated disruption
+              scenario. Further testing across additional failure
+              scenarios is needed before making a real-world recommendation.
+            </p>
+
+            <ul>
+              <li>
+                <strong>Budget constraint:</strong> road protection is
+                limited by the model's road-length budget.
+              </li>
+              <li>
+                <strong>Evaluation:</strong> this finding uses the
+                fixed-failure-set results, not the separate optimization
+                experiment.
+              </li>
+              <li>
+                <strong>Practical limitation:</strong> modelled
+                reachability does not guarantee that roads are safe,
+                open, or accessible in real conditions.
+              </li>
+            </ul>
+          </>
+        ) : (
+          <p>
+            A recommendation is unavailable because no comparable
+            strategy reachability results were found.
+          </p>
+        )}
+      </section>
+
+      {/* Limitations and future improvements */}
+      <section className="research-limitations">
+        <h2>Research Limitations &amp; Future Improvements</h2>
+
+        <p>
+          LANDSAFE provides a graph-theoretical approach to exploring
+          road-network resilience and healthcare accessibility under
+          simulated landslide-related disruptions. The findings should
+          be interpreted in light of the following limitations.
+        </p>
+
+        <h3>1. Road-risk estimation</h3>
+        <p>
+          Road-risk scores are model-based estimates derived from
+          available road and terrain features. They are not official
+          landslide susceptibility assessments or live warnings.
+          The scores may not represent every factor contributing to
+          an actual landslide.
+        </p>
+
+        <h3>2. Simulated road failures</h3>
+        <p>
+          The evaluation uses simulated road disruptions rather than
+          a fully calibrated model of real landslide occurrence.
+          Randomly selected failed roads may not reflect the actual
+          location, timing, frequency, or severity of future landslides.
+        </p>
+
+        <h3>3. Healthcare facility coverage</h3>
+        <p>
+          The analysis uses mapped healthcare facilities available
+          in the project dataset. Some facilities may be missing,
+          incorrectly mapped, or unavailable for emergency services.
+          Therefore, the results may not represent access to every
+          healthcare facility in the study area.
+        </p>
+
+        <h3>4. Network reachability</h3>
+        <p>
+          Reachability measures the proportion of road-network nodes
+          that remain connected to a mapped healthcare facility under
+          a modelled scenario. Reachable nodes are a proxy for access;
+          they do not directly measure the population served, travel
+          time, ambulance availability, or actual road safety.
+        </p>
+
+        <h3>5. Road-length budget</h3>
+        <p>
+          The protection budget is constrained by road length rather
+          than actual construction, maintenance, or landslide-mitigation
+          costs. Roads of equal length may have different protection
+          costs, engineering requirements, and practical feasibility.
+        </p>
+
+        <h3>6. Optimization assumptions</h3>
+        <p>
+          The hospital-access optimization results depend on the
+          selected design-failure scenario, graph representation,
+          objective function, and budget constraint. The reported
+          solution does not guarantee optimal performance under every
+          possible disruption scenario or real-world condition.
+        </p>
+
+        <h3>7. Data quality and completeness</h3>
+        <p>
+          The analysis depends on the completeness and accuracy of
+          available road-network, terrain, and healthcare data.
+          Missing road attributes, mapping errors, and infrastructure
+          changes may affect risk estimates and network results.
+        </p>
+
+        <h3>Future improvements</h3>
+        <ul>
+          <li>
+            Incorporate verified historical landslide inventories and
+            rainfall observations to improve risk estimation.
+          </li>
+          <li>
+            Validate predicted road risks against observed landslide
+            events and official hazard information.
+          </li>
+          <li>
+            Test protection strategies across multiple failure
+            scenarios and different budget levels.
+          </li>
+          <li>
+            Include population distribution, travel time, and
+            emergency-service requirements when suitable data are
+            available.
+          </li>
+          <li>
+            Extend the budget model to include estimated mitigation
+            costs and engineering feasibility.
+          </li>
+          <li>
+            Update road and healthcare datasets regularly and compare
+            model outputs with local authority information.
+          </li>
+        </ul>
+
+        <p className="research-footnote">
+          LANDSAFE is a research prototype intended to support
+          exploration of road-network resilience. Its outputs should
+          not be used as a substitute for official landslide warnings,
+          verified road conditions, or professional engineering
+          assessments.
+        </p>
+      </section>
+    </section>
+  )
+}
+
+/* =========================================
+   LANDSAFE HOME PAGE - MODERN RESPONSIVE UI
+   ========================================= */
+
+.home-page {
+  --home-ink: #15304a;
+  --home-muted: #61758a;
+  --home-green: #16845d;
+  --home-border: #e0e9ed;
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  color: var(--home-ink);
+}
+
+.home-page *,
+.home-page *::before,
+.home-page *::after {
+  box-sizing: border-box;
+}
+
+.home-hero {
+  position: relative;
+  min-height: 390px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  border-radius: 22px;
+  background: #153b52;
+  isolation: isolate;
+  box-shadow: 0 12px 32px rgba(20, 47, 67, 0.12);
+}
+
+.home-hero-image,
+.home-hero-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.home-hero-image {
+  z-index: -2;
+  object-fit: cover;
+  object-position: center 55%;
+}
+
+.home-hero-overlay {
+  z-index: -1;
+  background: linear-gradient(
+    90deg,
+    rgba(9, 34, 52, 0.94) 0%,
+    rgba(9, 34, 52, 0.78) 43%,
+    rgba(9, 34, 52, 0.2) 100%
+  );
+}
+
+.home-hero-content {
+  width: 100%;
+  max-width: 720px;
+  padding: 44px clamp(24px, 5vw, 62px);
+  color: #fff;
+}
+
+.home-eyebrow,
+.home-section-eyebrow {
+  margin: 0 0 10px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.home-eyebrow {
+  color: #a7e7ca;
+}
+
+.home-hero h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.1rem, 4.4vw, 3.8rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+}
+
+.home-hero h1 span {
+  color: #8be0b6;
+}
+
+.home-hero-content > p {
+  max-width: 520px;
+  margin: 18px 0 24px;
+  color: #e4edf4;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.home-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.home-primary-button,
+.home-secondary-button {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 19px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 750;
+  text-decoration: none;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.home-primary-button {
+  background: #159568;
+  color: #fff;
+}
+
+.home-primary-button:hover {
+  transform: translateY(-2px);
+  background: #0f7954;
+}
+
+.home-secondary-button {
+  border-color: rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.home-secondary-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.home-hero-caption {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 27px;
+  color: #e0ecee;
+  font-size: 0.78rem;
+}
+
+.home-caption-dot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
+  border-radius: 50%;
+  background: #7be2ac;
+}
+
+/* Welcome section */
+
+.home-welcome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 34px 0 30px;
+}
+
+.home-section-eyebrow {
+  color: var(--home-green);
+}
+
+.home-welcome h2,
+.home-section-heading h2 {
+  margin: 0;
+  color: var(--home-ink);
+  font-size: clamp(1.35rem, 2.2vw, 1.85rem);
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+}
+
+.home-welcome > div:first-child > p:last-child {
+  max-width: 670px;
+  margin: 9px 0 0;
+  color: var(--home-muted);
+  line-height: 1.7;
+}
+
+.home-study-badge {
+  display: flex;
+  min-width: 205px;
+  align-items: center;
+  gap: 13px;
+  padding: 16px 18px;
+  border: 1px solid #d6e9e0;
+  border-radius: 14px;
+  background: #f1faf5;
+}
+
+.home-study-badge > span {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  place-items: center;
+  border-radius: 12px;
+  background: #d8f3e4;
+  color: #11754f;
+  font-size: 1.8rem;
+}
+
+.home-study-badge div {
+  display: grid;
+  gap: 4px;
+}
+
+.home-study-badge strong {
+  font-size: 0.9rem;
+}
+
+.home-study-badge div span {
+  color: var(--home-muted);
+  font-size: 0.82rem;
+}
+
+/* Feature cards */
+
+.home-feature-section {
+  margin: 0 0 30px;
+}
+
+.home-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.home-feature-count {
+  flex-shrink: 0;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: #edf5f3;
+  color: #37685b;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.home-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.home-feature-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--home-border);
+  border-radius: 16px;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  box-shadow: 0 3px 12px rgba(26, 52, 72, 0.035);
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.home-feature-card:hover {
+  transform: translateY(-4px);
+  border-color: #b9d8cb;
+  box-shadow: 0 14px 28px rgba(26, 52, 72, 0.1);
+}
+
+.home-feature-image-wrap {
+  position: relative;
+  height: 155px;
+  overflow: hidden;
+  background: #e8f0ed;
+}
+
+.home-feature-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.home-feature-card:hover .home-feature-image {
+  transform: scale(1.045);
+}
+
+.home-feature-icon {
+  position: absolute;
+  bottom: 12px;
+  left: 14px;
+  display: grid;
+  width: 43px;
+  height: 43px;
+  place-items: center;
+  border: 3px solid #fff;
+  border-radius: 13px;
+  background: #16845d;
+  color: #fff;
+  font-size: 1.35rem;
+  font-weight: 800;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+}
+
+.home-tone-orange .home-feature-icon {
+  background: #e99220;
+}
+
+.home-tone-blue .home-feature-icon {
+  background: #2779c9;
+}
+
+.home-tone-purple .home-feature-icon {
+  background: #7958bd;
+}
+
+.home-feature-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 18px;
+}
+
+.home-feature-body h3 {
+  margin: 0 0 9px;
+  font-size: 1.04rem;
+  line-height: 1.4;
+}
+
+.home-feature-body p {
+  margin: 0 0 18px;
+  color: var(--home-muted);
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+.home-feature-link {
+  margin-top: auto;
+  color: var(--home-green);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+/* Emergency panel */
+
+.home-emergency-panel {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 30px 0 20px;
+  padding: 24px;
+  border: 1px solid #f1d6c9;
+  border-radius: 16px;
+  background: #fff8f3;
+}
+
+.home-emergency-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  place-items: center;
+  border-radius: 14px;
+  background: #ffeadb;
+  color: #b84b23;
+  font-size: 1.7rem;
+  font-weight: 900;
+}
+
+.home-emergency-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.home-emergency-copy .home-section-eyebrow {
+  color: #b84b23;
+}
+
+.home-emergency-copy h2 {
+  margin: 0 0 6px;
+  font-size: 1.2rem;
+}
+
+.home-emergency-copy > p:last-child {
+  margin: 0;
+  color: #745d53;
+  font-size: 0.88rem;
+  line-height: 1.65;
+}
+
+.home-emergency-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.home-emergency-button {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 13px;
+  border-radius: 9px;
+  background: #a83e27;
+  color: #fff;
+  font-size: 0.83rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.home-emergency-button-alt {
+  border: 1px solid #e8c2b2;
+  background: #fff;
+  color: #a83e27;
+}
+
+/* Safety notice */
+
+.home-safety-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  margin-bottom: 26px;
+  padding: 22px;
+  border: 1px solid #d8e8df;
+  border-radius: 15px;
+  background: #f3faf5;
+}
+
+.home-safety-icon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  place-items: center;
+  border-radius: 50%;
+  background: #d8f1e1;
+  color: #13774e;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.home-safety-note h3 {
+  margin: 2px 0 8px;
+  font-size: 1rem;
+}
+
+.home-safety-note p {
+  margin: 0 0 10px;
+  color: var(--home-muted);
+  font-size: 0.88rem;
+  line-height: 1.75;
+}
+
+.home-safety-note a {
+  color: #137c58;
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.home-safety-note a:hover {
+  text-decoration: underline;
+}
+
+/* Tablet layout */
+
+@media (max-width: 1100px) {
+  .home-feature-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-hero {
+    min-height: 360px;
+  }
+
+  .home-emergency-panel {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .home-emergency-copy {
+    flex-basis: calc(100% - 70px);
+  }
+
+  .home-emergency-actions {
+    width: 100%;
+    padding-left: 66px;
+  }
+}
+
+/* Mobile layout */
+
+@media (max-width: 650px) {
+  .home-hero {
+    min-height: 430px;
+    align-items: flex-end;
+    border-radius: 15px;
+  }
+
+  .home-hero-image {
+    object-position: 58% center;
+  }
+
+  .home-hero-overlay {
+    background: linear-gradient(
+      0deg,
+      rgba(7, 29, 45, 0.96) 0%,
+      rgba(7, 29, 45, 0.82) 55%,
+      rgba(7, 29, 45, 0.18) 100%
+    );
+  }
+
+  .home-hero-content {
+    padding: 28px 21px;
+  }
+
+  .home-hero h1 {
+    font-size: clamp(2rem, 9vw, 2.8rem);
+  }
+
+  .home-hero-content > p {
+    font-size: 0.92rem;
+  }
+
+  .home-hero-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .home-primary-button,
+  .home-secondary-button {
+    width: 100%;
+  }
+
+  .home-hero-caption {
+    align-items: flex-start;
+    font-size: 0.72rem;
+    line-height: 1.5;
+  }
+
+  .home-welcome {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 16px;
+    margin: 27px 0;
+  }
+
+  .home-study-badge {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .home-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .home-feature-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .home-feature-card {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+  }
+
+  .home-feature-image-wrap {
+    height: 100%;
+    min-height: 175px;
+  }
+
+  .home-feature-icon {
+    bottom: 10px;
+    left: 10px;
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+  }
+
+  .home-feature-body {
+    padding: 14px;
+  }
+
+  .home-feature-body h3 {
+    font-size: 0.96rem;
+  }
+
+  .home-feature-body p {
+    font-size: 0.82rem;
+    line-height: 1.55;
+  }
+
+  .home-emergency-panel {
+    gap: 12px;
+    padding: 17px;
+  }
+
+  .home-emergency-copy {
+    flex-basis: calc(100% - 60px);
+  }
+
+  .home-emergency-actions {
+    padding-left: 0;
+    flex-direction: column;
+  }
+
+  .home-emergency-button {
+    width: 100%;
+  }
+
+  .home-safety-note {
+    padding: 17px;
+  }
+}
+
+/* Keyboard accessibility */
+
+.home-page a:focus-visible {
+  outline: 3px solid #1a9a70;
+  outline-offset: 4px;
+}
+
+/* Respect reduced-motion preferences */
+
+@media (prefers-reduced-motion: reduce) {
+  .home-page *,
+  .home-page *::before,
+  .home-page *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* =========================================
+   LANDSAFE - GLOBAL RESPONSIVE LAYOUT
+   ========================================= */
+
+.app-shell {
+  min-height: 100vh;
+  width: 100%;
+}
+
+.sidebar {
+  background: linear-gradient(180deg, #102b40 0%, #0b2032 100%);
+  color: #f4f8fb;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.brand-icon {
+  display: grid;
+  width: 43px;
+  height: 43px;
+  flex: 0 0 43px;
+  place-items: center;
+  border-radius: 13px;
+  background: #16845d;
+  color: #fff;
+  font-size: 1.35rem;
+  font-weight: 850;
+}
+
+.brand strong {
+  display: block;
+  color: #fff;
+  letter-spacing: 0.07em;
+}
+
+.brand small {
+  display: block;
+  margin-top: 4px;
+  color: #b8cbd7;
+}
+
+.nav-heading {
+  color: #91adbd;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.side-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.side-nav a {
+  display: flex;
+  align-items: center;
+  min-height: 43px;
+  padding: 11px 13px;
+  border-radius: 9px;
+  color: #dce7ed;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.side-nav a:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: #fff;
+}
+
+.side-nav a.active {
+  background: #176c59;
+  color: #fff;
+  font-weight: 750;
+  box-shadow: inset 3px 0 #8be0b6;
+}
+
+.sidebar-location {
+  padding: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.sidebar-location small,
+.sidebar-location strong,
+.sidebar-location span {
+  display: block;
+}
+
+.sidebar-location small {
+  margin-bottom: 8px;
+  color: #a9c0ce;
+  font-size: 0.67rem;
+  letter-spacing: 0.08em;
+}
+
+.sidebar-location strong {
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.sidebar-location span {
+  margin-top: 5px;
+  color: #c5d5df;
+  font-size: 0.83rem;
+}
+
+/* Keep existing pages within the available screen width */
+
+.main-content {
+  min-width: 0;
+  max-width: 100%;
+  padding: clamp(16px, 2.5vw, 34px);
+}
+
+.main-content > * {
+  min-width: 0;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  max-width: 100%;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.page-description {
+  max-width: 760px;
+  line-height: 1.7;
+}
+
+.content-panel,
+.emergency-banner,
+.notice-card {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.feature-card {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.main-content img,
+.main-content canvas,
+.main-content svg {
+  max-width: 100%;
+}
+
+/* Tablet */
+
+@media (max-width: 1000px) {
+  .home-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .main-content {
+    padding: 22px;
+  }
+
+  .sidebar-location {
+    margin-top: 20px;
+  }
+}
+
+/* Phone: sidebar becomes a top navigation area */
+
+@media (max-width: 700px) {
+  .app-shell {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar {
+    position: relative;
+    top: auto;
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    max-height: none;
+    padding: 14px;
+    overflow: visible;
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .brand {
+    margin-bottom: 14px;
+  }
+
+  .sidebar .nav-heading {
+    margin: 12px 0 8px;
+  }
+
+  .side-nav {
+    flex-direction: row;
+    gap: 8px;
+    padding: 2px 0 9px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+  }
+
+  .side-nav a {
+    flex: 0 0 auto;
+    min-height: 40px;
+    padding: 10px 12px;
+    white-space: nowrap;
+    font-size: 0.82rem;
+  }
+
+  .side-nav a.active {
+    box-shadow: inset 0 -3px #8be0b6;
+  }
+
+  .sidebar-location {
+    margin-top: 8px;
+    padding: 11px 13px;
+  }
+
+  .main-content {
+    width: 100%;
+    padding: 16px;
+  }
+
+  .page-header {
+    margin-bottom: 20px;
+  }
+
+  .page-header h1 {
+    font-size: clamp(1.65rem, 7vw, 2.2rem);
+  }
+
+  .home-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .emergency-banner {
+    gap: 15px;
+  }
+
+  .emergency-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .content-panel {
+    padding: 15px;
+  }
+
+  .main-content footer {
+    padding: 18px 0;
+    font-size: 0.78rem;
+    line-height: 1.6;
+  }
+}
+
+/* Very narrow phones */
+
+@media (max-width: 380px) {
+  .main-content {
+    padding: 12px;
+  }
+
+  .sidebar {
+    padding: 11px;
+  }
+
+  .home-hero-content {
+    padding: 22px 16px;
+  }
+
+  .home-feature-card {
+    grid-template-columns: 94px minmax(0, 1fr);
+  }
+
+  .home-feature-body {
+    padding: 11px;
+  }
+}
