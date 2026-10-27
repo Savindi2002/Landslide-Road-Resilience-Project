@@ -1,0 +1,408 @@
+{
+  "lastUpdated": "2026-10-26T13:42:58+05:30",
+  "summary": {
+    "roadSegments": 14535,
+    "optimizationRoadCount": 14507,
+    "healthcareFacilities": 30,
+    "distinctHospitalNodes": 28,
+    "budgetPercent": 10.0,
+    "budgetLengthKm": 566.845,
+    "designFailurePercent": 20.0,
+    "designFailedRoadCount": 2901
+  },
+  "strategies": [
+    {
+      "name": "No protection",
+      "roadsSelected": 0,
+      "lengthKm": 0.0,
+      "budgetUsedPercent": 0.0,
+      "meanRisk": null,
+      "centrality": null,
+      "reachabilityPercent": 86.751,
+      "reachableNodes": 10961,
+      "closedRoads": 727,
+      "meanDistanceKm": 7.658
+    },
+    {
+      "name": "Risk-based",
+      "roadsSelected": 718,
+      "lengthKm": 566.845,
+      "budgetUsedPercent": 100.0,
+      "meanRisk": null,
+      "centrality": null,
+      "reachabilityPercent": 99.921,
+      "reachableNodes": 12625,
+      "closedRoads": 7,
+      "meanDistanceKm": 7.399
+    },
+    {
+      "name": "Centrality-based",
+      "roadsSelected": 1711,
+      "lengthKm": 566.845,
+      "budgetUsedPercent": 100.0,
+      "meanRisk": null,
+      "centrality": null,
+      "reachabilityPercent": 90.7,
+      "reachableNodes": 11460,
+      "closedRoads": 672,
+      "meanDistanceKm": 7.501
+    },
+    {
+      "name": "Combined",
+      "roadsSelected": 974,
+      "lengthKm": 566.845,
+      "budgetUsedPercent": 100.0,
+      "meanRisk": null,
+      "centrality": null,
+      "reachabilityPercent": 97.42,
+      "reachableNodes": 12309,
+      "closedRoads": 249,
+      "meanDistanceKm": 7.631
+    },
+    {
+      "name": "Hospital-access optimization",
+      "roadsSelected": 1676,
+      "lengthKm": 562.626,
+      "budgetUsedPercent": 99.256,
+      "meanRisk": null,
+      "centrality": null,
+      "reachabilityPercent": null,
+      "reachableNodes": null,
+      "closedRoads": null,
+      "meanDistanceKm": null
+    }
+  ],
+  "connectivity": [
+    {
+      "name": "No protection",
+      "initialFailureSetSize": 727,
+      "closedRoads": 727,
+      "reachableNodes": 10961,
+      "totalNodes": 12635,
+      "reachabilityPercent": 86.751,
+      "meanDistanceKm": 7.658,
+      "medianDistanceKm": 6.974
+    },
+    {
+      "name": "Risk-based",
+      "initialFailureSetSize": 727,
+      "closedRoads": 7,
+      "reachableNodes": 12625,
+      "totalNodes": 12635,
+      "reachabilityPercent": 99.921,
+      "meanDistanceKm": 7.399,
+      "medianDistanceKm": 6.945
+    },
+    {
+      "name": "Centrality-based",
+      "initialFailureSetSize": 727,
+      "closedRoads": 672,
+      "reachableNodes": 11460,
+      "totalNodes": 12635,
+      "reachabilityPercent": 90.7,
+      "meanDistanceKm": 7.501,
+      "medianDistanceKm": 6.872
+    },
+    {
+      "name": "Combined",
+      "initialFailureSetSize": 727,
+      "closedRoads": 249,
+      "reachableNodes": 12309,
+      "totalNodes": 12635,
+      "reachabilityPercent": 97.42,
+      "meanDistanceKm": 7.631,
+      "medianDistanceKm": 7.104
+    }
+  ],
+  "randomTrialComparison": [
+    {
+      "failurePercent": 2.0,
+      "strategy": "Centrality-based",
+      "trials": 30,
+      "meanReachablePercent": 97.322,
+      "sdReachablePercent": 0.479,
+      "meanDistanceKm": 7.401,
+      "sdMeanDistanceKm": 0.178
+    },
+    {
+      "failurePercent": 2.0,
+      "strategy": "Combined",
+      "trials": 30,
+      "meanReachablePercent": 97.069,
+      "sdReachablePercent": 0.755,
+      "meanDistanceKm": 7.613,
+      "sdMeanDistanceKm": 0.203
+    },
+    {
+      "failurePercent": 2.0,
+      "strategy": "Hospital-access optimization",
+      "trials": 30,
+      "meanReachablePercent": 97.343,
+      "sdReachablePercent": 0.645,
+      "meanDistanceKm": 7.741,
+      "sdMeanDistanceKm": 0.241
+    },
+    {
+      "failurePercent": 2.0,
+      "strategy": "No protection",
+      "trials": 30,
+      "meanReachablePercent": 96.731,
+      "sdReachablePercent": 0.766,
+      "meanDistanceKm": 7.814,
+      "sdMeanDistanceKm": 0.239
+    },
+    {
+      "failurePercent": 2.0,
+      "strategy": "Risk-based",
+      "trials": 30,
+      "meanReachablePercent": 97.098,
+      "sdReachablePercent": 0.749,
+      "meanDistanceKm": 7.794,
+      "sdMeanDistanceKm": 0.252
+    },
+    {
+      "failurePercent": 5.0,
+      "strategy": "Centrality-based",
+      "trials": 30,
+      "meanReachablePercent": 92.905,
+      "sdReachablePercent": 0.699,
+      "meanDistanceKm": 7.742,
+      "sdMeanDistanceKm": 0.234
+    },
+    {
+      "failurePercent": 5.0,
+      "strategy": "Combined",
+      "trials": 30,
+      "meanReachablePercent": 91.755,
+      "sdReachablePercent": 1.297,
+      "meanDistanceKm": 8.308,
+      "sdMeanDistanceKm": 0.27
+    },
+    {
+      "failurePercent": 5.0,
+      "strategy": "Hospital-access optimization",
+      "trials": 30,
+      "meanReachablePercent": 91.765,
+      "sdReachablePercent": 1.54,
+      "meanDistanceKm": 8.68,
+      "sdMeanDistanceKm": 0.367
+    },
+    {
+      "failurePercent": 5.0,
+      "strategy": "No protection",
+      "trials": 30,
+      "meanReachablePercent": 90.183,
+      "sdReachablePercent": 1.633,
+      "meanDistanceKm": 8.889,
+      "sdMeanDistanceKm": 0.375
+    },
+    {
+      "failurePercent": 5.0,
+      "strategy": "Risk-based",
+      "trials": 30,
+      "meanReachablePercent": 91.438,
+      "sdReachablePercent": 1.543,
+      "meanDistanceKm": 8.773,
+      "sdMeanDistanceKm": 0.386
+    },
+    {
+      "failurePercent": 10.0,
+      "strategy": "Centrality-based",
+      "trials": 30,
+      "meanReachablePercent": 85.047,
+      "sdReachablePercent": 0.929,
+      "meanDistanceKm": 8.273,
+      "sdMeanDistanceKm": 0.445
+    },
+    {
+      "failurePercent": 10.0,
+      "strategy": "Combined",
+      "trials": 30,
+      "meanReachablePercent": 79.249,
+      "sdReachablePercent": 2.703,
+      "meanDistanceKm": 9.656,
+      "sdMeanDistanceKm": 0.732
+    },
+    {
+      "failurePercent": 10.0,
+      "strategy": "Hospital-access optimization",
+      "trials": 30,
+      "meanReachablePercent": 78.067,
+      "sdReachablePercent": 3.945,
+      "meanDistanceKm": 10.723,
+      "sdMeanDistanceKm": 1.283
+    },
+    {
+      "failurePercent": 10.0,
+      "strategy": "No protection",
+      "trials": 30,
+      "meanReachablePercent": 72.995,
+      "sdReachablePercent": 3.996,
+      "meanDistanceKm": 10.86,
+      "sdMeanDistanceKm": 1.269
+    },
+    {
+      "failurePercent": 10.0,
+      "strategy": "Risk-based",
+      "trials": 30,
+      "meanReachablePercent": 76.569,
+      "sdReachablePercent": 3.843,
+      "meanDistanceKm": 10.86,
+      "sdMeanDistanceKm": 1.422
+    }
+  ],
+  "sensitivity": [
+    {
+      "failurePercent": 2.0,
+      "strategy": "No protection",
+      "initialFailureSetSize": 291,
+      "closedRoads": 291,
+      "reachableNodes": 11535,
+      "totalNodes": 12635,
+      "reachabilityPercent": 91.294,
+      "meanDistanceKm": 7.497,
+      "medianDistanceKm": 6.937
+    },
+    {
+      "failurePercent": 2.0,
+      "strategy": "Risk-based",
+      "initialFailureSetSize": 291,
+      "closedRoads": 0,
+      "reachableNodes": 12635,
+      "totalNodes": 12635,
+      "reachabilityPercent": 100.0,
+      "meanDistanceKm": 7.398,
+      "medianDistanceKm": 6.945
+    },
+    {
+      "failurePercent": 2.0,
+      "strategy": "Centrality-based",
+      "initialFailureSetSize": 291,
+      "closedRoads": 274,
+      "reachableNodes": 12060,
+      "totalNodes": 12635,
+      "reachabilityPercent": 95.449,
+      "meanDistanceKm": 7.515,
+      "medianDistanceKm": 6.993
+    },
+    {
+      "failurePercent": 2.0,
+      "strategy": "Combined",
+      "initialFailureSetSize": 291,
+      "closedRoads": 0,
+      "reachableNodes": 12635,
+      "totalNodes": 12635,
+      "reachabilityPercent": 100.0,
+      "meanDistanceKm": 7.398,
+      "medianDistanceKm": 6.945
+    },
+    {
+      "failurePercent": 5.0,
+      "strategy": "No protection",
+      "initialFailureSetSize": 727,
+      "closedRoads": 727,
+      "reachableNodes": 10961,
+      "totalNodes": 12635,
+      "reachabilityPercent": 86.751,
+      "meanDistanceKm": 7.658,
+      "medianDistanceKm": 6.974
+    },
+    {
+      "failurePercent": 5.0,
+      "strategy": "Risk-based",
+      "initialFailureSetSize": 727,
+      "closedRoads": 5,
+      "reachableNodes": 12623,
+      "totalNodes": 12635,
+      "reachabilityPercent": 99.905,
+      "meanDistanceKm": 7.392,
+      "medianDistanceKm": 6.945
+    },
+    {
+      "failurePercent": 5.0,
+      "strategy": "Centrality-based",
+      "initialFailureSetSize": 727,
+      "closedRoads": 672,
+      "reachableNodes": 11460,
+      "totalNodes": 12635,
+      "reachabilityPercent": 90.7,
+      "meanDistanceKm": 7.501,
+      "medianDistanceKm": 6.872
+    },
+    {
+      "failurePercent": 5.0,
+      "strategy": "Combined",
+      "initialFailureSetSize": 727,
+      "closedRoads": 245,
+      "reachableNodes": 12313,
+      "totalNodes": 12635,
+      "reachabilityPercent": 97.452,
+      "meanDistanceKm": 7.449,
+      "medianDistanceKm": 6.932
+    },
+    {
+      "failurePercent": 10.0,
+      "strategy": "No protection",
+      "initialFailureSetSize": 1454,
+      "closedRoads": 1454,
+      "reachableNodes": 9399,
+      "totalNodes": 12635,
+      "reachabilityPercent": 74.389,
+      "meanDistanceKm": 10.933,
+      "medianDistanceKm": 7.255
+    },
+    {
+      "failurePercent": 10.0,
+      "strategy": "Risk-based",
+      "initialFailureSetSize": 1454,
+      "closedRoads": 732,
+      "reachableNodes": 10892,
+      "totalNodes": 12635,
+      "reachabilityPercent": 86.205,
+      "meanDistanceKm": 8.628,
+      "medianDistanceKm": 7.746
+    },
+    {
+      "failurePercent": 10.0,
+      "strategy": "Centrality-based",
+      "initialFailureSetSize": 1454,
+      "closedRoads": 1339,
+      "reachableNodes": 10395,
+      "totalNodes": 12635,
+      "reachabilityPercent": 82.271,
+      "meanDistanceKm": 7.489,
+      "medianDistanceKm": 6.72
+    },
+    {
+      "failurePercent": 10.0,
+      "strategy": "Combined",
+      "initialFailureSetSize": 1454,
+      "closedRoads": 926,
+      "reachableNodes": 10818,
+      "totalNodes": 12635,
+      "reachabilityPercent": 85.619,
+      "meanDistanceKm": 7.66,
+      "medianDistanceKm": 6.854
+    }
+  ],
+  "optimization": {
+    "solver": "PuLP/CBC",
+    "status": "Optimal",
+    "optimalityProven": true,
+    "elapsedSeconds": 603.81,
+    "selectedRoadCount": 1676,
+    "protectedLengthKm": 562.626,
+    "budgetRemainingKm": 4.22,
+    "reachableNodeCount": 10918,
+    "reachablePercent": 86.411,
+    "objective": "Maximize nodes reachable from any hospital",
+    "limitation": "One randomly generated design-failure scenario. Random road failures are not calibrated landslide probabilities. Nodes are used as a proxy for access, not population."
+  },
+  "notes": {
+    "budgetDefinition": "Budget is measured by selected road length, not monetary cost.",
+    "interpretation": "These are modelled disruption scenarios, not live landslide predictions or guaranteed hospital access.",
+    "fairComparison": "The fair comparison uses a fixed initial set of failed roads.",
+    "randomTrials": "Random-trial results are averages across repeated simulations.",
+    "missingMetrics": "Mean risk and centrality are null because the selection summary does not contain these fields."
+  }
+}
