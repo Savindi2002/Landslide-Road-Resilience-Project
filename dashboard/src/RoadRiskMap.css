@@ -613,3 +613,891 @@
     flex-direction: column;
   }
 }
+
+/* ========================================
+   LANDSAFE ROAD RISK MAP
+======================================== */
+
+.road-risk-page {
+  width: 100%;
+  min-width: 0;
+  color: #18364b;
+}
+
+.road-risk-heading {
+  margin-bottom: 18px;
+}
+
+.road-risk-heading h2 {
+  margin: 0 0 8px;
+  color: #153d35;
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  line-height: 1.25;
+}
+
+.road-risk-heading p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+/* Road search and risk filters */
+
+.road-filter-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr) auto;
+  align-items: end;
+  gap: 12px;
+  margin: 18px 0 8px;
+  padding: 16px;
+  border: 1px solid #dce8e4;
+  border-radius: 14px;
+  background: #f7faf9;
+}
+
+.road-filter-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.road-filter-field label {
+  color: #18364b;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.road-filter-field input,
+.road-filter-field select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 43px;
+  padding: 10px 12px;
+  border: 1px solid #cbdad8;
+  border-radius: 8px;
+  background: #fff;
+  color: #18364b;
+  font: inherit;
+}
+
+.road-filter-field input:focus,
+.road-filter-field select:focus {
+  outline: 2px solid #16845d;
+  outline-offset: 2px;
+}
+
+.road-filter-reset {
+  min-height: 43px;
+  padding: 10px 14px;
+  border: 1px solid #cbdad8;
+  border-radius: 8px;
+  background: #fff;
+  color: #176b51;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.road-filter-reset:hover:not(:disabled) {
+  background: #eaf6ef;
+}
+
+.road-filter-reset:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.road-filter-count {
+  margin: 8px 0 16px;
+  color: #61758a;
+  font-size: 0.85rem;
+}
+
+/* Hospital search controls */
+
+.hospital-tools-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid #e0e8ed;
+  border-radius: 14px;
+  background: #fff;
+}
+
+/* Main map and facility sidebar */
+
+.map-layout {
+  display: grid;
+  grid-template-columns: minmax(230px, 290px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+  margin-top: 16px;
+}
+
+.hospital-sidebar {
+  min-width: 0;
+  max-height: 680px;
+  overflow-y: auto;
+  padding: 16px;
+  border: 1px solid #dce8e4;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.hospital-sidebar h3 {
+  margin: 0 0 6px;
+  color: #153d35;
+  font-size: 1.1rem;
+}
+
+.hospital-sidebar > p {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.hospital-results {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.hospital-result {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+  padding: 11px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #fff;
+  color: #18364b;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.hospital-result:hover,
+.hospital-result.selected {
+  border-color: #16845d;
+  background: #effaf4;
+}
+
+.hospital-result strong {
+  font-size: 0.9rem;
+}
+
+.hospital-result span {
+  color: #64748b;
+  font-size: 0.76rem;
+}
+
+.selected-hospital-panel,
+.nearest-hospitals {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.selected-hospital-panel h4,
+.nearest-hospitals h4 {
+  margin: 0 0 10px;
+  color: #176b51;
+}
+
+.selected-hospital-panel p {
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+
+.selected-hospital-panel .road-filter-reset,
+.clear-selection-button {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.clear-selection-button {
+  min-height: 40px;
+  padding: 9px 12px;
+  border: 1px solid #d8e1e8;
+  border-radius: 8px;
+  background: #fff;
+  color: #526579;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.clear-selection-button:hover {
+  background: #f1f5f9;
+}
+
+.nearest-hospital {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border: 0;
+  border-bottom: 1px solid #edf1f5;
+  background: transparent;
+  color: #18364b;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nearest-hospital span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.83rem;
+}
+
+.nearest-hospital strong {
+  flex-shrink: 0;
+  color: #176b51;
+  font-size: 0.82rem;
+}
+
+.nearest-hospital:hover span {
+  text-decoration: underline;
+}
+
+/* Map container */
+
+.road-map-wrapper {
+  position: relative;
+  min-width: 0;
+  min-height: 480px;
+  overflow: hidden;
+  border: 1px solid #dce5e9;
+  border-radius: 14px;
+  background: #edf3f0;
+}
+
+.road-risk-map {
+  width: 100%;
+  height: 600px;
+  min-height: 480px;
+  z-index: 1;
+}
+
+/* Hospital markers */
+
+.landsafe-hospital-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #176bce;
+  box-shadow: 0 2px 7px rgb(0 0 0 / 25%);
+}
+
+.landsafe-hospital-icon span {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.landsafe-location-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #2563eb;
+  box-shadow: 0 0 0 7px rgb(37 99 235 / 20%);
+}
+
+.landsafe-location-icon span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+/* Risk legend */
+
+.risk-legend {
+  position: absolute;
+  right: 12px;
+  bottom: 24px;
+  z-index: 500;
+  display: flex;
+  max-width: calc(100% - 24px);
+  flex-direction: column;
+  gap: 8px;
+  padding: 13px 15px;
+  border: 1px solid #dce5e9;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 96%);
+  box-shadow: 0 3px 12px rgb(15 23 42 / 12%);
+}
+
+.risk-legend h4 {
+  margin: 0 0 3px;
+  color: #18364b;
+  font-size: 0.9rem;
+}
+
+.risk-legend span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #425466;
+  font-size: 0.78rem;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.low-risk {
+  background: #2e9d67;
+}
+
+.medium-risk {
+  background: #e6a23c;
+}
+
+.high-risk {
+  background: #d94b4b;
+}
+
+.unknown-risk {
+  background: #89939d;
+}
+
+/* Road popup */
+
+.landsafe-road-popup {
+  min-width: 150px;
+  max-width: 240px;
+  color: #18364b;
+  overflow-wrap: anywhere;
+}
+
+.landsafe-road-popup strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+.landsafe-road-popup p {
+  margin: 5px 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+/* Status and error messages */
+
+.map-status-message {
+  margin: 10px 0;
+  color: #526579;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.map-error {
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid #f1b8b8;
+  border-radius: 10px;
+  background: #fff4f4;
+  color: #9b2929;
+  overflow-wrap: anywhere;
+}
+
+.map-error p {
+  margin-bottom: 0;
+  line-height: 1.5;
+}
+
+/* Research disclaimer */
+
+.map-disclaimer {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #e4d7a9;
+  border-radius: 12px;
+  background: #fffaf0;
+  color: #67552b;
+  line-height: 1.6;
+}
+
+.map-disclaimer strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.map-disclaimer p {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+/* Keyboard accessibility */
+
+.hospital-result:focus-visible,
+.nearest-hospital:focus-visible,
+.road-filter-reset:focus-visible,
+.clear-selection-button:focus-visible {
+  outline: 2px solid #16845d;
+  outline-offset: 3px;
+}
+
+/* Responsive layout */
+
+@media (max-width: 900px) {
+  .map-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hospital-sidebar {
+    max-height: none;
+  }
+
+  .hospital-results {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .road-risk-map {
+    height: 520px;
+  }
+}
+
+@media (max-width: 700px) {
+  .road-filter-panel {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 12px;
+  }
+
+  .road-filter-reset {
+    width: 100%;
+  }
+
+  .hospital-tools-panel {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 12px;
+  }
+
+  .hospital-results {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .road-map-wrapper {
+    min-height: 430px;
+  }
+
+  .road-risk-map {
+    height: 460px;
+    min-height: 430px;
+  }
+
+  .risk-legend {
+    right: 8px;
+    bottom: 18px;
+    gap: 6px;
+    padding: 10px;
+  }
+
+  .risk-legend span {
+    font-size: 0.72rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .road-risk-map {
+    height: 400px;
+    min-height: 400px;
+  }
+
+  .risk-legend {
+    right: 6px;
+    bottom: 16px;
+    padding: 8px;
+  }
+
+  .risk-legend h4 {
+    font-size: 0.8rem;
+  }
+}
+
+/* LANDSAFE interactive dashboard enhancements */
+
+.road-risk-eyebrow,
+.selected-road-eyebrow {
+  display: inline-block;
+  color: #218052;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.road-risk-heading h2 {
+  color: #153d35;
+  line-height: 1.3;
+}
+
+.road-risk-heading p {
+  color: #64748b;
+  line-height: 1.65;
+}
+
+/* Live statistics cards */
+
+.road-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.road-stat-card {
+  min-width: 0;
+  padding: 17px;
+  border: 1px solid #dce8e4;
+  border-radius: 15px;
+  background: linear-gradient(145deg, #fff, #f6faf8);
+  box-shadow: 0 3px 12px rgb(20 60 45 / 4%);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.road-stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 7px 18px rgb(20 60 45 / 9%);
+}
+
+.road-stat-label {
+  display: block;
+  margin-bottom: 10px;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.road-stat-card > strong {
+  display: block;
+  color: #153d35;
+  font-size: clamp(1.4rem, 2vw, 2rem);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.road-stat-card small {
+  display: block;
+  margin-top: 8px;
+  color: #718096;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.road-stat-card.stat-high {
+  border-top: 3px solid #d94b4b;
+}
+
+.road-stat-card.stat-high > strong {
+  color: #bd3434;
+}
+
+.road-stat-card.stat-medium {
+  border-top: 3px solid #e6a23c;
+}
+
+.road-stat-card.stat-medium > strong {
+  color: #a76b13;
+}
+
+.road-stat-card.stat-low {
+  border-top: 3px solid #2e9d67;
+}
+
+.road-stat-card.stat-low > strong {
+  color: #218052;
+}
+
+.road-stat-card.stat-unknown {
+  border-top: 3px solid #89939d;
+}
+
+/* CSV export toolbar */
+
+.road-export-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 16px 0 22px;
+  padding: 17px 19px;
+  border: 1px solid #dce8e4;
+  border-radius: 14px;
+  background: #f7faf9;
+}
+
+.road-export-row > div {
+  min-width: 0;
+}
+
+.road-export-row strong {
+  color: #18364b;
+}
+
+.road-export-row p {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.road-export-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  padding: 11px 17px;
+  border: 1px solid #176b51;
+  border-radius: 9px;
+  background: #176b51;
+  color: #fff;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.road-export-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #10553f;
+}
+
+.road-export-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Selected road detail panel */
+
+.selected-road-panel {
+  margin-top: 20px;
+  padding: clamp(16px, 2.5vw, 25px);
+  border: 1px solid #cfe3d9;
+  border-radius: 17px;
+  background: linear-gradient(145deg, #fff, #f4faf6);
+  box-shadow: 0 5px 18px rgb(20 60 45 / 5%);
+  animation: landsafe-panel-enter 0.25s ease-out;
+}
+
+@keyframes landsafe-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.selected-road-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.selected-road-header > div {
+  min-width: 0;
+}
+
+.selected-road-header h3 {
+  margin: 7px 0;
+  color: #153d35;
+  font-size: clamp(1.15rem, 2vw, 1.5rem);
+  overflow-wrap: anywhere;
+}
+
+.selected-road-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.87rem;
+  line-height: 1.5;
+}
+
+.selected-road-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.selected-road-metrics article {
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid #e1ebe5;
+  border-radius: 11px;
+  background: #fff;
+}
+
+.selected-road-metrics article span {
+  display: block;
+  margin-bottom: 8px;
+  color: #718096;
+  font-size: 0.8rem;
+}
+
+.selected-road-metrics article strong {
+  display: block;
+  color: #18364b;
+  font-size: 1rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.selected-road-panel h4 {
+  margin: 0 0 12px;
+  color: #18364b;
+}
+
+.selected-road-attributes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.road-attribute {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+  padding: 12px;
+  border: 1px solid #e8eeeb;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.road-attribute span {
+  color: #718096;
+  font-size: 0.77rem;
+  text-transform: capitalize;
+}
+
+.road-attribute strong {
+  color: #294457;
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Select road from its map popup */
+
+.road-popup-select {
+  margin-top: 8px;
+  padding: 8px 11px;
+  border: 0;
+  border-radius: 7px;
+  background: #176b51;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.road-popup-select:hover {
+  background: #10553f;
+}
+
+.landsafe-road-popup p {
+  line-height: 1.45;
+}
+
+/* Better focus visibility */
+
+.road-export-button:focus-visible,
+.selected-road-panel button:focus-visible,
+.road-popup-select:focus-visible {
+  outline: 3px solid #16845d;
+  outline-offset: 3px;
+}
+
+/* Tablet */
+
+@media (max-width: 1100px) {
+  .road-stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 700px) {
+  .road-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .road-stat-card {
+    padding: 13px;
+  }
+
+  .road-export-row {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 14px;
+  }
+
+  .road-export-button {
+    width: 100%;
+  }
+
+  .selected-road-header {
+    flex-direction: column;
+  }
+
+  .selected-road-metrics {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 9px;
+  }
+
+  .selected-road-metrics article {
+    padding: 12px;
+  }
+
+  .selected-road-attributes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 380px) {
+  .road-stats-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .road-stat-card,
+  .road-export-button {
+    transition: none;
+  }
+
+  .selected-road-panel {
+    animation: none;
+  }
+}
