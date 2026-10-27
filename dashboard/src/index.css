@@ -35,3 +35,123 @@ select,
 textarea {
   font: inherit;
 }
+
+.emergency-guidance {
+  margin: 20px 0;
+  padding: 22px;
+  border: 1px solid #e2b7b7;
+  border-radius: 16px;
+  background: #fffafa;
+  color: #292929;
+  font-family: inherit;
+}
+
+.emergency-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.emergency-eyebrow {
+  color: #b42318;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.emergency-guidance h2 {
+  margin: 8px 0;
+  font-size: 23px;
+}
+
+.emergency-guidance h3 {
+  margin: 0 0 12px;
+  font-size: 17px;
+}
+
+.emergency-guidance p {
+  line-height: 1.6;
+}
+
+.language-switch {
+  display: flex;
+  gap: 6px;
+}
+
+.language-switch button {
+  padding: 9px 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+}
+
+.language-switch button.active {
+  color: white;
+  background: #b42318;
+  border-color: #b42318;
+}
+
+.emergency-section {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid #eadede;
+}
+
+.emergency-guidance li {
+  margin-bottom: 10px;
+  padding-left: 4px;
+  line-height: 1.6;
+}
+
+.emergency-contacts {
+  display: grid;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.emergency-contacts h3 {
+  margin-bottom: 2px;
+}
+
+.emergency-contacts a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #e2b7b7;
+  border-radius: 10px;
+  background: white;
+  color: #292929;
+  text-decoration: none;
+}
+
+.emergency-contacts a strong {
+  color: #b42318;
+  font-size: 22px;
+  white-space: nowrap;
+}
+
+.emergency-disclaimer {
+  margin-top: 18px;
+  font-size: 12px;
+  color: #625858;
+}
+
+@media (max-width: 600px) {
+  .emergency-guidance {
+    padding: 16px;
+  }
+
+  .emergency-guidance h2 {
+    font-size: 20px;
+  }
+
+  .emergency-contacts a {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
