@@ -2488,3 +2488,1688 @@ function ResearchPage() {
     padding: 11px;
   }
 }
+
+/* Interactive research charts */
+
+.research-visualizations {
+  margin-top: 24px;
+}
+
+.research-graphs-heading {
+  margin-bottom: 22px;
+}
+
+.research-graphs-heading > span {
+  color: #0F766E;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.research-graphs-heading h2 {
+  margin: 8px 0;
+  color: #173B35;
+  font-size: clamp(22px, 3vw, 30px);
+}
+
+.research-graphs-heading p,
+.research-chart-card > p {
+  color: #64748B;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.research-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.research-chart-card {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  background: #FFFFFF;
+  box-shadow: 0 5px 20px rgba(15, 23, 42, 0.04);
+}
+
+.research-chart-card h3 {
+  margin: 0;
+  color: #173B35;
+  font-size: 17px;
+}
+
+.research-chart-card > p {
+  min-height: 42px;
+  margin: 8px 0 12px;
+}
+
+.research-chart {
+  width: 100%;
+  height: 280px;
+  min-width: 0;
+}
+
+.research-graph-note {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-left: 4px solid #0F766E;
+  border-radius: 8px;
+  background: #F0FDFA;
+  color: #475569;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+@media (max-width: 760px) {
+  .research-chart-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .research-chart-card {
+    padding: 14px;
+  }
+}
+
+/* Interactive Graph Theory Research Visualizations */
+.graph-theory-visuals {
+  margin-top: 24px;
+}
+
+.graph-visual-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 22px;
+}
+
+.graph-visual-card {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #ffffff, #f8fbff);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.graph-visual-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1);
+}
+
+.graph-visual-card-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 80px;
+}
+
+.graph-visual-number {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #e0f2fe;
+  color: #075985;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.graph-visual-card h3 {
+  margin: 0 0 7px;
+  color: #172554;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.graph-visual-card-heading p {
+  margin: 0;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.graph-visual-chart {
+  width: 100%;
+  min-width: 0;
+  min-height: 300px;
+  margin-top: 12px;
+}
+
+.graph-visual-chart .recharts-responsive-container {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .graph-visual-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .graph-visual-card {
+    padding: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .graph-visual-card {
+    transition: none;
+  }
+
+  .graph-visual-card:hover {
+    transform: none;
+  }
+}
+.research-chart {
+  width: 100%;
+  min-width: 0;
+  margin-top: 18px;
+}
+
+/* LANDSAFE sidebar enhancements */
+.brand {
+  gap: 12px;
+  align-items: center;
+}
+
+.brand-icon {
+  display: grid;
+  place-items: center;
+  min-width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+  color: white;
+  font-size: 23px;
+  box-shadow: 0 5px 16px rgba(15, 118, 110, 0.2);
+}
+
+.brand small {
+  display: block;
+  margin-top: 4px;
+  font-size: 10px;
+  opacity: 0.75;
+}
+
+.sidebar-visual {
+  position: relative;
+  height: 125px;
+  margin: 20px 0;
+  overflow: hidden;
+  border-radius: 15px;
+  background: #0f766e;
+}
+
+.sidebar-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.35s ease;
+}
+
+.sidebar-visual:hover img {
+  transform: scale(1.07);
+}
+
+.sidebar-visual-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 5px;
+  padding: 13px;
+  color: white;
+  background: linear-gradient(
+    180deg,
+    transparent 5%,
+    rgba(8, 25, 35, 0.82) 100%
+  );
+}
+
+.sidebar-visual-overlay span {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.3px;
+  color: #99f6e4;
+}
+
+.sidebar-visual-overlay strong {
+  font-size: 13px;
+}
+
+.side-nav a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border-radius: 10px;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.side-nav a:hover {
+  transform: translateX(3px);
+}
+
+.side-nav a.active {
+  background: rgba(20, 184, 166, 0.14);
+  color: #0f766e;
+  font-weight: 700;
+}
+
+.nav-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  min-width: 24px;
+  font-size: 17px;
+}
+
+@media (max-width: 700px) {
+  .sidebar-visual {
+    height: 90px;
+  }
+}
+
+/* ==========================================
+   LANDSAFE - BEAUTIFUL HOSPITAL ACCESS PAGE
+   ========================================== */
+
+.hospital-page-modern {
+  color: #18324d;
+  padding-bottom: 30px;
+}
+
+.hospital-hero {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 35px;
+  align-items: center;
+  padding: 36px;
+  margin-bottom: 25px;
+  border-radius: 25px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #edf6ff, #f9fbff 58%, #e1efff);
+  border: 1px solid #e0ebf8;
+}
+
+.hospital-hero-content {
+  padding: 8px 0;
+}
+
+.hospital-hero-tag,
+.hospital-section-eyebrow {
+  color: #1767bd;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.hospital-hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #dcecff;
+  padding: 10px 14px;
+  border-radius: 30px;
+}
+
+.hospital-hero-tag span {
+  font-size: 17px;
+}
+
+.hospital-hero-content h1 {
+  margin: 22px 0 15px;
+  font-size: clamp(32px, 3.4vw, 48px);
+  line-height: 1.12;
+  letter-spacing: -1.5px;
+  color: #163858;
+}
+
+.hospital-hero-content h1 span {
+  color: #2477cc;
+}
+
+.hospital-hero-content > p {
+  color: #61758b;
+  font-size: 14px;
+  line-height: 1.9;
+  max-width: 480px;
+  margin-bottom: 24px;
+}
+
+.hospital-hero-button,
+.hospital-location-button,
+.hospital-view-button,
+.hospital-map-button,
+.hospital-directions-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 17px;
+  border-radius: 11px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.hospital-hero-button {
+  color: white;
+  background: #176bc4;
+  border: 0;
+  box-shadow: 0 7px 18px #176bc426;
+}
+
+.hospital-hero-button:hover,
+.hospital-map-button:hover {
+  background: #1056a0;
+  transform: translateY(-2px);
+}
+
+.hospital-hero-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 23px;
+  color: #526b84;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.hospital-hero-points span::first-letter {
+  color: #15945a;
+}
+
+.hospital-hero-visual {
+  position: relative;
+  min-width: 0;
+  padding-bottom: 12px;
+}
+
+.hospital-hero-visual > img {
+  width: 100%;
+  height: 310px;
+  object-fit: cover;
+  display: block;
+  border-radius: 20px;
+  box-shadow: 0 16px 36px #173a6026;
+}
+
+.hospital-floating-card {
+  position: absolute;
+  left: -18px;
+  bottom: -4px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 17px;
+  border-radius: 15px;
+  background: white;
+  box-shadow: 0 9px 30px #16385820;
+}
+
+.hospital-floating-icon {
+  width: 43px;
+  height: 43px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: #e2f6eb;
+  color: #168451;
+  font-size: 25px;
+}
+
+.hospital-floating-card strong {
+  display: block;
+  color: #183858;
+  font-size: 12px;
+}
+
+.hospital-floating-card p {
+  margin: 5px 0 0;
+  color: #74859a;
+  font-size: 11px;
+}
+
+.hospital-hero-decoration {
+  position: absolute;
+  top: -19px;
+  right: -10px;
+  color: #77aeea;
+  font-size: 75px;
+  font-weight: 200;
+  opacity: 0.65;
+}
+
+/* Quick statistics */
+
+.hospital-quick-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 36px;
+}
+
+.hospital-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 19px;
+  border-radius: 17px;
+  background: white;
+  border: 1px solid #e8edf4;
+  box-shadow: 0 5px 18px #1b3e6508;
+}
+
+.hospital-stat-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 14px;
+  font-size: 24px;
+}
+
+.hospital-stat-icon.blue {
+  color: #176bc4;
+  background: #e8f2ff;
+}
+
+.hospital-stat-icon.green {
+  color: #168451;
+  background: #e4f7ed;
+}
+
+.hospital-stat-icon.purple {
+  color: #7650c7;
+  background: #f0eaff;
+}
+
+.hospital-stat-card span {
+  display: block;
+  color: #75869a;
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.hospital-stat-card strong {
+  display: block;
+  color: #183858;
+  font-size: 23px;
+}
+
+.hospital-stat-card .hospital-stat-status {
+  font-size: 16px;
+}
+
+/* Directory and search */
+
+.hospital-directory-section {
+  scroll-margin-top: 24px;
+}
+
+.hospital-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+
+.hospital-section-heading h2 {
+  color: #183858;
+  font-size: 25px;
+  margin: 9px 0;
+  letter-spacing: -0.6px;
+}
+
+.hospital-section-heading p {
+  color: #74859a;
+  font-size: 13px;
+  margin: 0;
+  line-height: 1.7;
+}
+
+.hospital-location-button {
+  color: #176bc4;
+  background: #edf5ff;
+  border: 1px solid #d8e9fc;
+  white-space: nowrap;
+}
+
+.hospital-location-button:hover {
+  background: #dcecff;
+}
+
+.hospital-search-modern {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 17px;
+  min-height: 56px;
+  margin-bottom: 22px;
+  border: 1px solid #e0e8f1;
+  border-radius: 14px;
+  background: white;
+  color: #176bc4;
+  box-shadow: 0 5px 18px #17385807;
+}
+
+.hospital-search-modern > span {
+  font-size: 25px;
+}
+
+.hospital-search-modern input {
+  width: 100%;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #183858;
+  font: inherit;
+  font-size: 13px;
+}
+
+.hospital-search-modern:focus-within {
+  border-color: #76aeea;
+  box-shadow: 0 0 0 3px #176bc414;
+}
+
+.hospital-clear-search {
+  border: 0;
+  background: #edf3f9;
+  color: #536c84;
+  width: 29px;
+  height: 29px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.hospital-status,
+.hospital-location-success {
+  padding: 12px 15px;
+  margin: 0 0 16px;
+  border-radius: 11px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.hospital-location-success {
+  background: #eaf8ef;
+  color: #187348;
+  border: 1px solid #d2efdc;
+}
+
+.hospital-location-success span {
+  font-weight: 800;
+  margin-right: 8px;
+}
+
+.hospital-status {
+  background: #edf5ff;
+  color: #285c91;
+}
+
+/* Facility cards */
+
+.hospital-list-modern {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.hospital-card-modern {
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 19px;
+  border: 1px solid #e4ebf3;
+  background: white;
+  box-shadow: 0 5px 20px #18385809;
+  transition: transform 0.22s ease, box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.hospital-card-modern:hover {
+  transform: translateY(-4px);
+  border-color: #c1dcfa;
+  box-shadow: 0 15px 32px #18385814;
+}
+
+.hospital-card-modern.selected {
+  border-color: #4b95e8;
+  box-shadow: 0 0 0 3px #4b95e81c;
+}
+
+.hospital-card-image-wrap {
+  height: 175px;
+  position: relative;
+  overflow: hidden;
+  background: #eaf2fa;
+}
+
+.hospital-card-image-wrap img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.hospital-card-modern:hover .hospital-card-image-wrap img {
+  transform: scale(1.045);
+}
+
+.hospital-card-badge {
+  position: absolute;
+  left: 13px;
+  top: 13px;
+  padding: 8px 11px;
+  border-radius: 30px;
+  background: #ffffffed;
+  color: #225b91;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.hospital-card-modern-body {
+  padding: 20px;
+}
+
+.hospital-card-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 19px;
+}
+
+.hospital-card-symbol {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #e7f2ff;
+  color: #176bc4;
+  font-size: 23px;
+}
+
+.hospital-card-title {
+  min-width: 0;
+}
+
+.hospital-card-title h3 {
+  color: #183858;
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 0 0 5px;
+  overflow-wrap: anywhere;
+}
+
+.hospital-card-title p {
+  color: #77899c;
+  font-size: 12px;
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.hospital-card-info {
+  display: grid;
+  gap: 14px;
+  padding: 15px;
+  background: #f7faff;
+  border-radius: 13px;
+  margin-bottom: 17px;
+}
+
+.hospital-info-row {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  min-width: 0;
+}
+
+.hospital-info-row > span {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: white;
+  color: #2878c6;
+  font-size: 18px;
+}
+
+.hospital-info-row div {
+  min-width: 0;
+}
+
+.hospital-info-row small {
+  display: block;
+  color: #8291a2;
+  font-size: 10px;
+  margin-bottom: 4px;
+}
+
+.hospital-info-row strong {
+  display: block;
+  color: #3b526b;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.hospital-card-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.hospital-view-button {
+  flex: 1;
+  background: white;
+  border: 1px solid #dce6f0;
+  color: #315575;
+}
+
+.hospital-view-button:hover {
+  background: #f3f8ff;
+}
+
+.hospital-map-button {
+  flex: 1;
+  background: #176bc4;
+  color: white;
+  border: 1px solid #176bc4;
+}
+
+/* Selected facility */
+
+.hospital-selected-panel {
+  margin: 0 0 25px;
+  padding: 23px;
+  border-radius: 18px;
+  border: 1px solid #cfe3fb;
+  background: linear-gradient(135deg, #f0f7ff, #ffffff);
+}
+
+.hospital-selected-heading {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.hospital-selected-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #dcecff;
+  color: #176bc4;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.hospital-selected-heading > div:nth-child(2) {
+  min-width: 0;
+  flex: 1;
+}
+
+.hospital-selected-heading span {
+  color: #2875be;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.hospital-selected-heading h3 {
+  margin: 5px 0;
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+
+.hospital-selected-heading p {
+  margin: 0;
+  font-size: 12px;
+  color: #72849a;
+}
+
+.hospital-close-selected {
+  width: 35px;
+  height: 35px;
+  border: none;
+  border-radius: 10px;
+  background: #e6eef8;
+  color: #315575;
+  font-size: 23px;
+  cursor: pointer;
+}
+
+.hospital-selected-details {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 22px 0;
+}
+
+.hospital-selected-details > div {
+  min-width: 0;
+  padding: 14px;
+  border-radius: 12px;
+  background: white;
+  border: 1px solid #e4edf7;
+}
+
+.hospital-selected-details span,
+.hospital-selected-details strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.hospital-selected-details span {
+  margin-bottom: 8px;
+  color: #7b8ca0;
+  font-size: 11px;
+}
+
+.hospital-selected-details strong {
+  color: #234c72;
+  font-size: 13px;
+}
+
+.hospital-directions-button {
+  color: white;
+  background: #176bc4;
+}
+
+.hospital-directions-button:hover {
+  background: #1056a0;
+}
+
+/* Loading and empty states */
+
+.hospital-loading,
+.hospital-empty-state {
+  text-align: center;
+  padding: 45px 20px;
+  border-radius: 18px;
+  background: #f7faff;
+  border: 1px dashed #d4e2f1;
+}
+
+.hospital-loading p,
+.hospital-empty-state p {
+  color: #74859a;
+  font-size: 13px;
+}
+
+.hospital-spinner {
+  width: 32px;
+  height: 32px;
+  margin: 0 auto 13px;
+  border: 3px solid #d7e8fa;
+  border-top-color: #176bc4;
+  border-radius: 50%;
+  animation: hospital-spin 0.8s linear infinite;
+}
+
+@keyframes hospital-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hospital-empty-state > span {
+  font-size: 36px;
+  color: #6796c9;
+}
+
+.hospital-empty-state h3 {
+  color: #234565;
+}
+
+/* Safety panel */
+
+.hospital-safety-banner {
+  display: flex;
+  gap: 17px;
+  align-items: flex-start;
+  margin-top: 32px;
+  padding: 24px;
+  border-radius: 18px;
+  border: 1px solid #f0dfb4;
+  background: linear-gradient(135deg, #fffaf0, #fffdf8);
+}
+
+.hospital-safety-symbol {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #fff0ca;
+  color: #a46b0b;
+  font-size: 23px;
+  font-weight: 800;
+}
+
+.hospital-safety-banner h3 {
+  color: #73521b;
+  margin: 2px 0 9px;
+  font-size: 16px;
+}
+
+.hospital-safety-banner p {
+  color: #7d6b4e;
+  font-size: 12px;
+  line-height: 1.8;
+  margin: 0;
+}
+
+.hospital-emergency-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  font-size: 12px;
+}
+
+.hospital-emergency-links > span {
+  color: #7d6b4e;
+  font-weight: 700;
+}
+
+.hospital-emergency-links a {
+  padding: 8px 11px;
+  border-radius: 9px;
+  background: white;
+  border: 1px solid #f0dfb4;
+  color: #8c5b0b;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+/* Responsive layout */
+
+@media (max-width: 900px) {
+  .hospital-hero {
+    grid-template-columns: 1fr;
+    padding: 27px;
+  }
+
+  .hospital-hero-visual {
+    margin-top: 8px;
+  }
+
+  .hospital-hero-visual > img {
+    height: 280px;
+  }
+
+  .hospital-floating-card {
+    left: 12px;
+  }
+
+  .hospital-list-modern {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .hospital-hero {
+    padding: 21px;
+    border-radius: 19px;
+  }
+
+  .hospital-hero-content h1 {
+    font-size: 34px;
+  }
+
+  .hospital-hero-visual > img {
+    height: 220px;
+  }
+
+  .hospital-hero-points {
+    gap: 9px;
+    flex-direction: column;
+  }
+
+  .hospital-quick-stats {
+    grid-template-columns: 1fr;
+    gap: 11px;
+  }
+
+  .hospital-stat-card {
+    padding: 15px;
+  }
+
+  .hospital-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .hospital-section-heading h2 {
+    font-size: 22px;
+  }
+
+  .hospital-selected-details {
+    grid-template-columns: 1fr;
+  }
+
+  .hospital-card-actions {
+    flex-direction: column;
+  }
+
+  .hospital-safety-banner {
+    padding: 17px;
+    gap: 12px;
+  }
+
+  .hospital-emergency-links {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* ===== LANDSAFE WARNING PAGE ===== */
+
+.warnings-page {
+  padding-bottom: 30px;
+  color: #203852;
+}
+
+.warnings-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 30px;
+  padding: 32px;
+  margin-bottom: 25px;
+  border: 1px solid #f1e1cf;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #fff7ed, #fffdf9 65%, #fff0e1);
+  overflow: hidden;
+}
+
+.warnings-eyebrow {
+  display: inline-block;
+  padding: 9px 13px;
+  border-radius: 30px;
+  background: #ffead5;
+  color: #a64e18;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.warnings-hero-content h1 {
+  margin: 22px 0 14px;
+  font-size: clamp(34px, 4vw, 48px);
+  line-height: 1.12;
+  letter-spacing: -1.3px;
+  color: #293c50;
+}
+
+.warnings-hero-content h1 span {
+  color: #d66b2b;
+}
+
+.warnings-hero-content p {
+  max-width: 440px;
+  margin-bottom: 23px;
+  color: #697889;
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+.warnings-hero-button,
+.warnings-primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 17px;
+  border-radius: 11px;
+  background: #c65c25;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: 0.2s ease;
+}
+
+.warnings-hero-button:hover,
+.warnings-primary-button:hover {
+  background: #a84619;
+  transform: translateY(-2px);
+}
+
+.warnings-hero-image {
+  position: relative;
+  min-width: 0;
+}
+
+.warnings-hero-image > img {
+  display: block;
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 19px;
+  box-shadow: 0 12px 30px #573d261c;
+}
+
+.warnings-image-caption {
+  position: absolute;
+  right: 13px;
+  bottom: 13px;
+  left: 13px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 13px;
+  background: #ffffffef;
+  box-shadow: 0 5px 20px #00000012;
+}
+
+.warnings-image-caption > span {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 11px;
+  background: #fff0d9;
+  color: #b96b1c;
+  font-size: 23px;
+}
+
+.warnings-image-caption strong {
+  font-size: 13px;
+  color: #293c50;
+}
+
+.warnings-image-caption p {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: #748092;
+}
+
+/* Emergency cards */
+
+.warnings-contact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  margin-bottom: 28px;
+}
+
+.warnings-contact-card {
+  overflow: hidden;
+  border: 1px solid #e7ebf0;
+  border-radius: 19px;
+  background: white;
+  box-shadow: 0 5px 20px #20385209;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.warnings-contact-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px #20385215;
+}
+
+.warnings-card-image {
+  display: block;
+  width: 100%;
+  height: 175px;
+  object-fit: cover;
+}
+
+.warnings-card-body {
+  padding: 22px;
+}
+
+.warnings-card-tag {
+  color: #a55a26;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+}
+
+.warnings-card-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin: 13px 0;
+  border-radius: 14px;
+  font-size: 25px;
+}
+
+.dmc-icon {
+  color: #b5651d;
+  background: #fff0d9;
+}
+
+.ambulance-icon {
+  color: #17834c;
+  background: #e3f7eb;
+}
+
+.warnings-card-body h2 {
+  margin: 8px 0;
+  color: #243d56;
+  font-size: 19px;
+}
+
+.warnings-card-body > p {
+  min-height: 48px;
+  color: #718095;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.warnings-primary-button {
+  margin-top: 9px;
+}
+
+.warnings-phone-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 21px;
+  padding: 15px;
+  border: 1px solid #edf0f4;
+  border-radius: 13px;
+  background: #f8fafc;
+}
+
+.warnings-phone-row span,
+.warnings-phone-row strong {
+  display: block;
+}
+
+.warnings-phone-row span {
+  margin-bottom: 5px;
+  color: #7a8999;
+  font-size: 11px;
+}
+
+.warnings-phone-row strong {
+  color: #243d56;
+  font-size: 22px;
+}
+
+.warnings-call-button {
+  padding: 10px 13px;
+  border: 1px solid #dce6f0;
+  border-radius: 10px;
+  background: white;
+  color: #305777;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.warnings-call-button:hover {
+  background: #edf5ff;
+}
+
+/* Safety notice */
+
+.warnings-safety-panel {
+  display: flex;
+  align-items: flex-start;
+  gap: 17px;
+  margin-top: 24px;
+  padding: 24px;
+  border: 1px solid #f0dfb4;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #fffaf0, #fffdf8);
+}
+
+.warnings-safety-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 43px;
+  height: 43px;
+  border-radius: 12px;
+  background: #fff0ca;
+  color: #a46b0b;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.warnings-safety-panel h2 {
+  margin: 8px 0 13px;
+  color: #73521b;
+  font-size: 18px;
+}
+
+.warnings-safety-panel ul {
+  padding-left: 20px;
+  margin-bottom: 0;
+  color: #7d6b4e;
+  font-size: 13px;
+  line-height: 2;
+}
+
+/* Mobile layout */
+
+@media (max-width: 800px) {
+  .warnings-hero {
+    grid-template-columns: 1fr;
+    padding: 24px;
+  }
+
+  .warnings-hero-image > img {
+    height: 250px;
+  }
+
+  .warnings-contact-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .warnings-hero {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .warnings-hero-content h1 {
+    font-size: 34px;
+  }
+
+  .warnings-hero-image > img {
+    height: 215px;
+  }
+
+  .warnings-card-body {
+    padding: 17px;
+  }
+
+  .warnings-safety-panel {
+    padding: 17px;
+    gap: 12px;
+  }
+}
+
+/* ===== Road Risk Map Picture Banner ===== */
+
+.road-map-hero {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  align-items: center;
+  gap: 24px;
+  padding: 22px 26px;
+  margin-bottom: 24px;
+  border: 1px solid #dceafa;
+  border-radius: 20px;
+  background: linear-gradient(120deg, #edf6ff, #f8fbff);
+  overflow: hidden;
+}
+
+.road-map-tag {
+  display: inline-block;
+  padding: 7px 11px;
+  border-radius: 20px;
+  background: #dcecff;
+  color: #1763ad;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.road-map-hero-content h1 {
+  margin: 14px 0 8px;
+  color: #183858;
+  font-size: 28px;
+  letter-spacing: -0.6px;
+}
+
+.road-map-hero-content p {
+  max-width: 480px;
+  margin: 0;
+  color: #63788f;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.road-map-hero-image {
+  display: block;
+  width: 100%;
+  height: 145px;
+  object-fit: cover;
+  border-radius: 15px;
+  box-shadow: 0 7px 20px #18385818;
+}
+
+@media (max-width: 600px) {
+  .road-map-hero {
+    grid-template-columns: 1fr;
+    padding: 19px;
+  }
+
+  .road-map-hero-content h1 {
+    font-size: 25px;
+  }
+
+  .road-map-hero-image {
+    height: 160px;
+  }
+}
+/* Road Risk Map image banner */
+.map-hero-image {
+  position: relative;
+  height: 230px;
+  margin-bottom: 24px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #183858;
+}
+
+.map-hero-image > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.map-hero-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 30px;
+  background: linear-gradient(
+    90deg,
+    rgba(10, 32, 52, 0.85),
+    rgba(10, 32, 52, 0.35)
+  );
+  color: white;
+}
+
+.map-hero-overlay span {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #b9dcff;
+}
+
+.map-hero-overlay h2 {
+  margin: 12px 0 8px;
+  font-size: 30px;
+}
+
+.map-hero-overlay p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+  .map-hero-image {
+    height: 190px;
+  }
+
+  .map-hero-overlay {
+    padding: 20px;
+  }
+
+  .map-hero-overlay h2 {
+    font-size: 24px;
+  }
+}
+
+/* Report page picture banner */
+.report-hero-image {
+  position: relative;
+  height: 230px;
+  margin-bottom: 24px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #183858;
+}
+
+.report-hero-image > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.report-hero-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 30px;
+  color: white;
+  background: linear-gradient(
+    90deg,
+    rgba(10, 32, 52, 0.85),
+    rgba(10, 32, 52, 0.25)
+  );
+}
+
+.report-hero-overlay span {
+  color: #b9dcff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.report-hero-overlay h2 {
+  margin: 12px 0 8px;
+  font-size: 30px;
+}
+
+.report-hero-overlay p {
+  max-width: 480px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+  .report-hero-image {
+    height: 190px;
+  }
+
+  .report-hero-overlay {
+    padding: 20px;
+  }
+
+  .report-hero-overlay h2 {
+    font-size: 24px;
+  }
+}
+
+/* Research page picture banner */
+.research-hero-image {
+  position: relative;
+  height: 250px;
+  margin-bottom: 24px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #183858;
+}
+
+.research-hero-image > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.research-hero-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 32px;
+  color: #fff;
+  background: linear-gradient(
+    90deg,
+    rgba(10, 32, 52, 0.88),
+    rgba(10, 32, 52, 0.25)
+  );
+}
+
+.research-hero-overlay span {
+  color: #b9dcff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.research-hero-overlay h2 {
+  max-width: 650px;
+  margin: 12px 0 8px;
+  font-size: 30px;
+  line-height: 1.25;
+}
+
+.research-hero-overlay p {
+  max-width: 540px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+@media (max-width: 600px) {
+  .research-hero-image {
+    height: 210px;
+  }
+
+  .research-hero-overlay {
+    padding: 20px;
+  }
+
+  .research-hero-overlay h2 {
+    font-size: 23px;
+  }
+
+  .research-hero-overlay p {
+    font-size: 13px;
+  }
+}
