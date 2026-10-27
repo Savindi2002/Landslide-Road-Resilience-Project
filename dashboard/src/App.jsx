@@ -1,13 +1,26 @@
+
 import {
   ResponsiveContainer,
   BarChart,
   Bar,
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  ScatterChart,
+  Scatter,
+  PieChart,
+  Pie,
+  Cell,
+  CartesianGrid,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
   Legend,
-} from "recharts";
+} from 'recharts'
+
+
+
 import { BrowserRouter, NavLink, Routes, Route, Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import RoadRiskMap from './RoadRiskMap'
@@ -20,35 +33,60 @@ const AMBULANCE_URL = 'https://www.1990.lk/'
 function Layout() {
   return (
     <div className="app-shell">
-      <aside className="sidebar">
-        <Link to="/" className="brand">
-          <span className="brand-icon">L</span>
-          <span>
-            <strong>LANDSAFE</strong>
-            <small>Community Safety</small>
-          </span>
-        </Link>
+     
+<aside className="sidebar">
+  <Link to="/" className="brand">
+    <span className="brand-icon">🛣️</span>
+    <span>
+      <strong>LANDSAFE</strong>
+      <small>Safer roads, stronger communities</small>
+    </span>
+  </Link>
 
-        <p className="nav-heading">PUBLIC SERVICES</p>
-        <nav className="side-nav">
-          <NavLink end to="/">Home</NavLink>
-          <NavLink to="/map">Road Risk Map</NavLink>
-          <NavLink to="/warnings">Warnings &amp; Help</NavLink>
-          <NavLink to="/hospitals">Hospital Access</NavLink>
-          <NavLink to="/report">Report a Road Problem</NavLink>
-        </nav>
+  <div className="sidebar-visual">
+    <img
+      src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=600&q=80"
+      alt="Mountain landscape"
+    />
+    <div className="sidebar-visual-overlay">
+      <span>ROAD RESILIENCE</span>
+      <strong>Connecting communities</strong>
+    </div>
+  </div>
 
-        <p className="nav-heading">RESEARCH</p>
-        <nav className="side-nav">
-          <NavLink to="/research">Road Planning</NavLink>
-        </nav>
+  <p className="nav-heading">PUBLIC SERVICES</p>
+  <nav className="side-nav">
+    <NavLink end to="/">
+      <span className="nav-icon">⌂</span> Home
+    </NavLink>
+    <NavLink to="/map">
+      <span className="nav-icon">⌖</span> Road Risk Map
+    </NavLink>
+    <NavLink to="/warnings">
+      <span className="nav-icon">⚠</span> Warnings &amp; Help
+    </NavLink>
+    <NavLink to="/hospitals">
+      <span className="nav-icon">✚</span> Hospital Access
+    </NavLink>
+    <NavLink to="/report">
+      <span className="nav-icon">▤</span> Report a Road Problem
+    </NavLink>
+  </nav>
 
-        <div className="sidebar-location">
-          <small>INITIAL STUDY AREA</small>
-          <strong>Ratnapura District</strong>
-          <span>Sri Lanka</span>
-        </div>
-      </aside>
+  <p className="nav-heading">RESEARCH</p>
+  <nav className="side-nav">
+    <NavLink to="/research">
+      <span className="nav-icon">▥</span> Road Planning
+    </NavLink>
+  </nav>
+
+  <div className="sidebar-location">
+    <small>INITIAL STUDY AREA</small>
+    <strong>Ratnapura District</strong>
+    <span>Sri Lanka</span>
+  </div>
+</aside>
+
 
       <main className="main-content">
         <Routes>
@@ -282,6 +320,7 @@ function HomePage() {
 }
 
 
+
 function MapPage() {
   return (
     <>
@@ -291,6 +330,18 @@ function MapPage() {
         description="Select a road segment to inspect the available research attributes."
       />
 
+      <section className="map-hero-image">
+        <img
+          src="https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1400&q=85"
+          alt="Mountain landscape with winding terrain"
+        />
+        <div className="map-hero-overlay">
+          <span>LANDSAFE · SRI LANKA</span>
+          <h2>Explore Road Risk</h2>
+          <p>Understand road vulnerability across the Ratnapura region.</p>
+        </div>
+      </section>
+
       <section className="content-panel">
         <RoadRiskMap />
       </section>
@@ -298,69 +349,174 @@ function MapPage() {
   )
 }
 
+
+
 function WarningsPage() {
   return (
-    <>
-      <PageHeader
-        eyebrow="OFFICIAL INFORMATION"
-        title="Warnings &amp; Emergency Help"
-        description="Use official sources for current warnings and urgent assistance."
-      />
+    <div className="warnings-page">
 
-      <section className="home-grid">
-        <article className="feature-card">
-          <span className="feature-icon">!</span>
-          <h2>Disaster Management Centre</h2>
-          <p>Check official disaster notices and warnings before travelling.</p>
+      {/* Warning hero banner */}
+      <section className="warnings-hero">
+        <div className="warnings-hero-content">
+          <span className="warnings-eyebrow">
+            ⚠ SAFETY & EMERGENCY INFORMATION
+          </span>
 
-          <a
-            className="button"
-            href={DMC_URL}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Open DMC website ↗
-          </a>
-
-          <p><strong>Emergency contact: 117</strong></p>
-          <a href="tel:117">Call 117 from your phone</a>
-        </article>
-
-        <article className="feature-card">
-          <span className="feature-icon">+</span>
-          <h2>Suwa Seriya ambulance</h2>
-          <p>For a medical emergency, contact the official ambulance service.</p>
-
-          <a className="button" href="tel:1990">
-            Call 1990
-          </a>
+          <h1>
+            Stay Alert.
+            <br />
+            <span>Stay Safe.</span>
+          </h1>
 
           <p>
-            <a href={AMBULANCE_URL} target="_blank" rel="noreferrer">
-              Official website ↗
-            </a>
+            Check official disaster warnings, follow safety guidance,
+            and get emergency assistance when needed.
           </p>
-        </article>
+
+          <a className="warnings-hero-button" href={DMC_URL}
+            target="_blank" rel="noreferrer">
+            Check Official Warnings ↗
+          </a>
+        </div>
+
+        <div className="warnings-hero-image">
+          <img
+            src="https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=1000&q=85"
+            alt="Dense forest in a mountainous landscape"
+          />
+
+          <div className="warnings-image-caption">
+            <span>⚠</span>
+            <div>
+              <strong>Be prepared</strong>
+              <p>Check official alerts before travelling</p>
+            </div>
+          </div>
+        </div>
       </section>
 
+      {/* Emergency contact cards */}
+      <section className="warnings-contact-grid">
+
+        <article className="warnings-contact-card">
+          <img
+            className="warnings-card-image"
+            src="https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=800&q=85"
+            alt="Forest and natural landscape"
+            loading="lazy"
+          />
+
+          <div className="warnings-card-body">
+            <span className="warnings-card-tag">OFFICIAL WARNINGS</span>
+            <div className="warnings-card-icon dmc-icon">⚠</div>
+
+            <h2>Disaster Management Centre</h2>
+            <p>
+              Check official disaster notices and warnings before travelling.
+            </p>
+
+            <a
+              className="warnings-primary-button"
+              href={DMC_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open DMC website ↗
+            </a>
+
+            <div className="warnings-phone-row">
+              <div>
+                <span>Emergency contact</span>
+                <strong>117</strong>
+              </div>
+
+              <a href="tel:117" className="warnings-call-button">
+                Call 117
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <article className="warnings-contact-card">
+          <img
+            className="warnings-card-image"
+            src="https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?auto=format&fit=crop&w=800&q=85"
+            alt="Hospital building"
+            loading="lazy"
+          />
+
+          <div className="warnings-card-body">
+            <span className="warnings-card-tag">MEDICAL EMERGENCY</span>
+            <div className="warnings-card-icon ambulance-icon">✚</div>
+
+            <h2>Suwa Seriya Ambulance</h2>
+            <p>
+              Contact the official ambulance service when urgent medical
+              assistance is needed.
+            </p>
+
+            <a className="warnings-primary-button"
+              href="tel:1990">
+              Call 1990
+            </a>
+
+            <div className="warnings-phone-row">
+              <div>
+                <span>Official service</span>
+                <strong>1990</strong>
+              </div>
+
+              <a
+                href={AMBULANCE_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="warnings-call-button"
+              >
+                Website ↗
+              </a>
+            </div>
+          </div>
+        </article>
+
+      </section>
+
+      {/* Existing guidance */}
       <section className="content-panel">
         <EmergencyGuidance />
       </section>
 
-      <section className="notice-card">
-        <h2>Before travelling in a landslide-prone area</h2>
-        <ul>
-          <li>Check official warnings and follow evacuation instructions.</li>
-          <li>
-            Do not cross a road affected by a landslide, flood or unstable slope.
-          </li>
-          <li>Do not use this prototype as confirmation that a route is open.</li>
-          <li>If there is immediate danger, contact the relevant emergency service.</li>
-        </ul>
+      {/* Travel safety notice */}
+      <section className="warnings-safety-panel">
+        <div className="warnings-safety-icon">!</div>
+
+        <div>
+          <span className="warnings-card-tag">TRAVEL SAFETY</span>
+          <h2>Before travelling in a landslide-prone area</h2>
+
+          <ul>
+            <li>
+              Check official warnings and follow evacuation instructions.
+            </li>
+            <li>
+              Do not cross a road affected by a landslide, flood,
+              or unstable slope.
+            </li>
+            <li>
+              Do not use this prototype as confirmation that a route is open.
+            </li>
+            <li>
+              If there is immediate danger, contact the relevant
+              emergency service.
+            </li>
+          </ul>
+        </div>
       </section>
-    </>
+
+    </div>
   )
 }
+
+
 
 function HospitalPage() {
   const [facilities, setFacilities] = useState([])
@@ -369,6 +525,7 @@ function HospitalPage() {
   const [locationMessage, setLocationMessage] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [selectedId, setSelectedId] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -400,22 +557,23 @@ function HospitalPage() {
             const properties = feature.properties || {}
             const [longitude, latitude] = feature.geometry.coordinates
 
-            const name =
-              properties.name ||
-              properties.Name ||
-              properties.facility ||
-              properties.amenity ||
-              `Healthcare facility ${index + 1}`
-
             return {
               id: feature.id ?? `${longitude}-${latitude}-${index}`,
-              name: String(name),
+              name: String(
+                properties.name ||
+                properties.Name ||
+                properties.facility ||
+                properties.amenity ||
+                `Healthcare facility ${index + 1}`
+              ),
               latitude,
               longitude,
-              type:
+              type: String(
                 properties.amenity ||
                 properties.healthcare ||
-                'Healthcare facility',
+                properties.facility ||
+                'Healthcare facility'
+              ),
             }
           })
 
@@ -476,11 +634,11 @@ function HospitalPage() {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
         })
-        setLocationMessage('Your location was found.')
+        setLocationMessage('Your location was found successfully.')
       },
       () => {
         setLocationMessage(
-          'Location unavailable. Allow location access in your browser and try again.'
+          'Location unavailable. Allow location access and try again.'
         )
       },
       {
@@ -513,6 +671,10 @@ function HospitalPage() {
       return a.distance - b.distance
     })
 
+  const selectedFacility = visibleFacilities.find(
+    (facility) => facility.id === selectedId
+  )
+
   function getDirectionsUrl(facility) {
     const destination = `${facility.latitude},${facility.longitude}`
     const origin = userLocation
@@ -525,31 +687,118 @@ function HospitalPage() {
     )
   }
 
-  return (
-    <>
-      <PageHeader
-        eyebrow="HEALTHCARE ACCESS"
-        title="Find healthcare facilities"
-        description="Explore mapped healthcare locations in the research dataset and find directions to a selected facility."
-      />
+  const hospitalImages = [
+    'https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1538108149393-fbbd81895907?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80',
+  ]
 
-      <section className="content-panel hospital-page">
-        <div className="hospital-toolbar">
+  return (
+    <div className="hospital-page hospital-page-modern">
+
+      {/* Hero banner */}
+      <section className="hospital-hero">
+        <div className="hospital-hero-content">
+          <span className="hospital-hero-tag">
+            <span>✚</span> HEALTHCARE ACCESS
+          </span>
+
+          <h1>
+            Healthcare,
+            <br />
+            <span>Closer to You.</span>
+          </h1>
+
+          <p>
+            Explore healthcare facilities in the research dataset,
+            check approximate distances, and find directions to your
+            selected destination.
+          </p>
+
+          <button
+            type="button"
+            className="hospital-hero-button"
+            onClick={() =>
+              document.getElementById('hospital-facility-list')
+                ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }
+          >
+            Explore facilities <span>→</span>
+          </button>
+
+          <div className="hospital-hero-points">
+            <span>✓ Facility search</span>
+            <span>✓ Location support</span>
+            <span>✓ Map directions</span>
+          </div>
+        </div>
+
+        <div className="hospital-hero-visual">
+          <img
+            src={hospitalImages[0]}
+            alt="Hospital building"
+          />
+
+          <div className="hospital-floating-card">
+            <div className="hospital-floating-icon">✚</div>
+            <div>
+              <strong>Healthcare directory</strong>
+              <p>
+                {loading
+                  ? 'Loading facilities...'
+                  : `${facilities.length} mapped facilities`}
+              </p>
+            </div>
+          </div>
+
+          <div className="hospital-hero-decoration">+</div>
+        </div>
+      </section>
+
+      {/* Quick information cards */}
+      <section className="hospital-quick-stats">
+        <article className="hospital-stat-card">
+          <div className="hospital-stat-icon blue">✚</div>
           <div>
-            <h2>Healthcare facilities</h2>
-            <p>
-              {loading
-                ? 'Loading facility data...'
-                : `${visibleFacilities.length} facilities found`}
-            </p>
+            <span>Mapped facilities</span>
+            <strong>{loading ? '...' : facilities.length}</strong>
+          </div>
+        </article>
+
+        <article className="hospital-stat-card">
+          <div className="hospital-stat-icon green">⌖</div>
+          <div>
+            <span>Your location</span>
+            <strong className="hospital-stat-status">
+              {userLocation ? 'Located' : 'Not set'}
+            </strong>
+          </div>
+        </article>
+
+        <article className="hospital-stat-card">
+          <div className="hospital-stat-icon purple">↗</div>
+          <div>
+            <span>Search results</span>
+            <strong>{loading ? '...' : visibleFacilities.length}</strong>
+          </div>
+        </article>
+      </section>
+
+      {/* Search and location controls */}
+      <section className="hospital-directory-section" id="hospital-facility-list">
+        <div className="hospital-section-heading">
+          <div>
+            <span className="hospital-section-eyebrow">YOUR DIRECTORY</span>
+            <h2>Find a healthcare facility</h2>
+            <p>Search the available locations and explore your options.</p>
           </div>
 
           <button
             type="button"
-            className="button"
+            className="hospital-location-button"
             onClick={findMyLocation}
           >
-            Find my location
+            <span>⌖</span> Find my location
           </button>
         </div>
 
@@ -559,90 +808,228 @@ function HospitalPage() {
           </p>
         )}
 
-        <label className="hospital-search">
-          Search facilities
+        <label className="hospital-search-modern">
+          <span>⌕</span>
           <input
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search by facility name or type..."
+            placeholder="Search by hospital name or facility type..."
           />
+          {search && (
+            <button
+              type="button"
+              className="hospital-clear-search"
+              onClick={() => setSearch('')}
+              aria-label="Clear search"
+            >
+              ×
+            </button>
+          )}
         </label>
 
-        {loading && <p>Loading healthcare locations...</p>}
+        {userLocation && (
+          <div className="hospital-location-success">
+            <span>✓</span>
+            Your location is available. Facilities are sorted by
+            approximate straight-line distance.
+          </div>
+        )}
+
+        {loading && (
+          <div className="hospital-loading">
+            <div className="hospital-spinner" />
+            <p>Loading healthcare facilities...</p>
+          </div>
+        )}
 
         {!loading && error && (
           <div className="notice-card" role="alert">
+            <h3>Unable to load facilities</h3>
             <p>{error}</p>
             <p>
-              Check that the file exists at{' '}
-              <code>dashboard/public/data/hospitals.geojson</code>.
+              Check that{' '}
+              <code>dashboard/public/data/hospitals.geojson</code>{' '}
+              exists and contains valid point locations.
             </p>
           </div>
         )}
 
         {!loading && !error && visibleFacilities.length === 0 && (
-          <div className="notice-card">
-            No matching facilities. Try another search.
+          <div className="hospital-empty-state">
+            <span>⌕</span>
+            <h3>No matching facilities</h3>
+            <p>Try a different name or search term.</p>
+            <button
+              type="button"
+              className="hospital-location-button"
+              onClick={() => setSearch('')}
+            >
+              Clear search
+            </button>
           </div>
         )}
 
-        <div className="hospital-list">
-          {visibleFacilities.map((facility) => (
-            <article className="hospital-card" key={facility.id}>
-              <div className="hospital-card-heading">
-                <span className="hospital-icon" aria-hidden="true">+</span>
-
-                <div>
-                  <h3>{facility.name}</h3>
-                  <p>{facility.type}</p>
-                </div>
+        {/* Selected facility information */}
+        {selectedFacility && !loading && (
+          <section className="hospital-selected-panel">
+            <div className="hospital-selected-heading">
+              <div className="hospital-selected-icon">✚</div>
+              <div>
+                <span>SELECTED FACILITY</span>
+                <h3>{selectedFacility.name}</h3>
+                <p>{selectedFacility.type}</p>
               </div>
-
-              <div className="hospital-details">
-                <span>
-                  <strong>Coordinates:</strong>{' '}
-                  {facility.latitude.toFixed(4)},{' '}
-                  {facility.longitude.toFixed(4)}
-                </span>
-
-                {facility.distance != null && (
-                  <span>
-                    <strong>Straight-line distance:</strong>{' '}
-                    {facility.distance.toFixed(1)} km
-                  </span>
-                )}
-              </div>
-
-              <a
-                className="button hospital-directions"
-                href={getDirectionsUrl(facility)}
-                target="_blank"
-                rel="noreferrer"
+              <button
+                type="button"
+                className="hospital-close-selected"
+                onClick={() => setSelectedId(null)}
+                aria-label="Close selected facility"
               >
-                Get directions ↗
-              </a>
-            </article>
-          ))}
-        </div>
+                ×
+              </button>
+            </div>
 
-        <div className="notice-card hospital-safety-notice">
-          <h3>Important safety information</h3>
+            <div className="hospital-selected-details">
+              <div>
+                <span>Latitude</span>
+                <strong>{selectedFacility.latitude.toFixed(5)}</strong>
+              </div>
+              <div>
+                <span>Longitude</span>
+                <strong>{selectedFacility.longitude.toFixed(5)}</strong>
+              </div>
+              <div>
+                <span>Straight-line distance</span>
+                <strong>
+                  {selectedFacility.distance == null
+                    ? 'Set your location'
+                    : `${selectedFacility.distance.toFixed(1)} km`}
+                </strong>
+              </div>
+            </div>
+
+            <a
+              className="hospital-directions-button"
+              href={getDirectionsUrl(selectedFacility)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open directions in Google Maps ↗
+            </a>
+          </section>
+        )}
+
+        {/* Facility cards */}
+        {!loading && !error && visibleFacilities.length > 0 && (
+          <div className="hospital-list-modern">
+            {visibleFacilities.map((facility, index) => (
+              <article
+                className={`hospital-card-modern ${
+                  selectedId === facility.id ? 'selected' : ''
+                }`}
+                key={facility.id}
+              >
+                <div className="hospital-card-image-wrap">
+                  <img
+                    src={hospitalImages[index % hospitalImages.length]}
+                    alt="Illustrative healthcare facility"
+                    loading="lazy"
+                  />
+
+                  <span className="hospital-card-badge">
+                    Healthcare facility
+                  </span>
+                </div>
+
+                <div className="hospital-card-modern-body">
+                  <div className="hospital-card-title-row">
+                    <div className="hospital-card-symbol">✚</div>
+                    <div className="hospital-card-title">
+                      <h3>{facility.name}</h3>
+                      <p>{facility.type}</p>
+                    </div>
+                  </div>
+
+                  <div className="hospital-card-info">
+                    <div className="hospital-info-row">
+                      <span>⌖</span>
+                      <div>
+                        <small>Coordinates</small>
+                        <strong>
+                          {facility.latitude.toFixed(4)},{' '}
+                          {facility.longitude.toFixed(4)}
+                        </strong>
+                      </div>
+                    </div>
+
+                    <div className="hospital-info-row">
+                      <span>↔</span>
+                      <div>
+                        <small>Straight-line distance</small>
+                        <strong>
+                          {facility.distance == null
+                            ? 'Set your location to calculate'
+                            : `${facility.distance.toFixed(1)} km away`}
+                        </strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="hospital-card-actions">
+                    <button
+                      type="button"
+                      className="hospital-view-button"
+                      onClick={() =>
+                        setSelectedId(
+                          selectedId === facility.id ? null : facility.id
+                        )
+                      }
+                    >
+                      {selectedId === facility.id
+                        ? 'Hide details'
+                        : 'View details'}
+                    </button>
+
+                    <a
+                      className="hospital-map-button"
+                      href={getDirectionsUrl(facility)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Directions ↗
+                    </a>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Safety information */}
+      <section className="hospital-safety-banner">
+        <div className="hospital-safety-symbol">!</div>
+        <div>
+          <h3>Travel safely. Check conditions first.</h3>
           <p>
-            Distances shown are straight-line estimates, not road distances.
-            Directions open Google Maps and may not reflect landslide risks,
-            road closures, traffic conditions, or hospital operating status.
-            Confirm current conditions before travelling.
+            Distances are straight-line estimates, not road distances.
+            Google Maps directions may not reflect landslide risks,
+            road closures, traffic, or current hospital operating status.
+            Verify local conditions before travelling.
           </p>
-          <p>
-            For emergencies in Sri Lanka, call DMC 117 or Suwa Seriya
-            ambulance 1990 as appropriate.
-          </p>
+          <div className="hospital-emergency-links">
+            <span>🇱🇰 Sri Lanka emergency contacts</span>
+            <a href="tel:117">DMC: 117</a>
+            <a href="tel:1990">Ambulance: 1990</a>
+          </div>
         </div>
       </section>
-    </>
+    </div>
   )
 }
+
+
 
 function ReportPage() {
   function handleSubmit(event) {
@@ -679,6 +1066,19 @@ function ReportPage() {
         title="Prepare a road problem report"
         description="Record details about a road problem. You can save the report and share it with the relevant authority."
       />
+
+      {/* Road safety picture */}
+      <section className="report-hero-image">
+        <img
+          src="https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1400&q=85"
+          alt="Mountainous terrain illustrating the importance of road safety"
+        />
+        <div className="report-hero-overlay">
+          <span>LANDSAFE · COMMUNITY SAFETY</span>
+          <h2>See a Road Hazard?</h2>
+          <p>Help identify road problems and support safer journeys.</p>
+        </div>
+      </section>
 
       <section className="content-panel report-panel">
         <div className="notice-card">
@@ -733,6 +1133,8 @@ function ReportPage() {
     </>
   )
 }
+
+
 
 
 
@@ -855,7 +1257,6 @@ function ResearchPage() {
     return Number(value).toLocaleString()
   }
 
-  // Identify strategies with comparable fixed-failure results.
   const comparableStrategies = strategies.filter(
     (strategy) =>
       strategy.name !== 'No protection' &&
@@ -877,7 +1278,6 @@ function ResearchPage() {
   const designFailurePercent =
     summary.designFailurePercent ?? summary.disruptionPercent
 
-  // Find all failure levels available in the random-trial dataset.
   const failureLevels = [
     ...new Set(
       randomTrialComparison
@@ -896,7 +1296,6 @@ function ResearchPage() {
           : failureLevels[0] ?? ''
       )
 
-  // Group chart bars by strategy for the selected failure level.
   const chartData = randomTrialComparison
     .filter(
       (item) => String(item.failurePercent) === activeFailure
@@ -917,6 +1316,24 @@ function ResearchPage() {
         description="Compare road-protection strategies under modelled road-disruption scenarios."
       />
 
+      {/* Research picture banner */}
+      <section className="research-hero-image">
+        <img
+          src="https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1400&q=85"
+          alt="Mountain terrain representing landslide resilience research"
+        />
+
+        <div className="research-hero-overlay">
+          <span>LANDSAFE · RESEARCH &amp; ANALYSIS</span>
+          <h2>Building Resilient Road Networks</h2>
+          <p>
+            Explore graph theory, road-risk analysis, and
+            strategies for protecting access to healthcare.
+          </p>
+        </div>
+      </section>
+
+      {/* Research notice */}
       <div className="research-notice">
         <strong>Research prototype:</strong> these results represent
         simulated scenarios, not live landslide warnings or guaranteed
@@ -977,7 +1394,6 @@ function ResearchPage() {
                 <th>Reachability</th>
               </tr>
             </thead>
-
             <tbody>
               {strategies.map((strategy) => (
                 <tr key={strategy.name}>
@@ -1007,7 +1423,7 @@ function ResearchPage() {
         </p>
       </section>
 
-      {/* Fixed-failure-set connectivity */}
+      {/* Healthcare-network reachability */}
       <section className="research-panel">
         <h2>Healthcare-network reachability</h2>
         <p>
@@ -1057,6 +1473,397 @@ function ResearchPage() {
           {notes.fairComparison ||
             'Reachability is a modelled network measure, not a live road-status indicator.'}
         </p>
+      </section>
+
+      {/* Interactive Graph Theory Research Visualizations */}
+      <section className="research-panel graph-theory-visuals">
+        <h2>Interactive Graph Theory Visualizations</h2>
+        <p>
+          Explore how road protection, simulated road failures, and
+          network connectivity relate to healthcare access in the
+          Ratnapura study area. These are research results, not live
+          road conditions.
+        </p>
+
+        {(() => {
+          const COLORS = [
+            '#0F766E',
+            '#2563EB',
+            '#EA580C',
+            '#7C3AED',
+            '#DB2777',
+            '#0891B2',
+            '#65A30D',
+          ]
+
+          const validStrategies = strategies.filter(
+            (item) =>
+              Number.isFinite(Number(item.roadsSelected)) &&
+              item.roadsSelected != null
+          )
+
+          const roadSelectionData = validStrategies.map((item) => ({
+            name: item.name,
+            roads: Number(item.roadsSelected),
+          }))
+
+          const riskData = validStrategies
+            .filter((item) => item.meanRisk != null)
+            .map((item) => ({
+              name: item.name,
+              risk: Number(item.meanRisk),
+              centrality: Number(item.centrality || 0),
+            }))
+
+          const reachabilityData = connectivity
+            .filter(
+              (item) =>
+                item.reachabilityPercent != null &&
+                Number.isFinite(Number(item.reachabilityPercent))
+            )
+            .map((item) => ({
+              name: item.name,
+              reachability: Number(item.reachabilityPercent),
+            }))
+
+          const failureData = sensitivity
+            .filter(
+              (item) =>
+                item.failurePercent != null &&
+                item.reachabilityPercent != null &&
+                Number.isFinite(Number(item.reachabilityPercent))
+            )
+            .map((item) => ({
+              failure: Number(item.failurePercent),
+              strategy: item.strategy,
+              reachability: Number(item.reachabilityPercent),
+            }))
+
+          const randomData = randomTrialComparison
+            .filter(
+              (item) =>
+                item.failurePercent != null &&
+                item.meanReachablePercent != null &&
+                Number.isFinite(Number(item.meanReachablePercent))
+            )
+            .map((item) => ({
+              failure: Number(item.failurePercent),
+              strategy: item.strategy,
+              meanReachability: Number(item.meanReachablePercent),
+              distance: Number(item.meanDistanceKm || 0),
+            }))
+
+          const optimizationData = optimization
+            ? [
+                {
+                  name: 'Budget used',
+                  value:
+                    Number(optimization.protectedLengthKm || 0) +
+                      Number(optimization.budgetRemainingKm || 0) > 0
+                      ? (Number(optimization.protectedLengthKm || 0) /
+                          (Number(optimization.protectedLengthKm || 0) +
+                            Number(optimization.budgetRemainingKm || 0))) *
+                        100
+                      : 0,
+                },
+                {
+                  name: 'Budget remaining',
+                  value:
+                    Number(optimization.protectedLengthKm || 0) +
+                      Number(optimization.budgetRemainingKm || 0) > 0
+                      ? (Number(optimization.budgetRemainingKm || 0) /
+                          (Number(optimization.protectedLengthKm || 0) +
+                            Number(optimization.budgetRemainingKm || 0))) *
+                        100
+                      : 0,
+                },
+              ]
+            : []
+
+          const graphCard = (number, title, description, chart) => (
+            <article className="graph-visual-card" key={number}>
+              <div className="graph-visual-card-heading">
+                <span className="graph-visual-number">
+                  {String(number).padStart(2, '0')}
+                </span>
+                <div>
+                  <h3>{title}</h3>
+                  <p>{description}</p>
+                </div>
+              </div>
+              <div className="graph-visual-chart">{chart}</div>
+            </article>
+          )
+
+          return (
+            <div className="graph-visual-grid">
+              {graphCard(
+                1,
+                'Roads selected by strategy',
+                'Compare how many road segments each strategy selects.',
+                roadSelectionData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={roadSelectionData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="name"
+                        angle={-15}
+                        textAnchor="end"
+                        height={75}
+                        tick={{ fontSize: 11 }}
+                      />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar
+                        dataKey="roads"
+                        name="Road segments"
+                        radius={[7, 7, 0, 0]}
+                      >
+                        {roadSelectionData.map((item, index) => (
+                          <Cell
+                            key={item.name}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : <p>No road-selection data available.</p>
+              )}
+
+              {graphCard(
+                2,
+                'Strategy reachability',
+                'Compare the percentage of network nodes that remain reachable.',
+                reachabilityData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={reachabilityData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="name"
+                        angle={-15}
+                        textAnchor="end"
+                        height={75}
+                        tick={{ fontSize: 11 }}
+                      />
+                      <YAxis
+                        domain={[0, 100]}
+                        tickFormatter={(value) => `${value}%`}
+                      />
+                      <Tooltip
+                        formatter={(value) =>
+                          `${Number(value).toFixed(2)}%`
+                        }
+                      />
+                      <Bar
+                        dataKey="reachability"
+                        name="Reachability"
+                        radius={[7, 7, 0, 0]}
+                      >
+                        {reachabilityData.map((item, index) => (
+                          <Cell
+                            key={item.name}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : <p>No comparable reachability data available.</p>
+              )}
+
+              {graphCard(
+                3,
+                'Road risk by strategy',
+                'Compare the reported average risk score for each strategy.',
+                riskData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <AreaChart data={riskData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="name"
+                        angle={-15}
+                        textAnchor="end"
+                        height={75}
+                        tick={{ fontSize: 11 }}
+                      />
+                      <YAxis />
+                      <Tooltip />
+                      <Area
+                        type="monotone"
+                        dataKey="risk"
+                        name="Mean risk"
+                        stroke="#EA580C"
+                        fill="#FDBA74"
+                        strokeWidth={3}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="centrality"
+                        name="Centrality"
+                        stroke="#7C3AED"
+                        fill="#C4B5FD"
+                        strokeWidth={3}
+                      />
+                      <Legend />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : <p>No risk-score data available.</p>
+              )}
+
+              {graphCard(
+                4,
+                'Road selection distribution',
+                'See how selected road segments are distributed across strategies.',
+                roadSelectionData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={roadSelectionData}
+                        dataKey="roads"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={95}
+                        label={({ name, percent }) =>
+                          `${name}: ${(percent * 100).toFixed(0)}%`
+                        }
+                      >
+                        {roadSelectionData.map((item, index) => (
+                          <Cell
+                            key={item.name}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : <p>No road-selection data available.</p>
+              )}
+
+              {graphCard(
+                5,
+                'Reachability under road failures',
+                'Explore how reachability changes as the simulated failure percentage changes.',
+                failureData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={failureData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="failure"
+                        type="number"
+                        domain={['dataMin', 'dataMax']}
+                        tickFormatter={(value) => `${value}%`}
+                      />
+                      <YAxis
+                        domain={[0, 100]}
+                        tickFormatter={(value) => `${value}%`}
+                      />
+                      <Tooltip
+                        labelFormatter={(value) =>
+                          `Failure level: ${value}%`
+                        }
+                        formatter={(value, name) => [
+                          `${Number(value).toFixed(2)}%`,
+                          name,
+                        ]}
+                      />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="reachability"
+                        name="Reachability"
+                        stroke="#2563EB"
+                        strokeWidth={3}
+                        dot={{ r: 4 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : <p>No sensitivity data available.</p>
+              )}
+
+              {graphCard(
+                6,
+                'Repeated simulation results',
+                'Compare average reachability from the available random trials.',
+                randomData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <ScatterChart>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        type="number"
+                        dataKey="failure"
+                        name="Failure percentage"
+                        tickFormatter={(value) => `${value}%`}
+                      />
+                      <YAxis
+                        type="number"
+                        dataKey="meanReachability"
+                        name="Mean reachability"
+                        domain={[0, 100]}
+                        tickFormatter={(value) => `${value}%`}
+                      />
+                      <Tooltip
+                        cursor={{ strokeDasharray: '3 3' }}
+                        formatter={(value, name) => [
+                          Number(value).toFixed(2),
+                          name,
+                        ]}
+                      />
+                      <Legend />
+                      {Array.from(
+                        new Set(randomData.map((item) => item.strategy))
+                      ).map((strategy, index) => (
+                        <Scatter
+                          key={strategy}
+                          name={strategy}
+                          data={randomData.filter(
+                            (item) => item.strategy === strategy
+                          )}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                    </ScatterChart>
+                  </ResponsiveContainer>
+                ) : <p>No random-trial data available.</p>
+              )}
+
+              {graphCard(
+                7,
+                'Optimization budget use',
+                'View the proportion of the selected road-length budget used and remaining.',
+                optimizationData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={optimizationData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={95}
+                        label={({ name, value }) =>
+                          `${name}: ${Number(value).toFixed(1)}%`
+                        }
+                      >
+                        <Cell fill="#0F766E" />
+                        <Cell fill="#F59E0B" />
+                      </Pie>
+                      <Tooltip
+                        formatter={(value) =>
+                          `${Number(value).toFixed(2)}%`
+                        }
+                      />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : <p>Optimization budget data is unavailable.</p>
+              )}
+            </div>
+          )
+        })()}
       </section>
 
       {/* Optimization experiment */}
@@ -1119,7 +1926,7 @@ function ResearchPage() {
         </section>
       )}
 
-      {/* Findings */}
+      {/* Key findings */}
       <section className="research-panel">
         <h2>Key findings</h2>
 
@@ -1161,7 +1968,7 @@ function ResearchPage() {
         )}
       </section>
 
-      {/* Random-trial chart and table */}
+      {/* Random-trial comparison */}
       {randomTrialComparison.length > 0 && (
         <section className="research-panel">
           <h2>Random-trial comparison</h2>
@@ -1204,7 +2011,6 @@ function ResearchPage() {
                   }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-
                   <XAxis
                     dataKey="strategy"
                     angle={-20}
@@ -1213,21 +2019,17 @@ function ResearchPage() {
                     height={80}
                     tick={{ fontSize: 11 }}
                   />
-
                   <YAxis
                     domain={[0, 100]}
                     tickFormatter={(value) => `${value}%`}
                   />
-
                   <Tooltip
                     formatter={(value) => [
                       `${Number(value).toFixed(2)}%`,
                       'Mean reachability',
                     ]}
                   />
-
                   <Legend />
-
                   <Bar
                     dataKey="meanReachablePercent"
                     name="Mean reachability"
@@ -1261,7 +2063,6 @@ function ResearchPage() {
                   <th>Mean distance</th>
                 </tr>
               </thead>
-
               <tbody>
                 {randomTrialComparison.map((item, index) => (
                   <tr
@@ -1281,7 +2082,236 @@ function ResearchPage() {
         </section>
       )}
 
-      {/* Sensitivity analysis */}
+      {/* Road-selection chart */}
+      <section className="research-panel">
+        <h2>Roads Selected by Strategy</h2>
+        <p>Compare how many road segments each strategy selects.</p>
+        <div className="research-chart">
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={strategies}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis />
+              <Tooltip />
+              <Bar
+                dataKey="roadsSelected"
+                name="Roads selected"
+                radius={[6, 6, 0, 0]}
+              >
+                {strategies.map((item, index) => (
+                  <Cell
+                    key={item.name}
+                    fill={['#0d9488', '#6366f1', '#f59e0b', '#ec4899'][index % 4]}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
+
+      {/* Selected road length */}
+      <section className="research-panel">
+        <h2>Road Length Selected</h2>
+        <p>Compare the total road length selected under each strategy.</p>
+        <div className="research-chart">
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={strategies}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis />
+              <Tooltip
+                formatter={(value) => [
+                  `${Number(value).toFixed(2)} km`,
+                  'Selected length',
+                ]}
+              />
+              <Bar
+                dataKey="lengthKm"
+                name="Length (km)"
+                radius={[6, 6, 0, 0]}
+              >
+                {strategies.map((item, index) => (
+                  <Cell
+                    key={item.name}
+                    fill={['#2563eb', '#14b8a6', '#a855f7', '#f97316'][index % 4]}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
+
+      {/* Risk score */}
+      <section className="research-panel">
+        <h2>Average Road-Risk Score</h2>
+        <p>Compare the reported average risk score for each strategy.</p>
+        <div className="research-chart">
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={strategies.filter(
+                (item) =>
+                  item.meanRisk != null &&
+                  Number.isFinite(Number(item.meanRisk))
+              )}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis domain={[0, 1]} />
+              <Tooltip
+                formatter={(value) => [
+                  Number(value).toFixed(3),
+                  'Mean risk',
+                ]}
+              />
+              <Bar
+                dataKey="meanRisk"
+                name="Mean risk"
+                fill="#ef4444"
+                radius={[6, 6, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
+
+      {/* Reachability chart */}
+      <section className="research-panel">
+        <h2>Healthcare Network Reachability</h2>
+        <p>
+          Compare the percentage of network nodes that remain reachable.
+        </p>
+        <div className="research-chart">
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={connectivity.filter(
+                (item) =>
+                  item.reachabilityPercent != null &&
+                  item.reachabilityPercent !== '' &&
+                  Number.isFinite(Number(item.reachabilityPercent))
+              )}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis
+                domain={[0, 100]}
+                tickFormatter={(value) => `${value}%`}
+              />
+              <Tooltip
+                formatter={(value) => [
+                  `${Number(value).toFixed(3)}%`,
+                  'Reachability',
+                ]}
+              />
+              <Bar
+                dataKey="reachabilityPercent"
+                name="Reachability"
+                radius={[6, 6, 0, 0]}
+              >
+                {connectivity.map((item, index) => (
+                  <Cell
+                    key={`${item.name}-${index}`}
+                    fill={['#16a34a', '#0ea5e9', '#8b5cf6', '#f59e0b'][index % 4]}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
+
+      {/* Sensitivity chart */}
+      {sensitivity.length > 0 && (
+        <section className="research-panel">
+          <h2>Effect of Increasing Road Failures</h2>
+          <p>
+            Explore how modelled reachability changes as more roads fail.
+          </p>
+          <div className="research-chart">
+            <ResponsiveContainer width="100%" height={340}>
+              <LineChart data={sensitivity}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="failurePercent"
+                  tickFormatter={(value) => `${value}%`}
+                />
+                <YAxis
+                  domain={[0, 100]}
+                  tickFormatter={(value) => `${value}%`}
+                />
+                <Tooltip
+                  formatter={(value) => [
+                    `${Number(value).toFixed(2)}%`,
+                    'Reachability',
+                  ]}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="reachabilityPercent"
+                  name="Reachability"
+                  stroke="#7c3aed"
+                  strokeWidth={3}
+                  dot={{ r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <p className="research-footnote">
+            Each point represents a row in the sensitivity dataset. If
+            several strategies share a failure level, the chart displays
+            those rows in dataset order.
+          </p>
+        </section>
+      )}
+
+      {/* Optimization budget */}
+      {optimization && (
+        <section className="research-panel">
+          <h2>Optimization Budget Use</h2>
+          <p>
+            Compare the road-length budget with selected and remaining lengths.
+          </p>
+          <div className="research-chart">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={[
+                  {
+                    name: 'Budget',
+                    length: Number(optimization.budgetLengthKm),
+                  },
+                  {
+                    name: 'Selected',
+                    length: Number(optimization.protectedLengthKm),
+                  },
+                  {
+                    name: 'Remaining',
+                    length: Number(optimization.budgetRemainingKm),
+                  },
+                ].filter((item) => Number.isFinite(item.length))}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip
+                  formatter={(value) => [
+                    `${Number(value).toFixed(2)} km`,
+                    'Road length',
+                  ]}
+                />
+                <Bar dataKey="length" name="Road length" radius={[6, 6, 0, 0]}>
+                  <Cell fill="#2563eb" />
+                  <Cell fill="#10b981" />
+                  <Cell fill="#f59e0b" />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </section>
+      )}
+
+      {/* Sensitivity analysis table */}
       {sensitivity.length > 0 && (
         <section className="research-panel">
           <h2>Sensitivity analysis</h2>
@@ -1301,7 +2331,6 @@ function ResearchPage() {
                   <th>Reachability</th>
                 </tr>
               </thead>
-
               <tbody>
                 {sensitivity.map((item, index) => (
                   <tr

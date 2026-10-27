@@ -1,69 +1,1784 @@
-/* Add this to the end of RoadRiskMap.css */
-.route-comparison {
-  margin-top: 16px;
-  padding: 16px;
-  border: 1px solid #dbe4ef;
+/* =========================================
+   LANDSAFE - ROAD RISK MAP
+   Complete stylesheet
+========================================= */
+
+.road-map-wrapper {
+  width: 100%;
+  min-width: 0;
+  color: #172033;
+  font-family: inherit;
+}
+
+/* =========================================
+   ROUTE CONTROLS
+========================================= */
+
+.route-controls {
+  margin-bottom: 20px;
+  padding: 20px;
+  border: 1px solid #dbe4ee;
   border-radius: 14px;
-  background: #fff;
+  background: #f8fafc;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
 }
-.route-comparison h4 {
-  margin: 0 0 6px;
-  color: #183153;
-  font-size: 1rem;
+
+.route-controls h3 {
+  margin: 0 0 14px;
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 700;
 }
-.route-comparison-intro,
-.route-comparison-note,
-.route-comparison-warning {
-  margin: 6px 0 12px;
-  color: #5e6b7b;
-  font-size: 0.88rem;
+
+.route-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.route-buttons button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 10px 16px;
+  border: 1px solid #147d69;
+  border-radius: 9px;
+  background: #147d69;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.route-buttons button:hover {
+  background: #0f6656;
+  border-color: #0f6656;
+}
+
+.route-buttons button:active {
+  transform: scale(0.98);
+}
+
+.route-buttons button:focus-visible {
+  outline: 3px solid #99f6e4;
+  outline-offset: 3px;
+}
+
+.route-controls p {
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.route-note {
+  color: #475569;
+  font-size: 13px !important;
+}
+
+/* =========================================
+   HOSPITAL SEARCH
+========================================= */
+
+.hospital-search {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.hospital-search label {
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.hospital-search input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #172033;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.hospital-search input::placeholder {
+  color: #94a3b8;
+}
+
+.hospital-search input:focus {
+  border-color: #147d69;
+  box-shadow: 0 0 0 3px rgba(20, 125, 105, 0.12);
+}
+
+.hospital-results {
+  display: grid;
+  gap: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.hospital-results button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #1e293b;
+  font-family: inherit;
+  font-size: 14px;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.hospital-results button:hover {
+  border-color: #147d69;
+  background: #ecfdf5;
+}
+
+.hospital-results button:focus-visible {
+  outline: 3px solid #99f6e4;
+  outline-offset: 2px;
+}
+
+.hospital-results p {
+  margin: 6px 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* =========================================
+   MAP LEGEND
+========================================= */
+
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.map-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.legend-dot {
+  display: inline-block;
+  flex: 0 0 11px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+
+.legend-dot.low {
+  background: #16a34a;
+}
+
+.legend-dot.medium {
+  background: #f59e0b;
+}
+
+.legend-dot.high {
+  background: #dc2626;
+}
+
+.legend-dot.hospital {
+  background: #147d69;
+}
+
+.legend-dot.route-dot {
+  background: #2563eb;
+}
+
+/* =========================================
+   LEAFLET MAP
+========================================= */
+
+.road-map {
+  z-index: 1;
+  width: 100%;
+  height: 540px;
+  min-height: 360px;
+  border: 1px solid #dbe4ee;
+  border-radius: 14px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.road-map .leaflet-control-attribution {
+  font-size: 10px;
+}
+
+.road-map .leaflet-popup-content-wrapper {
+  border-radius: 10px;
+}
+
+.road-map .leaflet-popup-content {
+  margin: 13px 16px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.road-map .leaflet-popup-content p {
+  margin: 7px 0;
+}
+
+.road-map .leaflet-popup-content a {
+  color: #147d69;
+  font-weight: 600;
+}
+
+/* =========================================
+   HOSPITAL MAP MARKERS
+========================================= */
+
+.hospital-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #147d69;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #147d69;
+  font-size: 20px;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+}
+
+.hospital-marker span {
+  display: block;
+  line-height: 1;
+}
+
+/* =========================================
+   MAP POPUPS
+========================================= */
+
+.road-popup,
+.hospital-popup {
+  max-width: 260px;
+  color: #1e293b;
+  font-size: 13px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.road-popup strong,
+.hospital-popup strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.road-popup p,
+.hospital-popup p {
+  margin: 6px 0;
+}
+
+.road-popup small {
+  display: block;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 11px;
+}
+
+/* =========================================
+   ROUTE STATUS
+========================================= */
+
+.route-status {
+  margin: 10px 0;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 13px;
   line-height: 1.5;
 }
-.route-comparison-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+
+.route-error {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
 }
-.route-comparison-card {
-  min-width: 0;
-  padding: 12px;
-  border: 1px solid #e1e8f0;
+
+/* =========================================
+   MAP LOADING AND ERROR MESSAGES
+========================================= */
+
+.map-message {
+  margin: 12px 0;
+  padding: 14px 16px;
+  border: 1px solid #e2e8f0;
   border-radius: 10px;
-  background: #f7f9fc;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================
+   SAFETY DISCLAIMER
+========================================= */
+
+.map-disclaimer {
+  margin: 14px 0 0;
+  padding: 13px 15px;
+  border-left: 4px solid #d97706;
+  border-radius: 5px;
+  background: #fffbeb;
+  color: #78350f;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+/* =========================================
+   RESPONSIVE DESIGN - TABLETS
+========================================= */
+
+@media (max-width: 768px) {
+  .route-controls {
+    padding: 15px;
+  }
+
+  .route-controls h3 {
+    font-size: 16px;
+  }
+
+  .route-buttons {
+    flex-direction: column;
+  }
+
+  .route-buttons button {
+    width: 100%;
+  }
+
+  .hospital-search {
+    padding: 14px;
+  }
+
+  .map-legend {
+    gap: 10px 14px;
+    padding: 12px;
+  }
+
+  .map-legend span {
+    font-size: 12px;
+  }
+
+  .road-map {
+    height: 450px;
+    min-height: 320px;
+  }
+}
+
+/* =========================================
+   RESPONSIVE DESIGN - MOBILE
+========================================= */
+
+@media (max-width: 480px) {
+  .road-map-wrapper {
+    width: 100%;
+  }
+
+  .route-controls,
+  .hospital-search {
+    margin-bottom: 12px;
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .route-controls h3 {
+    font-size: 15px;
+  }
+
+  .route-buttons button {
+    min-height: 44px;
+    font-size: 13px;
+  }
+
+  .hospital-search label {
+    font-size: 14px;
+  }
+
+  .hospital-search input {
+    padding: 11px;
+    font-size: 13px;
+  }
+
+  .hospital-results button {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .map-legend {
+    gap: 9px 12px;
+    padding: 10px;
+  }
+
+  .map-legend span {
+    gap: 6px;
+    font-size: 11px;
+  }
+
+  .road-map {
+    height: 380px;
+    min-height: 300px;
+    border-radius: 10px;
+  }
+
+  .map-disclaimer {
+    padding: 11px;
+    font-size: 11px;
+  }
+}
+
+.nearest-hospitals {
+  margin: 16px 0;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #dce3e8;
+  border-radius: 12px;
+}
+
+.nearest-toggle {
   display: flex;
+  width: 100%;
+  justify-content: space-between;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.nearest-hospital-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.nearest-hospital-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e3e8ed;
+  border-radius: 8px;
+}
+
+.nearest-hospital-details {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.nearest-hospital-item p {
+  margin: 5px 0 0;
+  color: #52606d;
+  font-size: 13px;
+}
+
+.nearest-hospital-item button,
+.location-button {
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 7px;
+  background: #1769aa;
+  color: #fff;
+  cursor: pointer;
+}
+
+.nearest-hospital-note {
+  margin-top: 12px;
+  color: #8a4b08;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.current-location-container,
+.hospital-marker-container {
+  background: transparent;
+  border: 0;
+}
+
+.current-location-dot {
+  width: 18px;
+  height: 18px;
+  border: 3px solid white;
+  border-radius: 50%;
+  background: #2563eb;
+  box-shadow: 0 0 0 5px #2563eb44;
+}
+
+.hospital-marker {
+  display: flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: #7c3aed;
+  color: white;
+  font-size: 17px;
+  box-shadow: 0 2px 6px #0004;
+}
+
+.leaflet-map {
+  width: 100%;
+  height: 540px;
+}
+
+.map-intro {
+  line-height: 1.5;
+  color: #52606d;
+}
+
+.selected-facility,
+.map-disclaimer {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 9px;
+  background: #f1f5f9;
+  line-height: 1.5;
+}
+
+.map-disclaimer {
+  background: #fff7ed;
+  color: #7c3e0b;
+}
+
+.map-disclaimer p {
+  margin-bottom: 8px;
+}
+
+.map-message {
+  padding: 24px;
+}
+
+.map-error,
+.route-error {
+  color: #b91c1c;
+}
+
+@media (max-width: 600px) {
+  .leaflet-map {
+    height: 400px;
+  }
+
+  .nearest-hospital-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* ========================================
+   LANDSAFE ROAD RISK MAP
+======================================== */
+
+.road-risk-page {
+  width: 100%;
+  min-width: 0;
+  color: #18364b;
+}
+
+.road-risk-heading {
+  margin-bottom: 18px;
+}
+
+.road-risk-heading h2 {
+  margin: 0 0 8px;
+  color: #153d35;
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  line-height: 1.25;
+}
+
+.road-risk-heading p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+/* Road search and risk filters */
+
+.road-filter-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr) auto;
+  align-items: end;
+  gap: 12px;
+  margin: 18px 0 8px;
+  padding: 16px;
+  border: 1px solid #dce8e4;
+  border-radius: 14px;
+  background: #f7faf9;
+}
+
+.road-filter-field {
+  display: flex;
+  min-width: 0;
   flex-direction: column;
   gap: 7px;
 }
-.route-comparison-card span {
-  color: #5e6b7b;
-  font-size: 0.8rem;
-  line-height: 1.4;
+
+.road-filter-field label {
+  color: #18364b;
+  font-size: 0.85rem;
+  font-weight: 700;
 }
-.route-comparison-card strong {
-  color: #183153;
-  font-size: 1.25rem;
+
+.road-filter-field input,
+.road-filter-field select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 43px;
+  padding: 10px 12px;
+  border: 1px solid #cbdad8;
+  border-radius: 8px;
+  background: #fff;
+  color: #18364b;
+  font: inherit;
+}
+
+.road-filter-field input:focus,
+.road-filter-field select:focus {
+  outline: 2px solid #16845d;
+  outline-offset: 2px;
+}
+
+.road-filter-reset {
+  min-height: 43px;
+  padding: 10px 14px;
+  border: 1px solid #cbdad8;
+  border-radius: 8px;
+  background: #fff;
+  color: #176b51;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.road-filter-reset:hover:not(:disabled) {
+  background: #eaf6ef;
+}
+
+.road-filter-reset:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.road-filter-count {
+  margin: 8px 0 16px;
+  color: #61758a;
+  font-size: 0.85rem;
+}
+
+/* Hospital search controls */
+
+.hospital-tools-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid #e0e8ed;
+  border-radius: 14px;
+  background: #fff;
+}
+
+/* Main map and facility sidebar */
+
+.map-layout {
+  display: grid;
+  grid-template-columns: minmax(230px, 290px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+  margin-top: 16px;
+}
+
+.hospital-sidebar {
+  min-width: 0;
+  max-height: 680px;
+  overflow-y: auto;
+  padding: 16px;
+  border: 1px solid #dce8e4;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.hospital-sidebar h3 {
+  margin: 0 0 6px;
+  color: #153d35;
+  font-size: 1.1rem;
+}
+
+.hospital-sidebar > p {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.hospital-results {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.hospital-result {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+  padding: 11px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #fff;
+  color: #18364b;
+  text-align: left;
   overflow-wrap: anywhere;
+  cursor: pointer;
 }
-.route-comparison-card small {
-  color: #68778a;
+
+.hospital-result:hover,
+.hospital-result.selected {
+  border-color: #16845d;
+  background: #effaf4;
+}
+
+.hospital-result strong {
+  font-size: 0.9rem;
+}
+
+.hospital-result span {
+  color: #64748b;
   font-size: 0.76rem;
 }
-.route-comparison-extra {
-  border-color: #c9d9f4;
-  background: #f0f5ff;
+
+.selected-hospital-panel,
+.nearest-hospitals {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #e2e8f0;
 }
-.route-comparison-warning {
-  margin-top: 12px;
-  padding: 10px 12px;
+
+.selected-hospital-panel h4,
+.nearest-hospitals h4 {
+  margin: 0 0 10px;
+  color: #176b51;
+}
+
+.selected-hospital-panel p {
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+
+.selected-hospital-panel .road-filter-reset,
+.clear-selection-button {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.clear-selection-button {
+  min-height: 40px;
+  padding: 9px 12px;
+  border: 1px solid #d8e1e8;
   border-radius: 8px;
-  background: #fff5e8;
-  color: #8a4c00;
+  background: #fff;
+  color: #526579;
+  font-weight: 600;
+  cursor: pointer;
 }
-.route-comparison-note {
-  margin-bottom: 0;
+
+.clear-selection-button:hover {
+  background: #f1f5f9;
+}
+
+.nearest-hospital {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border: 0;
+  border-bottom: 1px solid #edf1f5;
+  background: transparent;
+  color: #18364b;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nearest-hospital span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.83rem;
+}
+
+.nearest-hospital strong {
+  flex-shrink: 0;
+  color: #176b51;
+  font-size: 0.82rem;
+}
+
+.nearest-hospital:hover span {
+  text-decoration: underline;
+}
+
+/* Map container */
+
+.road-map-wrapper {
+  position: relative;
+  min-width: 0;
+  min-height: 480px;
+  overflow: hidden;
+  border: 1px solid #dce5e9;
+  border-radius: 14px;
+  background: #edf3f0;
+}
+
+.road-risk-map {
+  width: 100%;
+  height: 600px;
+  min-height: 480px;
+  z-index: 1;
+}
+
+/* Hospital markers */
+
+.landsafe-hospital-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #176bce;
+  box-shadow: 0 2px 7px rgb(0 0 0 / 25%);
+}
+
+.landsafe-hospital-icon span {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.landsafe-location-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #2563eb;
+  box-shadow: 0 0 0 7px rgb(37 99 235 / 20%);
+}
+
+.landsafe-location-icon span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+/* Risk legend */
+
+.risk-legend {
+  position: absolute;
+  right: 12px;
+  bottom: 24px;
+  z-index: 500;
+  display: flex;
+  max-width: calc(100% - 24px);
+  flex-direction: column;
+  gap: 8px;
+  padding: 13px 15px;
+  border: 1px solid #dce5e9;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 96%);
+  box-shadow: 0 3px 12px rgb(15 23 42 / 12%);
+}
+
+.risk-legend h4 {
+  margin: 0 0 3px;
+  color: #18364b;
+  font-size: 0.9rem;
+}
+
+.risk-legend span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #425466;
   font-size: 0.78rem;
 }
-@media (max-width: 640px) {
-  .route-comparison-grid { grid-template-columns: 1fr; }
-  .route-comparison-card { padding: 10px 12px; }
+
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.low-risk {
+  background: #2e9d67;
+}
+
+.medium-risk {
+  background: #e6a23c;
+}
+
+.high-risk {
+  background: #d94b4b;
+}
+
+.unknown-risk {
+  background: #89939d;
+}
+
+/* Road popup */
+
+.landsafe-road-popup {
+  min-width: 150px;
+  max-width: 240px;
+  color: #18364b;
+  overflow-wrap: anywhere;
+}
+
+.landsafe-road-popup strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+.landsafe-road-popup p {
+  margin: 5px 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+/* Status and error messages */
+
+.map-status-message {
+  margin: 10px 0;
+  color: #526579;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.map-error {
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid #f1b8b8;
+  border-radius: 10px;
+  background: #fff4f4;
+  color: #9b2929;
+  overflow-wrap: anywhere;
+}
+
+.map-error p {
+  margin-bottom: 0;
+  line-height: 1.5;
+}
+
+/* Research disclaimer */
+
+.map-disclaimer {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #e4d7a9;
+  border-radius: 12px;
+  background: #fffaf0;
+  color: #67552b;
+  line-height: 1.6;
+}
+
+.map-disclaimer strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.map-disclaimer p {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+/* Keyboard accessibility */
+
+.hospital-result:focus-visible,
+.nearest-hospital:focus-visible,
+.road-filter-reset:focus-visible,
+.clear-selection-button:focus-visible {
+  outline: 2px solid #16845d;
+  outline-offset: 3px;
+}
+
+/* Responsive layout */
+
+@media (max-width: 900px) {
+  .map-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hospital-sidebar {
+    max-height: none;
+  }
+
+  .hospital-results {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .road-risk-map {
+    height: 520px;
+  }
+}
+
+@media (max-width: 700px) {
+  .road-filter-panel {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 12px;
+  }
+
+  .road-filter-reset {
+    width: 100%;
+  }
+
+  .hospital-tools-panel {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 12px;
+  }
+
+  .hospital-results {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .road-map-wrapper {
+    min-height: 430px;
+  }
+
+  .road-risk-map {
+    height: 460px;
+    min-height: 430px;
+  }
+
+  .risk-legend {
+    right: 8px;
+    bottom: 18px;
+    gap: 6px;
+    padding: 10px;
+  }
+
+  .risk-legend span {
+    font-size: 0.72rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .road-risk-map {
+    height: 400px;
+    min-height: 400px;
+  }
+
+  .risk-legend {
+    right: 6px;
+    bottom: 16px;
+    padding: 8px;
+  }
+
+  .risk-legend h4 {
+    font-size: 0.8rem;
+  }
+}
+
+/* LANDSAFE interactive dashboard enhancements */
+
+.road-risk-eyebrow,
+.selected-road-eyebrow {
+  display: inline-block;
+  color: #218052;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.road-risk-heading h2 {
+  color: #153d35;
+  line-height: 1.3;
+}
+
+.road-risk-heading p {
+  color: #64748b;
+  line-height: 1.65;
+}
+
+/* Live statistics cards */
+
+.road-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.road-stat-card {
+  min-width: 0;
+  padding: 17px;
+  border: 1px solid #dce8e4;
+  border-radius: 15px;
+  background: linear-gradient(145deg, #fff, #f6faf8);
+  box-shadow: 0 3px 12px rgb(20 60 45 / 4%);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.road-stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 7px 18px rgb(20 60 45 / 9%);
+}
+
+.road-stat-label {
+  display: block;
+  margin-bottom: 10px;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.road-stat-card > strong {
+  display: block;
+  color: #153d35;
+  font-size: clamp(1.4rem, 2vw, 2rem);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.road-stat-card small {
+  display: block;
+  margin-top: 8px;
+  color: #718096;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.road-stat-card.stat-high {
+  border-top: 3px solid #d94b4b;
+}
+
+.road-stat-card.stat-high > strong {
+  color: #bd3434;
+}
+
+.road-stat-card.stat-medium {
+  border-top: 3px solid #e6a23c;
+}
+
+.road-stat-card.stat-medium > strong {
+  color: #a76b13;
+}
+
+.road-stat-card.stat-low {
+  border-top: 3px solid #2e9d67;
+}
+
+.road-stat-card.stat-low > strong {
+  color: #218052;
+}
+
+.road-stat-card.stat-unknown {
+  border-top: 3px solid #89939d;
+}
+
+/* CSV export toolbar */
+
+.road-export-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 16px 0 22px;
+  padding: 17px 19px;
+  border: 1px solid #dce8e4;
+  border-radius: 14px;
+  background: #f7faf9;
+}
+
+.road-export-row > div {
+  min-width: 0;
+}
+
+.road-export-row strong {
+  color: #18364b;
+}
+
+.road-export-row p {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.road-export-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  padding: 11px 17px;
+  border: 1px solid #176b51;
+  border-radius: 9px;
+  background: #176b51;
+  color: #fff;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.road-export-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #10553f;
+}
+
+.road-export-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Selected road detail panel */
+
+.selected-road-panel {
+  margin-top: 20px;
+  padding: clamp(16px, 2.5vw, 25px);
+  border: 1px solid #cfe3d9;
+  border-radius: 17px;
+  background: linear-gradient(145deg, #fff, #f4faf6);
+  box-shadow: 0 5px 18px rgb(20 60 45 / 5%);
+  animation: landsafe-panel-enter 0.25s ease-out;
+}
+
+@keyframes landsafe-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.selected-road-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.selected-road-header > div {
+  min-width: 0;
+}
+
+.selected-road-header h3 {
+  margin: 7px 0;
+  color: #153d35;
+  font-size: clamp(1.15rem, 2vw, 1.5rem);
+  overflow-wrap: anywhere;
+}
+
+.selected-road-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.87rem;
+  line-height: 1.5;
+}
+
+.selected-road-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.selected-road-metrics article {
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid #e1ebe5;
+  border-radius: 11px;
+  background: #fff;
+}
+
+.selected-road-metrics article span {
+  display: block;
+  margin-bottom: 8px;
+  color: #718096;
+  font-size: 0.8rem;
+}
+
+.selected-road-metrics article strong {
+  display: block;
+  color: #18364b;
+  font-size: 1rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.selected-road-panel h4 {
+  margin: 0 0 12px;
+  color: #18364b;
+}
+
+.selected-road-attributes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.road-attribute {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+  padding: 12px;
+  border: 1px solid #e8eeeb;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.road-attribute span {
+  color: #718096;
+  font-size: 0.77rem;
+  text-transform: capitalize;
+}
+
+.road-attribute strong {
+  color: #294457;
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Select road from its map popup */
+
+.road-popup-select {
+  margin-top: 8px;
+  padding: 8px 11px;
+  border: 0;
+  border-radius: 7px;
+  background: #176b51;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.road-popup-select:hover {
+  background: #10553f;
+}
+
+.landsafe-road-popup p {
+  line-height: 1.45;
+}
+
+/* Better focus visibility */
+
+.road-export-button:focus-visible,
+.selected-road-panel button:focus-visible,
+.road-popup-select:focus-visible {
+  outline: 3px solid #16845d;
+  outline-offset: 3px;
+}
+
+/* Tablet */
+
+@media (max-width: 1100px) {
+  .road-stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 700px) {
+  .road-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .road-stat-card {
+    padding: 13px;
+  }
+
+  .road-export-row {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 14px;
+  }
+
+  .road-export-button {
+    width: 100%;
+  }
+
+  .selected-road-header {
+    flex-direction: column;
+  }
+
+  .selected-road-metrics {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 9px;
+  }
+
+  .selected-road-metrics article {
+    padding: 12px;
+  }
+
+  .selected-road-attributes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 380px) {
+  .road-stats-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .road-stat-card,
+  .road-export-button {
+    transition: none;
+  }
+
+  .selected-road-panel {
+    animation: none;
+  }
+}
+/* Hospital Journey Summary */
+
+.journey-summary {
+  margin-top: 18px;
+  padding: 22px;
+  border: 1px solid #dce8e1;
+  border-radius: 16px;
+  background: #ffffff;
+  color: #183b32;
+  box-shadow: 0 5px 18px rgba(24, 59, 50, 0.06);
+}
+
+.journey-summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.journey-summary-header h4 {
+  margin: 0 0 6px;
+  color: #183b32;
+  font-size: 18px;
+}
+
+.journey-summary-header p {
+  margin: 0;
+  color: #687970;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.journey-summary-badge {
+  padding: 6px 10px;
+  border-radius: 20px;
+  background: #e5f3eb;
+  color: #23734e;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.journey-summary-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.journey-summary-item {
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid #e5ece7;
+  border-radius: 11px;
+  background: #f8fbf9;
+}
+
+.journey-summary-item span {
+  display: block;
+  margin-bottom: 8px;
+  color: #687970;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.journey-summary-item strong {
+  display: block;
+  color: #183b32;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.journey-summary-status {
+  margin: 14px 0 0;
+  color: #687970;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.journey-summary-warning {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-left: 4px solid #d94b4b;
+  border-radius: 8px;
+  background: #fff0f0;
+  color: #842c2c;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.journey-summary-notice {
+  margin-top: 16px;
+  padding: 15px;
+  border-left: 4px solid #d49a32;
+  border-radius: 8px;
+  background: #fff8e9;
+  color: #59451f;
+}
+
+.journey-summary-notice strong {
+  font-size: 13px;
+}
+
+.journey-summary-notice p {
+  margin: 7px 0 0;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+@media (max-width: 600px) {
+  .journey-summary {
+    padding: 16px;
+  }
+
+  .journey-summary-details {
+    grid-template-columns: 1fr;
+  }
+
+  .journey-summary-header {
+    flex-wrap: wrap;
+  }
+}
+
+/* Fix LANDSAFE map and sidebar alignment */
+
+.map-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+  width: 100%;
+}
+
+.hospital-sidebar {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.road-map-wrapper {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.road-risk-map {
+  width: 100%;
+  height: 650px;
+  min-width: 0;
+}
+
+/* Prevent journey summary text from breaking awkwardly */
+
+.journey-summary {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+}
+
+.journey-summary-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.journey-summary-header > div {
+  flex: 1 1 160px;
+  min-width: 0;
+}
+
+.journey-summary-header h4 {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.journey-summary-header p {
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.journey-summary-badge {
+  flex-shrink: 0;
+}
+
+.journey-summary-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.journey-summary-item {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.journey-summary-item span,
+.journey-summary-item strong {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+/* Keep the sidebar and map usable on smaller screens */
+
+@media (max-width: 900px) {
+  .map-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hospital-sidebar {
+    order: 2;
+  }
+
+  .road-map-wrapper {
+    order: 1;
+  }
+
+  .road-risk-map {
+    height: 500px;
+  }
+}
+
+@media (max-width: 600px) {
+  .road-risk-map {
+    height: 400px;
+  }
+
+  .journey-summary {
+    padding: 16px;
+  }
+}
+
+.route-comparison-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.route-comparison-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  padding: 14px;
+  box-sizing: border-box;
+  border: 1px solid #e5ece7;
+  border-radius: 10px;
+  background: #f8fbf9;
+}
+
+.route-comparison-card span {
+  display: block;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+}
+
+.route-comparison-card strong {
+  display: block;
+  font-size: 20px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.route-comparison-card small {
+  display: block;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+}
+
+.route-comparison-intro,
+.route-comparison-note {
+  line-height: 1.7;
+  overflow-wrap: break-word;
 }

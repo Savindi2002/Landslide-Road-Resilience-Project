@@ -593,7 +593,7 @@ export default function RoadRiskMap() {
 
     if (!key) {
       setRouteStatus(
-        'This road cannot be included in the closure simulation because its road data is incomplete.',
+        'This road has no valid u/v graph-node IDs, so it cannot be closed in the graph simulation.',
       )
       return
     }
@@ -941,7 +941,7 @@ export default function RoadRiskMap() {
 
                   {destinationNodeId && (
                     <p className="map-status-message">
-                      Road network connection ID: {destinationNodeId}
+                      Nearest graph node: {destinationNodeId}
                     </p>
                   )}
 
@@ -963,39 +963,6 @@ export default function RoadRiskMap() {
                 <p className="map-status-message" aria-live="polite">
                   {routeStatus}
                 </p>
-              )}
-
-              {selectedHospital && (
-                <section className="journey-summary" aria-live="polite">
-                  <div className="journey-summary-heading">
-                    <span className="journey-summary-icon" aria-hidden="true">＋</span>
-                    <div>
-                      <h4>Hospital journey</h4>
-                      <p>Review your selected destination and route status.</p>
-                    </div>
-                  </div>
-                  <div className="journey-summary-details">
-                    <div className="journey-summary-item">
-                      <span>Starting point</span>
-                      <strong>{currentLocation ? 'Your current location' : 'Location not set'}</strong>
-                    </div>
-                    <div className="journey-summary-item">
-                      <span>Destination</span>
-                      <strong>{selectedHospital.name}</strong>
-                    </div>
-                    <div className="journey-summary-item">
-                      <span>Roads marked closed</span>
-                      <strong>{closedEdgeKeys.length}</strong>
-                    </div>
-                    <div className="journey-summary-item">
-                      <span>Route status</span>
-                      <strong>{!currentLocation ? 'Set your location to begin' : !showRoute ? 'Ready to calculate' : routeComparison?.alternative ? 'Route available in simulation' : routeStatus || 'Checking route...'}</strong>
-                    </div>
-                  </div>
-                  {!currentLocation && (
-                    <p className="journey-summary-hint">Select “Use my location” to set your starting point before calculating a route.</p>
-                  )}
-                </section>
               )}
 
               {showRoute && routeComparison && (
@@ -1055,6 +1022,133 @@ export default function RoadRiskMap() {
 
               {nearestHospitals.length > 0 && (
                 <div className="nearest-hospitals">
+                                {/* Hospital Journey Summary */}
+              {showRoute && selectedHospital && (
+                <section
+                  className="journey-summary"
+                  aria-live="polite"
+                  aria-label="Hospital journey summary"
+                >
+                  <div className="journey-summary-header">
+                    <div>
+                      <h4>Hospital Journey Summary</h4>
+                      <p>
+                        Review your selected healthcare facility and
+                        the current route calculation.
+                      </p>
+                    </div>
+
+                    <span className="journey-summary-badge">
+                      LANDSAFE
+                    </span>
+                  </div>
+
+                  <div className="journey-summary-details">
+                    <article className="journey-summary-item">
+                      <span>Selected healthcare facility</span>
+                      <strong>{selectedHospital.name}</strong>
+                    </article>
+
+                    <article className="journey-summary-item">
+                      <span>Starting point</span>
+                      <strong>
+                        {currentLocation
+                          ? `${currentLocation[0].toFixed(4)}, ${currentLocation[1].toFixed(4)}`
+                          : 'Location not selected'}
+                      </strong>
+                    </article>
+
+                    <article className="journey-summary-item">
+                      <span>Simulated road closures</span>
+                      <strong>
+                        {closedEdgeKeys.length}{' '}
+                        {closedEdgeKeys.length === 1
+                          ? 'connection'
+                          : 'connections'}
+                      </strong>
+                    </article>
+
+                    <article className="journey-summary-item">
+                      <span>Alternative route result</span>
+                      <strong>
+                        {!routeComparison
+                          ? 'Waiting for route calculation'
+                          : routeComparison.alternative
+                            ? 'An alternative route was found'
+                            : 'No alternative route found'}
+                      </strong>
+                    </article>
+
+                    <article className="journey-summary-item">
+                      <span>Usual route distance</span>
+                      <strong>
+                        {routeComparison?.original
+                          ? `${(
+                              routeComparison.original.distanceMetres / 1000
+                            ).toFixed(2)} km`
+                          : 'Not available'}
+                      </strong>
+                    </article>
+
+                    <article className="journey-summary-item">
+                      <span>Alternative route distance</span>
+                      <strong>
+                        {routeComparison?.alternative
+                          ? `${(
+                              routeComparison.alternative.distanceMetres / 1000
+                            ).toFixed(2)} km`
+                          : 'Not available'}
+                      </strong>
+                    </article>
+
+                    <article className="journey-summary-item">
+                      <span>Additional distance</span>
+                      <strong>
+                        {routeComparison?.additionalDistanceMetres == null
+                          ? 'Not available'
+                          : `${(
+                              routeComparison.additionalDistanceMetres / 1000
+                            ).toFixed(2)} km`}
+                      </strong>
+                    </article>
+
+                    <article className="journey-summary-item">
+                      <span>Road connections marked closed</span>
+                      <strong>
+                        {routeComparison?.closedCount ??
+                          closedEdgeKeys.length}
+                      </strong>
+                    </article>
+                  </div>
+
+                  {!routeComparison && (
+                    <p className="journey-summary-status">
+                      {routeStatus || 'Waiting for the route calculation.'}
+                    </p>
+                  )}
+
+                  {routeComparison &&
+                    !routeComparison.alternative &&
+                    closedEdgeKeys.length > 0 && (
+                      <p className="journey-summary-warning">
+                        No alternative route was found with the selected
+                        connections excluded. Try reopening one or more
+                        connections and calculate the route again.
+                      </p>
+                    )}
+
+                  <div className="journey-summary-notice">
+                    <strong>Important travel information</strong>
+                    <p>
+                      LANDSAFE uses the project's supplied road data and
+                      simulated road closures. It does not provide live
+                      road conditions, verified landslide warnings, or
+                      confirmation that a road is safe. Check official
+                      updates before travelling.
+                    </p>
+                  </div>
+                </section>
+              )}
                   <h4>Nearest facilities</h4>
                   {nearestHospitals.map((facility) => (
                     <button
@@ -1073,7 +1167,7 @@ export default function RoadRiskMap() {
               <section className="closed-roads-panel">
                 <h3>Simulated road closures</h3>
                 <p>
-                  {closedEdgeKeys.length} road connection(s) marked closed
+                  {closedEdgeKeys.length} closed graph connection(s)
                 </p>
 
                 {closedEdgeKeys.length > 0 ? (
@@ -1274,7 +1368,8 @@ export default function RoadRiskMap() {
               <div className="road-closure-controls">
                 <h4>Road closure simulation</h4>
                 <p>
-                  This removes the selected road from the route calculation. It does not report a verified
+                  This manually excludes the selected graph connection
+                  from the route calculation. It does not report a verified
                   real-world road closure.
                 </p>
 
@@ -1294,7 +1389,8 @@ export default function RoadRiskMap() {
                   </button>
                 ) : (
                   <p>
-                    This road has incomplete connection data and cannot be included in the closure simulation.
+                    This feature has no valid u/v node IDs and cannot be
+                    toggled in the graph simulation.
                   </p>
                 )}
               </div>
