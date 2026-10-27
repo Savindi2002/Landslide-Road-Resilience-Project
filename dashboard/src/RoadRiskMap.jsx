@@ -1,11 +1,12 @@
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   MapContainer,
   TileLayer,
   GeoJSON,
   Marker,
   Polyline,
+  Popup,
   useMap,
 } from 'react-leaflet'
 import L from 'leaflet'
@@ -17,208 +18,218 @@ const MAP_ZOOM = 10
 
 const ROADS_URL = '/data/roads.geojson'
 const HOSPITALS_URL = '/data/hospitals.geojson'
+const OSRM_URL = 'https://router.project-osrm.org/route/v1/driving'
 
-const ROUTING_URL = 'https://router.project-osrm.org/route/v1/driving'
-
-function calculateDistanceKm(lat1, lon1, lat2, lon2) {
-  const toRadians = (degrees) => (degrees * Math.PI) / 180
-  const earthRadiusKm = 6371
-
-  const dLat = toRadians(lat2 - lat1)
-  const dLon = toRadians(lon2 - lon1)
-
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRadians(lat1)) *
-      Math.cos(toRadians(lat2)) *
-      Math.sin(dLon / 2) ** 2
-
-  return (
-    2 *
-    earthRadiusKm *
-    Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  )
-}
-
-function getFacilityName(feature, index = 0) {
-  const properties = feature?.properties || {}
-
-  return (
-    properties.name ||
-    properties.operator ||
-    `Healthcare facility ${properties.facility_id || index + 1}`
-  )
-}
+const RISK_THRESHOLDS = { low: 0.45, high: 0.65 }
 
 function getRoadRisk(feature) {
-  const properties = feature?.properties || {}
-  const value = Number(properties.risk_proxy_score)
+  const raw = feature?.properties?.risk_proxy_score
 
+  if (raw === null || raw === undefined || raw === '') return null
+
+  const value = Number(raw)
   return Number.isFinite(value) ? value : null
 }
 
+function getRiskCategory(risk) {
+  if (risk === null || risk === undefined) return 'unknown'
+  if (risk < RISK_THRESHOLDS.low) return 'low'
+  if (risk < RISK_THRESHOLDS.high) return 'medium'
+  return 'high'
+}
+
+function getRiskLabel(risk) {
+  const labels = {
+    low: 'Lower estimated risk',
+    medium: 'Moderate estimated risk',
+    high: 'Higher estimated risk',
+    unknown: 'Risk score unavailable',
+  }
+
+  return labels[getRiskCategory(risk)]
+}
+
 function getRoadColor(feature) {
-  const risk = getRoadRisk(feature)
+  const colors = {
+    low: '#2e9d67',
+    medium: '#e6a23c',
+    high: '#d94b4b',
+    unknown: '#89939d',
+  }
 
-  if (risk === null) return '#7b8794'
-  if (risk >= 0.65) return '#dc2626'
-  if (risk >= 0.45) return '#f59e0b'
-
-  return '#16a34a'
+  return colors[getRiskCategory(getRoadRisk(feature))]
 }
 
 function roadStyle(feature) {
   return {
     color: getRoadColor(feature),
     weight: 3,
-    opacity: 0.8,
+    opacity: 0.85,
   }
+}
+
+function getFacilityName(feature) {
+  const p = feature?.properties || {}
+
+  return (
+    p.name ||
+    p['name:en'] ||
+    p.official_name ||
+    p.operator ||
+    p.healthcare ||
+    'Healthcare facility'
+  )
+}
+
+function getValidPoint(feature) {
+  const coordinates = feature?.geometry?.coordinates
+
+  if (
+    feature?.geometry?.type !== 'Point' ||
+    !Array.isArray(coordinates) ||
+    coordinates.length < 2
+  ) {
+    return null
+  }
+
+  const [longitude, latitude] = coordinates
+
+  if (
+    !Number.isFinite(Number(longitude)) ||
+    !Number.isFinite(Number(latitude))
+  ) {
+    return null
+  }
+
+  return [Number(latitude), Number(longitude)]
+}
+
+function calculateDistanceKm(a, b) {
+  if (!a || !b) return Infinity
+
+  const radians = (degrees) => (degrees * Math.PI) / 180
+  const earthRadiusKm = 6371
+
+  const lat1 = radians(a[0])
+  const lat2 = radians(b[0])
+  const deltaLat = radians(b[0] - a[0])
+  const deltaLon = radians(b[1] - a[1])
+
+  const value =
+    Math.sin(deltaLat / 2) ** 2 +
+    Math.cos(lat1) *
+      Math.cos(lat2) *
+      Math.sin(deltaLon / 2) ** 2
+
+  return (
+    earthRadiusKm *
+    2 *
+    Math.atan2(Math.sqrt(value), Math.sqrt(1 - value))
+  )
 }
 
 function createHospitalIcon() {
   return L.divIcon({
-    className: 'hospital-marker-container',
-    html: '<div class="hospital-marker">✚</div>',
+    className: 'landsafe-hospital-icon',
+    html: '<span>+</span>',
     iconSize: [30, 30],
     iconAnchor: [15, 15],
     popupAnchor: [0, -13],
   })
 }
 
-function getValidPoint(feature) {
-  if (feature?.geometry?.type !== 'Point') return null
-
-  const coordinates = feature.geometry.coordinates
-
-  if (
-    !Array.isArray(coordinates) ||
-    coordinates.length < 2 ||
-    !Number.isFinite(Number(coordinates[0])) ||
-    !Number.isFinite(Number(coordinates[1]))
-  ) {
-    return null
-  }
-
-  const [lng, lat] = coordinates.map(Number)
-
-  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-    return null
-  }
-
-  return { lat, lng }
+function createLocationIcon() {
+  return L.divIcon({
+    className: 'landsafe-location-icon',
+    html: '<span></span>',
+    iconSize: [22, 22],
+    iconAnchor: [11, 11],
+  })
 }
 
-function CurrentLocationMarker({ position }) {
+const hospitalIcon = createHospitalIcon()
+const locationIcon = createLocationIcon()
+
+function FlyToLocation({ position, zoom = 13 }) {
   const map = useMap()
 
   useEffect(() => {
     if (position) {
-      map.flyTo([position.lat, position.lng], 13, {
-        duration: 0.8,
-      })
+      map.flyTo(position, zoom, { duration: 0.8 })
     }
-  }, [position, map])
+  }, [map, position, zoom])
 
+  return null
+}
+
+function CurrentLocationMarker({ position }) {
   if (!position) return null
 
   return (
-    <Marker
-      position={[position.lat, position.lng]}
-      icon={L.divIcon({
-        className: 'current-location-container',
-        html: '<div class="current-location-dot"></div>',
-        iconSize: [22, 22],
-        iconAnchor: [11, 11],
-      })}
-    />
+    <Marker position={position} icon={locationIcon}>
+      <Popup>
+        <strong>Your current location</strong>
+        <br />
+        Used as the starting point for route planning.
+      </Popup>
+    </Marker>
   )
 }
 
-function HospitalRoute({
-  origin,
-  destination,
-  onRouteStatus,
-}) {
-  const map = useMap()
+function HospitalRoute({ start, destination, onStatus }) {
   const [routeCoordinates, setRouteCoordinates] = useState([])
   const [routeInfo, setRouteInfo] = useState(null)
 
   useEffect(() => {
     let cancelled = false
-    const controller = new AbortController()
 
     async function loadRoute() {
       setRouteCoordinates([])
       setRouteInfo(null)
 
-      if (!origin || !destination) {
-        onRouteStatus({
-          type: 'idle',
-          message: '',
-        })
+      if (!start || !destination) {
+        onStatus('')
         return
       }
 
-      onRouteStatus({
-        type: 'loading',
-        message: 'Finding a route...',
-      })
+      onStatus('Finding a driving route...')
 
       try {
-        const url =
-          `${ROUTING_URL}/` +
-          `${origin.lng},${origin.lat};` +
-          `${destination.lng},${destination.lat}` +
-          '?overview=full&geometries=geojson'
+        const coordinates =
+          `${start[1]},${start[0]};${destination[1]},${destination[0]}`
 
-        const response = await fetch(url, {
-          signal: controller.signal,
-        })
+        const url =
+          `${OSRM_URL}/${coordinates}?overview=full&geometries=geojson`
+
+        const response = await fetch(url)
 
         if (!response.ok) {
-          throw new Error('The routing service could not be reached.')
+          throw new Error('Route service could not be reached.')
         }
 
         const data = await response.json()
 
-        if (data.code !== 'Ok' || !data.routes?.length) {
-          throw new Error('No route was returned for this destination.')
+        if (!data.routes?.length) {
+          throw new Error('No driving route was found.')
         }
-
-        const route = data.routes[0]
-
-        const coordinates = route.geometry.coordinates.map(
-          ([lng, lat]) => [lat, lng]
-        )
 
         if (cancelled) return
 
-        setRouteCoordinates(coordinates)
+        const route = data.routes[0]
+        const points = route.geometry.coordinates.map(
+          ([longitude, latitude]) => [latitude, longitude],
+        )
+
+        setRouteCoordinates(points)
         setRouteInfo({
           distanceKm: route.distance / 1000,
           durationMinutes: route.duration / 60,
         })
-
-        onRouteStatus({
-          type: 'success',
-          message: `Route found: ${(route.distance / 1000).toFixed(1)} km, approximately ${Math.round(route.duration / 60)} minutes driving. Verify current road conditions before travelling.`,
-        })
-
-        if (coordinates.length > 0) {
-          map.fitBounds(coordinates, {
-            padding: [40, 40],
-            maxZoom: 14,
-          })
-        }
+        onStatus('Route found.')
       } catch (error) {
-        if (error.name === 'AbortError' || cancelled) return
-
-        onRouteStatus({
-          type: 'error',
-          message:
-            error.message ||
-            'Could not calculate the route. Please try again.',
-        })
+        if (!cancelled) {
+          onStatus(error.message || 'Unable to calculate the route.')
+        }
       }
     }
 
@@ -226,61 +237,142 @@ function HospitalRoute({
 
     return () => {
       cancelled = true
-      controller.abort()
     }
-  }, [
-    origin,
-    destination,
-    map,
-    onRouteStatus,
-  ])
+  }, [start, destination, onStatus])
 
   return (
     <>
       {routeCoordinates.length > 0 && (
         <Polyline
           positions={routeCoordinates}
-          pathOptions={{
-            color: '#2563eb',
-            weight: 6,
-            opacity: 0.9,
-          }}
+          pathOptions={{ color: '#1769e0', weight: 5, opacity: 0.9 }}
         />
       )}
 
       {routeInfo && (
-        <></>
+        <Marker position={destination}>
+          <Popup>
+            <strong>Route information</strong>
+            <br />
+            Distance: {routeInfo.distanceKm.toFixed(2)} km
+            <br />
+            Estimated driving time:{' '}
+            {Math.round(routeInfo.durationMinutes)} minutes
+            <br />
+            <small>
+              This is an estimate from the routing service. Actual
+              travel conditions may differ.
+            </small>
+          </Popup>
+        </Marker>
       )}
     </>
   )
 }
 
+/* CSV helpers */
+
+function csvCell(value) {
+  let text = ''
+
+  if (value === null || value === undefined) {
+    text = ''
+  } else if (typeof value === 'object') {
+    text = JSON.stringify(value)
+  } else {
+    text = String(value)
+  }
+
+  // Prevent exported values from being interpreted as spreadsheet formulas.
+  if (/^[\s]*[=+\-@]/.test(text)) {
+    text = `'${text}`
+  }
+
+  return `"${text.replace(/"/g, '""')}"`
+}
+
+function downloadRoadsCsv(features) {
+  if (!features?.length) {
+    window.alert('No road segments match the current filters.')
+    return
+  }
+
+  const keys = [
+    ...new Set(
+      features.flatMap((feature) =>
+        Object.keys(feature.properties || {}),
+      ),
+    ),
+  ]
+
+  const headers = keys.includes('risk_proxy_score')
+    ? keys
+    : [...keys, 'risk_proxy_score']
+
+  const rows = features.map((feature) => {
+    const properties = feature.properties || {}
+
+    return headers.map((key) => {
+      if (key === 'risk_proxy_score') {
+        return csvCell(getRoadRisk(feature))
+      }
+
+      return csvCell(properties[key])
+    })
+  })
+
+  const csv = [
+    headers.map(csvCell).join(','),
+    ...rows.map((row) => row.join(',')),
+  ].join('\r\n')
+
+  const blob = new Blob(['\uFEFF', csv], {
+    type: 'text/csv;charset=utf-8;',
+  })
+
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+
+  link.href = url
+  link.download = 'landsafe-filtered-roads.csv'
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+
+  // Revoke after the browser has had a moment to start the download.
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
+function getRoadTitle(feature) {
+  const p = feature?.properties || {}
+  return p.name || p.ref || p.highway || 'Unnamed road segment'
+}
+
 export default function RoadRiskMap() {
   const [roads, setRoads] = useState(null)
   const [hospitals, setHospitals] = useState(null)
-
+  const [loadError, setLoadError] = useState('')
   const [loading, setLoading] = useState(true)
-  const [dataError, setDataError] = useState('')
 
-  const [origin, setOrigin] = useState(null)
-  const [locationStatus, setLocationStatus] = useState('')
-  const [locationError, setLocationError] = useState('')
+  // Road search, filtering, and selection.
+  const [roadSearch, setRoadSearch] = useState('')
+  const [riskFilter, setRiskFilter] = useState('all')
+  const [selectedRoad, setSelectedRoad] = useState(null)
 
+  // Hospital search, location, and routing.
+  const [hospitalSearch, setHospitalSearch] = useState('')
   const [selectedHospital, setSelectedHospital] = useState(null)
-  const [searchText, setSearchText] = useState('')
-  const [showNearest, setShowNearest] = useState(true)
-
-  const [routeStatus, setRouteStatus] = useState({
-    type: 'idle',
-    message: '',
-  })
+  const [currentLocation, setCurrentLocation] = useState(null)
+  const [locationMessage, setLocationMessage] = useState('')
+  const [routeStatus, setRouteStatus] = useState('')
+  const [showRoute, setShowRoute] = useState(false)
 
   useEffect(() => {
     let cancelled = false
 
     async function loadMapData() {
       setLoading(true)
-      setDataError('')
+      setLoadError('')
 
       try {
         const [roadsResponse, hospitalsResponse] = await Promise.all([
@@ -289,11 +381,15 @@ export default function RoadRiskMap() {
         ])
 
         if (!roadsResponse.ok) {
-          throw new Error('Could not load roads.geojson.')
+          throw new Error(
+            'Could not load roads.geojson. Check dashboard/public/data/roads.geojson.',
+          )
         }
 
         if (!hospitalsResponse.ok) {
-          throw new Error('Could not load hospitals.geojson.')
+          throw new Error(
+            'Could not load hospitals.geojson. Check dashboard/public/data/hospitals.geojson.',
+          )
         }
 
         const [roadsData, hospitalsData] = await Promise.all([
@@ -301,15 +397,13 @@ export default function RoadRiskMap() {
           hospitalsResponse.json(),
         ])
 
-        if (cancelled) return
-
-        setRoads(roadsData)
-        setHospitals(hospitalsData)
+        if (!cancelled) {
+          setRoads(roadsData)
+          setHospitals(hospitalsData)
+        }
       } catch (error) {
         if (!cancelled) {
-          setDataError(
-            `${error.message} Check the files in dashboard/public/data/.`
-          )
+          setLoadError(error.message || 'Unable to load map data.')
         }
       } finally {
         if (!cancelled) setLoading(false)
@@ -328,479 +422,654 @@ export default function RoadRiskMap() {
 
     return hospitals.features
       .map((feature, index) => {
-        const point = getValidPoint(feature)
-
-        if (!point) return null
+        const position = getValidPoint(feature)
+        if (!position) return null
 
         return {
           feature,
-          index,
-          ...point,
-          name: getFacilityName(feature, index),
+          position,
+          name: getFacilityName(feature),
+          id:
+            feature.properties?.osm_id ??
+            feature.properties?.id ??
+            `${getFacilityName(feature)}-${index}`,
         }
       })
       .filter(Boolean)
   }, [hospitals])
 
+  const filteredRoads = useMemo(() => {
+    if (!roads?.features) return null
+
+    const query = roadSearch.trim().toLowerCase()
+
+    const features = roads.features.filter((feature) => {
+      const p = feature.properties || {}
+      const risk = getRoadRisk(feature)
+      const category = getRiskCategory(risk)
+
+      const searchableText = [
+        p.name,
+        p.highway,
+        p.ref,
+        p.osm_id,
+        p.id,
+        p.u,
+        p.v,
+        p.road_id,
+      ]
+        .filter((value) => value !== null && value !== undefined)
+        .join(' ')
+        .toLowerCase()
+
+      const matchesSearch =
+        !query || searchableText.includes(query)
+
+      const matchesRisk =
+        riskFilter === 'all' || category === riskFilter
+
+      return matchesSearch && matchesRisk
+    })
+
+    return { ...roads, features }
+  }, [roads, roadSearch, riskFilter])
+
+  const riskStatistics = useMemo(() => {
+    const features = filteredRoads?.features || []
+
+    const counts = {
+      low: 0,
+      medium: 0,
+      high: 0,
+      unknown: 0,
+    }
+
+    features.forEach((feature) => {
+      counts[getRiskCategory(getRoadRisk(feature))] += 1
+    })
+
+    return {
+      total: features.length,
+      allRoads: roads?.features?.length || 0,
+      counts,
+      highRiskShare: features.length
+        ? (counts.high / features.length) * 100
+        : 0,
+    }
+  }, [filteredRoads, roads])
+
+  const filteredHospitals = useMemo(() => {
+    const query = hospitalSearch.trim().toLowerCase()
+    if (!query) return validFacilities
+
+    return validFacilities.filter((facility) => {
+      const p = facility.feature.properties || {}
+
+      const searchableText = [
+        facility.name,
+        p.amenity,
+        p.healthcare,
+        p.operator,
+        p['name:en'],
+        p.address,
+      ]
+        .filter((value) => value !== null && value !== undefined)
+        .join(' ')
+        .toLowerCase()
+
+      return searchableText.includes(query)
+    })
+  }, [validFacilities, hospitalSearch])
+
   const nearestHospitals = useMemo(() => {
-    if (!origin) return []
+    if (!currentLocation) return []
 
     return validFacilities
       .map((facility) => ({
         ...facility,
         distanceKm: calculateDistanceKm(
-          origin.lat,
-          origin.lng,
-          facility.lat,
-          facility.lng
+          currentLocation,
+          facility.position,
         ),
       }))
       .sort((a, b) => a.distanceKm - b.distanceKm)
       .slice(0, 5)
-  }, [origin, validFacilities])
+  }, [currentLocation, validFacilities])
 
-  const filteredHospitals = useMemo(() => {
-    const query = searchText.trim().toLowerCase()
+  const resetRoadFilters = () => {
+    setRoadSearch('')
+    setRiskFilter('all')
+    setSelectedRoad(null)
+  }
 
-    if (!query) return validFacilities.slice(0, 8)
-
-    return validFacilities
-      .filter(({ feature, name }) => {
-        const properties = feature.properties || ''
-
-        const searchableText = [
-          name,
-          properties.facility_id,
-          properties.amenity,
-          properties.healthcare,
-          properties.emergency,
-          properties.operator,
-        ]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase()
-
-        return searchableText.includes(query)
-      })
-      .slice(0, 10)
-  }, [validFacilities, searchText])
-
-  const selectedPoint = useMemo(() => {
-    return selectedHospital ? getValidPoint(selectedHospital) : null
-  }, [selectedHospital])
-
-  const handleRouteStatus = useMemo(
-    () => (status) => setRouteStatus(status),
-    []
-  )
-
-  function useCurrentLocation() {
-    setLocationError('')
-    setLocationStatus('Requesting your location...')
+  const findCurrentLocation = () => {
+    setLocationMessage('')
 
     if (!navigator.geolocation) {
-      setLocationStatus('')
-      setLocationError(
-        'Your browser does not support location access.'
+      setLocationMessage(
+        'Your browser does not support location access.',
       )
       return
     }
 
+    setLocationMessage('Finding your current location...')
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const newOrigin = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        }
-
-        setOrigin(newOrigin)
-        setLocationStatus('Your current location is ready.')
-        setLocationError('')
+        setCurrentLocation([
+          position.coords.latitude,
+          position.coords.longitude,
+        ])
+        setLocationMessage('Your current location was found.')
       },
       (error) => {
-        setLocationStatus('')
-
         const messages = {
           1: 'Location permission was denied. Allow location access in your browser settings.',
-          2: 'Your location could not be determined. Check your device location settings.',
+          2: 'Your location is currently unavailable.',
           3: 'Location request timed out. Please try again.',
         }
 
-        setLocationError(
-          messages[error.code] ||
-            'Unable to get your current location.'
+        setLocationMessage(
+          messages[error.code] || 'Unable to get your current location.',
         )
       },
       {
         enableHighAccuracy: true,
-        timeout: 15000,
+        timeout: 12000,
         maximumAge: 60000,
-      }
+      },
     )
   }
 
-  function chooseFacility(feature) {
-    setSelectedHospital(feature)
-    setRouteStatus({
-      type: 'idle',
-      message: '',
-    })
+  const selectHospital = (facility) => {
+    setSelectedHospital(facility)
+    setShowRoute(false)
+    setRouteStatus('')
   }
 
-  function clearRoute() {
-    setSelectedHospital(null)
-    setRouteStatus({
-      type: 'idle',
-      message: '',
+  const handleRouteStatus = useCallback((message) => {
+    setRouteStatus(message)
+  }, [])
+
+  const selectRoad = useCallback((feature) => {
+    setSelectedRoad({
+      feature,
+      properties: { ...(feature.properties || {}) },
+      risk: getRoadRisk(feature),
     })
-  }
+  }, [])
 
-  function openFacilityInMap(facility) {
-    chooseFacility(facility.feature)
-  }
+  // Clear a road selection if the selected feature is filtered out.
+  useEffect(() => {
+    if (!selectedRoad || !filteredRoads?.features) return
 
-  function hospitalPointToLayer(feature, latlng) {
-    const marker = L.marker(latlng, {
-      icon: createHospitalIcon(),
-    })
-
-    const name = getFacilityName(feature)
-    const properties = feature.properties || {}
-
-    const popup = document.createElement('div')
-    popup.className = 'hospital-popup'
-
-    const title = document.createElement('strong')
-    title.textContent = name
-    popup.appendChild(title)
-
-    const type = properties.healthcare || properties.amenity
-    if (type) {
-      const typeLine = document.createElement('p')
-      typeLine.textContent = `Type: ${type}`
-      popup.appendChild(typeLine)
+    if (!filteredRoads.features.includes(selectedRoad.feature)) {
+      setSelectedRoad(null)
     }
+  }, [filteredRoads, selectedRoad])
 
-    if (properties.phone) {
-      const phoneLine = document.createElement('p')
-      phoneLine.textContent = `Phone: ${properties.phone}`
-      popup.appendChild(phoneLine)
-    }
-
-    const note = document.createElement('p')
-    note.textContent =
-      'Verify the facility services and availability before travelling.'
-    popup.appendChild(note)
-
-    marker.bindPopup(popup)
-
-    return marker
-  }
-
-  function roadOnEachFeature(feature, layer) {
-    const properties = feature.properties || {}
+  const roadOnEachFeature = (feature, layer) => {
+    const p = feature.properties || {}
     const risk = getRoadRisk(feature)
 
+    const slope =
+      p.slope_mean ?? p.mean_slope ?? p.slope
+
+    const length =
+      p.length_m ?? p.length ?? p.length_metres
+
     const popup = document.createElement('div')
-    popup.className = 'road-popup'
+    popup.className = 'landsafe-road-popup'
 
     const title = document.createElement('strong')
-    title.textContent =
-      properties.name ||
-      `Road segment ${properties.u ?? properties.osm_id ?? ''}`
+    title.textContent = String(getRoadTitle(feature))
     popup.appendChild(title)
 
-    const riskLine = document.createElement('p')
-    riskLine.textContent =
-      risk === null
-        ? 'Risk proxy score: unavailable'
-        : `Risk proxy score: ${risk.toFixed(3)}`
-    popup.appendChild(riskLine)
+    const details = [
+      `Estimated risk score: ${risk === null ? 'Unavailable' : risk.toFixed(3)}`,
+      `Risk category: ${getRiskLabel(risk)}`,
+      ...(slope !== undefined && slope !== null
+        ? [`Mean slope: ${slope}`]
+        : []),
+      ...(length !== undefined && length !== null
+        ? [`Road length: ${length} m`]
+        : []),
+      ...(p.highway ? [`Road type: ${p.highway}`] : []),
+      ...(p.osm_id !== undefined ? [`OSM ID: ${p.osm_id}`] : []),
+    ]
 
-    if (Number.isFinite(Number(properties.slope_mean_deg))) {
-      const slopeLine = document.createElement('p')
-      slopeLine.textContent =
-        `Mean slope: ${Number(properties.slope_mean_deg).toFixed(2)}°`
-      popup.appendChild(slopeLine)
-    }
+    details.forEach((detail) => {
+      const paragraph = document.createElement('p')
+      paragraph.textContent = detail
+      popup.appendChild(paragraph)
+    })
 
-    if (Number.isFinite(Number(properties.nearest_landslide_m))) {
-      const landslideLine = document.createElement('p')
-      landslideLine.textContent =
-        `Nearest mapped landslide: ${Number(properties.nearest_landslide_m).toFixed(0)} m`
-      popup.appendChild(landslideLine)
-    }
-
-    const disclaimer = document.createElement('p')
-    disclaimer.textContent =
-      'This is a research risk estimate, not an official warning or live road-closure status.'
-    popup.appendChild(disclaimer)
+    const selectButton = document.createElement('button')
+    selectButton.type = 'button'
+    selectButton.className = 'road-popup-select'
+    selectButton.textContent = 'View road details'
+    selectButton.addEventListener('click', () => selectRoad(feature))
+    popup.appendChild(selectButton)
 
     layer.bindPopup(popup)
-  }
 
-  if (loading) {
-    return (
-      <div className="map-message">
-        Loading LANDSAFE map data...
-      </div>
-    )
-  }
-
-  if (dataError) {
-    return (
-      <div className="map-message map-error">
-        <strong>Unable to load map data</strong>
-        <p>{dataError}</p>
-        <p>
-          Expected files: <code>public/data/roads.geojson</code> and{' '}
-          <code>public/data/hospitals.geojson</code>
-        </p>
-      </div>
-    )
+    layer.on({
+      click: () => selectRoad(feature),
+      mouseover: (event) => {
+        event.target.setStyle({ weight: 6, opacity: 1 })
+      },
+      mouseout: (event) => {
+        event.target.setStyle(roadStyle(feature))
+      },
+    })
   }
 
   return (
-    <div className="road-map-wrapper">
-      <div className="route-controls">
-        <h2>LANDSAFE Road Risk & Healthcare Access</h2>
-
-        <p className="map-intro">
-          Explore estimated road-risk levels, locate mapped healthcare
-          facilities, and request a route from your current location.
+    <section className="road-risk-page">
+      <header className="road-risk-heading">
+        <span className="road-risk-eyebrow">LANDSLIDE RESILIENCE RESEARCH</span>
+        <h2>LANDSAFE Road Risk &amp; Healthcare Access</h2>
+        <p>
+          Explore modelled road risk, inspect available road attributes,
+          and find mapped healthcare facilities in the study area.
         </p>
+      </header>
 
-        <div className="route-buttons">
-          <button
-            type="button"
-            className="location-button"
-            onClick={useCurrentLocation}
-          >
-            Use My Current Location
-          </button>
-
-          <button
-            type="button"
-            className="clear-route-button"
-            onClick={clearRoute}
-          >
-            Clear Route
-          </button>
+      <div className="road-filter-panel">
+        <div className="road-filter-field">
+          <label htmlFor="road-search">Search road segments</label>
+          <input
+            id="road-search"
+            type="search"
+            value={roadSearch}
+            onChange={(event) => setRoadSearch(event.target.value)}
+            placeholder="Road name, road type, or node ID..."
+          />
         </div>
 
-        {locationStatus && (
-          <p className="route-status">{locationStatus}</p>
-        )}
+        <div className="road-filter-field">
+          <label htmlFor="risk-filter">Estimated risk category</label>
+          <select
+            id="risk-filter"
+            value={riskFilter}
+            onChange={(event) => setRiskFilter(event.target.value)}
+          >
+            <option value="all">All risk categories</option>
+            <option value="low">Lower score (&lt; 0.45)</option>
+            <option value="medium">Moderate score (0.45–0.649)</option>
+            <option value="high">Higher score (≥ 0.65)</option>
+            <option value="unknown">Score unavailable</option>
+          </select>
+        </div>
 
-        {locationError && (
-          <p className="route-error">{locationError}</p>
-        )}
+        <button
+          type="button"
+          className="road-filter-reset"
+          onClick={resetRoadFilters}
+        >
+          Reset filters
+        </button>
+      </div>
 
-        <div className="hospital-search">
-          <label htmlFor="hospital-search-input">
+      <p className="road-filter-count" aria-live="polite">
+        Showing {riskStatistics.total.toLocaleString()} of{' '}
+        {riskStatistics.allRoads.toLocaleString()} road segments
+      </p>
+
+      <div className="road-stats-grid">
+        <article className="road-stat-card">
+          <span className="road-stat-label">Matching roads</span>
+          <strong>{riskStatistics.total.toLocaleString()}</strong>
+          <small>Road segments after filtering</small>
+        </article>
+
+        <article className="road-stat-card stat-high">
+          <span className="road-stat-label">Higher risk</span>
+          <strong>{riskStatistics.counts.high.toLocaleString()}</strong>
+          <small>{riskStatistics.highRiskShare.toFixed(1)}% of matching roads</small>
+        </article>
+
+        <article className="road-stat-card stat-medium">
+          <span className="road-stat-label">Moderate risk</span>
+          <strong>{riskStatistics.counts.medium.toLocaleString()}</strong>
+          <small>Scores from 0.45 to below 0.65</small>
+        </article>
+
+        <article className="road-stat-card stat-low">
+          <span className="road-stat-label">Lower risk</span>
+          <strong>{riskStatistics.counts.low.toLocaleString()}</strong>
+          <small>Scores below 0.45</small>
+        </article>
+
+        <article className="road-stat-card stat-unknown">
+          <span className="road-stat-label">Unavailable scores</span>
+          <strong>{riskStatistics.counts.unknown.toLocaleString()}</strong>
+          <small>Missing or invalid scores</small>
+        </article>
+      </div>
+
+      <div className="road-export-row">
+        <div>
+          <strong>Export road data</strong>
+          <p>Download the segments matching your current filters.</p>
+        </div>
+
+        <button
+          type="button"
+          className="road-export-button"
+          disabled={!riskStatistics.total}
+          onClick={() =>
+            downloadRoadsCsv(filteredRoads?.features || [])
+          }
+        >
+          Export filtered roads CSV
+        </button>
+      </div>
+
+      <div className="hospital-tools-panel">
+        <div className="road-filter-field">
+          <label htmlFor="hospital-search">
             Search healthcare facilities
           </label>
-
           <input
-            id="hospital-search-input"
+            id="hospital-search"
             type="search"
-            value={searchText}
-            onChange={(event) => setSearchText(event.target.value)}
-            placeholder="Search by name or facility type..."
+            value={hospitalSearch}
+            onChange={(event) => setHospitalSearch(event.target.value)}
+            placeholder="Search hospital or facility name..."
           />
-
-          {searchText.trim() && (
-            <div className="hospital-results">
-              {filteredHospitals.length === 0 && (
-                <p>No matching mapped facilities found.</p>
-              )}
-
-              {filteredHospitals.map((facility) => (
-                <button
-                  type="button"
-                  className="hospital-result"
-                  key={`${facility.lat}-${facility.lng}-${facility.index}`}
-                  onClick={() => openFacilityInMap(facility)}
-                >
-                  <span>{facility.name}</span>
-                  <small>
-                    {facility.feature.properties?.healthcare ||
-                      facility.feature.properties?.amenity ||
-                      'Healthcare facility'}
-                  </small>
-                </button>
-              ))}
-            </div>
-          )}
         </div>
 
-        <section className="nearest-hospitals">
-          <button
-            type="button"
-            className="nearest-toggle"
-            onClick={() => setShowNearest((value) => !value)}
-            aria-expanded={showNearest}
-          >
-            <span>Nearest Healthcare Facilities</span>
-            <span>{showNearest ? '−' : '+'}</span>
-          </button>
+        <button
+          type="button"
+          className="road-filter-reset"
+          onClick={findCurrentLocation}
+        >
+          Use my location
+        </button>
+      </div>
 
-          {showNearest && (
-            <>
-              {!origin && (
-                <p>
-                  Share your location to rank mapped facilities by
-                  approximate distance.
-                </p>
-              )}
+      {locationMessage && (
+        <p className="map-status-message" aria-live="polite">
+          {locationMessage}
+        </p>
+      )}
 
-              {origin && nearestHospitals.length === 0 && (
-                <p>No valid mapped healthcare points are available.</p>
-              )}
+      {loading && (
+        <p className="map-status-message">
+          Loading road and healthcare data...
+        </p>
+      )}
 
-              {origin && nearestHospitals.length > 0 && (
-                <div className="nearest-hospital-list">
-                  {nearestHospitals.map((facility, index) => (
-                    <div
-                      className="nearest-hospital-item"
-                      key={`${facility.lat}-${facility.lng}-${facility.index}`}
-                    >
-                      <div className="nearest-hospital-details">
-                        <strong>
-                          {index + 1}. {facility.name}
-                        </strong>
+      {loadError && (
+        <div className="map-error" role="alert">
+          <strong>Map data could not be loaded.</strong>
+          <p>{loadError}</p>
+          <p>
+            Check that roads.geojson and hospitals.geojson exist in
+            dashboard/public/data.
+          </p>
+        </div>
+      )}
 
-                        <p>
-                          {facility.distanceKm.toFixed(2)} km away
-                          <span> · straight-line distance</span>
-                        </p>
-                      </div>
+      {!loading && !loadError && (
+        <>
+          <div className="map-layout">
+            <aside className="hospital-sidebar">
+              <h3>Healthcare facilities</h3>
+              <p>{filteredHospitals.length} matching mapped facilities</p>
 
-                      <button
-                        type="button"
-                        onClick={() => openFacilityInMap(facility)}
-                      >
-                        Get Route
-                      </button>
-                    </div>
-                  ))}
+              <div className="hospital-results">
+                {filteredHospitals.length === 0 && (
+                  <p>No matching facilities were found.</p>
+                )}
+
+                {filteredHospitals.map((facility) => (
+                  <button
+                    type="button"
+                    className={`hospital-result ${
+                      selectedHospital?.id === facility.id ? 'selected' : ''
+                    }`}
+                    key={facility.id}
+                    onClick={() => selectHospital(facility)}
+                  >
+                    <strong>{facility.name}</strong>
+                    <span>
+                      {facility.position[0].toFixed(4)},{' '}
+                      {facility.position[1].toFixed(4)}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {selectedHospital && (
+                <div className="selected-hospital-panel">
+                  <h4>Selected facility</h4>
+                  <p>{selectedHospital.name}</p>
+
+                  {currentLocation && (
+                    <p>
+                      Straight-line distance:{' '}
+                      {calculateDistanceKm(
+                        currentLocation,
+                        selectedHospital.position,
+                      ).toFixed(2)} km
+                    </p>
+                  )}
+
+                  <button
+                    type="button"
+                    className="road-filter-reset"
+                    disabled={!currentLocation}
+                    onClick={() => {
+                      if (!currentLocation) {
+                        setRouteStatus('Find your current location first.')
+                        return
+                      }
+
+                      setShowRoute(true)
+                      setRouteStatus('Preparing route...')
+                    }}
+                  >
+                    Route from my location
+                  </button>
+
+                  <button
+                    type="button"
+                    className="clear-selection-button"
+                    onClick={() => {
+                      setSelectedHospital(null)
+                      setShowRoute(false)
+                      setRouteStatus('')
+                    }}
+                  >
+                    Clear selection
+                  </button>
                 </div>
               )}
 
-              <p className="nearest-hospital-note">
-                Nearest by distance does not mean clinically suitable.
-                Facility names and services may be incomplete.
-              </p>
-            </>
-          )}
-        </section>
+              {routeStatus && (
+                <p className="map-status-message" aria-live="polite">
+                  {routeStatus}
+                </p>
+              )}
 
-        {selectedHospital && (
-          <div className="selected-facility">
-            <strong>Selected facility</strong>
-            <p>{getFacilityName(selectedHospital)}</p>
+              {nearestHospitals.length > 0 && (
+                <div className="nearest-hospitals">
+                  <h4>Nearest facilities</h4>
+                  {nearestHospitals.map((facility) => (
+                    <button
+                      type="button"
+                      className="nearest-hospital"
+                      key={facility.id}
+                      onClick={() => selectHospital(facility)}
+                    >
+                      <span>{facility.name}</span>
+                      <strong>{facility.distanceKm.toFixed(2)} km</strong>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </aside>
 
-            {!origin && (
-              <p>
-                Share your current location to request a route.
-              </p>
-            )}
+            <div className="road-map-wrapper">
+              <MapContainer
+                center={MAP_CENTER}
+                zoom={MAP_ZOOM}
+                scrollWheelZoom
+                className="road-risk-map"
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+
+                {filteredRoads && (
+                  <GeoJSON
+                    key={`roads-${roadSearch}-${riskFilter}`}
+                    data={filteredRoads}
+                    style={roadStyle}
+                    onEachFeature={roadOnEachFeature}
+                  />
+                )}
+
+                {validFacilities.map((facility) => (
+                  <Marker
+                    key={facility.id}
+                    position={facility.position}
+                    icon={hospitalIcon}
+                    eventHandlers={{
+                      click: () => selectHospital(facility),
+                    }}
+                  >
+                    <Popup>
+                      <strong>{facility.name}</strong>
+                      <br />
+                      <button
+                        type="button"
+                        onClick={() => selectHospital(facility)}
+                      >
+                        Select this facility
+                      </button>
+                    </Popup>
+                  </Marker>
+                ))}
+
+                <CurrentLocationMarker position={currentLocation} />
+
+                {selectedHospital && (
+                  <FlyToLocation
+                    position={selectedHospital.position}
+                    zoom={13}
+                  />
+                )}
+
+                {currentLocation && !selectedHospital && (
+                  <FlyToLocation position={currentLocation} zoom={13} />
+                )}
+
+                {showRoute && currentLocation && selectedHospital && (
+                  <HospitalRoute
+                    start={currentLocation}
+                    destination={selectedHospital.position}
+                    onStatus={handleRouteStatus}
+                  />
+                )}
+              </MapContainer>
+
+              <div className="risk-legend">
+                <h4>Estimated road risk</h4>
+                <span><i className="legend-dot low-risk" />Lower (&lt; 0.45)</span>
+                <span><i className="legend-dot medium-risk" />Moderate (0.45–0.649)</span>
+                <span><i className="legend-dot high-risk" />Higher (≥ 0.65)</span>
+                <span><i className="legend-dot unknown-risk" />Unavailable</span>
+              </div>
+            </div>
           </div>
-        )}
 
-        {routeStatus.message && (
-          <p
-            className={
-              routeStatus.type === 'error'
-                ? 'route-error'
-                : 'route-status'
-            }
-            role="status"
-          >
-            {routeStatus.message}
-          </p>
-        )}
+          {selectedRoad && (
+            <section
+              className="selected-road-panel"
+              aria-live="polite"
+              aria-label="Selected road details"
+            >
+              <div className="selected-road-header">
+                <div>
+                  <span className="selected-road-eyebrow">ROAD EXPLORER</span>
+                  <h3>{getRoadTitle(selectedRoad.feature)}</h3>
+                  <p>
+                    Inspect the road attributes available in the dataset.
+                  </p>
+                </div>
 
-        <div className="map-legend">
-          <strong>Road risk proxy</strong>
+                <button
+                  type="button"
+                  className="clear-selection-button"
+                  onClick={() => setSelectedRoad(null)}
+                >
+                  Clear selection
+                </button>
+              </div>
 
-          <span>
-            <i className="legend-dot low" /> Lower estimate
-          </span>
+              <div className="selected-road-metrics">
+                <article>
+                  <span>Risk score</span>
+                  <strong>
+                    {selectedRoad.risk === null
+                      ? 'Unavailable'
+                      : selectedRoad.risk.toFixed(3)}
+                  </strong>
+                </article>
 
-          <span>
-            <i className="legend-dot medium" /> Moderate estimate
-          </span>
+                <article>
+                  <span>Risk category</span>
+                  <strong>{getRiskLabel(selectedRoad.risk)}</strong>
+                </article>
 
-          <span>
-            <i className="legend-dot high" /> Higher estimate
-          </span>
+                <article>
+                  <span>Road type</span>
+                  <strong>
+                    {selectedRoad.properties.highway || 'Not recorded'}
+                  </strong>
+                </article>
+              </div>
 
-          <span>
-            <i className="legend-dot hospital" /> Healthcare facility
-          </span>
+              <h4>Available road attributes</h4>
 
-          <span>
-            <i className="legend-dot route-dot" /> Requested route
-          </span>
-        </div>
-      </div>
+              <div className="selected-road-attributes">
+                {Object.entries(selectedRoad.properties).map(([key, value]) => (
+                  <div className="road-attribute" key={key}>
+                    <span>{key.replace(/_/g, ' ')}</span>
+                    <strong>
+                      {value === null || value === undefined || value === ''
+                        ? 'Not recorded'
+                        : typeof value === 'object'
+                          ? JSON.stringify(value)
+                          : String(value)}
+                    </strong>
+                  </div>
+                ))}
 
-      <div className="road-map">
-        <MapContainer
-          center={MAP_CENTER}
-          zoom={MAP_ZOOM}
-          scrollWheelZoom
-          className="leaflet-map"
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-
-          {roads && (
-            <GeoJSON
-              key="road-risk-layer"
-              data={roads}
-              style={roadStyle}
-              onEachFeature={roadOnEachFeature}
-            />
+                {!Object.keys(selectedRoad.properties).length && (
+                  <p>No road attributes are available for this segment.</p>
+                )}
+              </div>
+            </section>
           )}
 
-          {hospitals && (
-            <GeoJSON
-              key="healthcare-layer"
-              data={hospitals}
-              pointToLayer={hospitalPointToLayer}
-            />
-          )}
-
-          <CurrentLocationMarker position={origin} />
-
-          {origin && selectedPoint && (
-            <HospitalRoute
-              origin={origin}
-              destination={selectedPoint}
-              onRouteStatus={handleRouteStatus}
-            />
-          )}
-        </MapContainer>
-      </div>
-
-      <div className="map-disclaimer">
-        <strong>Important safety information</strong>
-        <p>
-          Road colours show a research risk proxy, not an official
-          landslide alert. The route service does not verify live
-          landslides, road closures, traffic, or hospital availability.
-          Confirm conditions with official sources before travelling.
-        </p>
-        <p>
-          Sri Lanka Disaster Management Centre: <strong>117</strong>
-          {' · '}
-          Suwa Seriya ambulance: <strong>1990</strong>
-        </p>
-      </div>
-    </div>
+          <div className="map-disclaimer">
+            <strong>Research demonstration only</strong>
+            <p>
+              Road colours represent modelled risk scores in the project
+              dataset. They are not live landslide alerts, official
+              road-closure notices, or guarantees of road safety. Healthcare
+              locations and routes may be incomplete. Route distance and
+              time are estimates from an external routing service and do
+              not account for verified landslide closures.
+            </p>
+          </div>
+        </>
+      )}
+    </section>
   )
 }
