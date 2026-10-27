@@ -1,11 +1,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import GraphTheoryRoute from './GraphTheoryRoute'
 import {
   MapContainer,
   TileLayer,
   GeoJSON,
   Marker,
-  Polyline,
   Popup,
   useMap,
 } from 'react-leaflet'
@@ -18,13 +18,11 @@ const MAP_ZOOM = 10
 
 const ROADS_URL = '/data/roads.geojson'
 const HOSPITALS_URL = '/data/hospitals.geojson'
-const OSRM_URL = 'https://router.project-osrm.org/route/v1/driving'
 
 const RISK_THRESHOLDS = { low: 0.45, high: 0.65 }
 
 function getRoadRisk(feature) {
   const raw = feature?.properties?.risk_proxy_score
-
   if (raw === null || raw === undefined || raw === '') return null
 
   const value = Number(raw)
@@ -61,6 +59,9 @@ function getRoadColor(feature) {
 }
 
 function roadStyle(feature) {
+  const key = getEdgeKey(feature)
+  const closed = key && feature.properties?._unused
+
   return {
     color: getRoadColor(feature),
     weight: 3,
@@ -96,7 +97,9 @@ function getValidPoint(feature) {
 
   if (
     !Number.isFinite(Number(longitude)) ||
-    !Number.isFinite(Number(latitude))
+    !Number.isFinite(Number(latitude)) ||
+    Math.abs(Number(latitude)) > 90 ||
+    Math.abs(Number(longitude)) > 180
   ) {
     return null
   }
@@ -126,6 +129,79 @@ function calculateDistanceKm(a, b) {
     2 *
     Math.atan2(Math.sqrt(value), Math.sqrt(1 - value))
   )
+}
+
+// Keep this key format identical to GraphTheoryRoute.jsx.
+function getEdgeKey(feature) {
+  const p = feature?.properties || {}
+  const { u, v } = p
+
+  if (u == null || v == null || String(u) === String(v)) {
+    return null
+  }
+
+  return [String(u), String(v)].sort().join('|')
+}
+
+// Find the nearest graph endpoint to a hospital.
+// GraphTheoryRoute independently snaps the starting location to a node.
+function findNearestGraphNode(roads, position) {
+  if (!roads?.features || !position) return null
+
+  let nearest = null
+  let nearestDistance = Infinity
+
+  for (const feature of roads.features) {
+    const p = feature.properties || {}
+    const coordinates = feature.geometry?.coordinates
+
+    if (
+      p.u == null ||
+      p.v == null ||
+      feature.geometry?.type !== 'LineString' ||
+      !Array.isArray(coordinates) ||
+      coordinates.length < 2
+    ) {
+      continue
+    }
+
+    const first = coordinates[0]
+    const last = coordinates[coordinates.length - 1]
+
+    if (
+      !Array.isArray(first) ||
+      !Array.isArray(last) ||
+      first.length < 2 ||
+      last.length < 2
+    ) {
+      continue
+    }
+
+    const start = [Number(first[1]), Number(first[0])]
+    const end = [Number(last[1]), Number(last[0])]
+
+    if (
+      !start.every(Number.isFinite) ||
+      !end.every(Number.isFinite)
+    ) {
+      continue
+    }
+
+    const startDistance = calculateDistanceKm(position, start)
+    const endDistance = calculateDistanceKm(position, end)
+
+    if (startDistance < nearestDistance) {
+      nearestDistance = startDistance
+      nearest = String(p.u)
+    }
+
+    if (endDistance < nearestDistance) {
+      nearestDistance = endDistance
+      nearest = String(p.v)
+    }
+  }
+
+  return nearest
 }
 
 function createHospitalIcon() {
@@ -176,101 +252,7 @@ function CurrentLocationMarker({ position }) {
   )
 }
 
-function HospitalRoute({ start, destination, onStatus }) {
-  const [routeCoordinates, setRouteCoordinates] = useState([])
-  const [routeInfo, setRouteInfo] = useState(null)
-
-  useEffect(() => {
-    let cancelled = false
-
-    async function loadRoute() {
-      setRouteCoordinates([])
-      setRouteInfo(null)
-
-      if (!start || !destination) {
-        onStatus('')
-        return
-      }
-
-      onStatus('Finding a driving route...')
-
-      try {
-        const coordinates =
-          `${start[1]},${start[0]};${destination[1]},${destination[0]}`
-
-        const url =
-          `${OSRM_URL}/${coordinates}?overview=full&geometries=geojson`
-
-        const response = await fetch(url)
-
-        if (!response.ok) {
-          throw new Error('Route service could not be reached.')
-        }
-
-        const data = await response.json()
-
-        if (!data.routes?.length) {
-          throw new Error('No driving route was found.')
-        }
-
-        if (cancelled) return
-
-        const route = data.routes[0]
-        const points = route.geometry.coordinates.map(
-          ([longitude, latitude]) => [latitude, longitude],
-        )
-
-        setRouteCoordinates(points)
-        setRouteInfo({
-          distanceKm: route.distance / 1000,
-          durationMinutes: route.duration / 60,
-        })
-        onStatus('Route found.')
-      } catch (error) {
-        if (!cancelled) {
-          onStatus(error.message || 'Unable to calculate the route.')
-        }
-      }
-    }
-
-    loadRoute()
-
-    return () => {
-      cancelled = true
-    }
-  }, [start, destination, onStatus])
-
-  return (
-    <>
-      {routeCoordinates.length > 0 && (
-        <Polyline
-          positions={routeCoordinates}
-          pathOptions={{ color: '#1769e0', weight: 5, opacity: 0.9 }}
-        />
-      )}
-
-      {routeInfo && (
-        <Marker position={destination}>
-          <Popup>
-            <strong>Route information</strong>
-            <br />
-            Distance: {routeInfo.distanceKm.toFixed(2)} km
-            <br />
-            Estimated driving time:{' '}
-            {Math.round(routeInfo.durationMinutes)} minutes
-            <br />
-            <small>
-              This is an estimate from the routing service. Actual
-              travel conditions may differ.
-            </small>
-          </Popup>
-        </Marker>
-      )}
-    </>
-  )
-}
-
-/* CSV helpers */
+/* CSV export helpers */
 
 function csvCell(value) {
   let text = ''
@@ -283,7 +265,6 @@ function csvCell(value) {
     text = String(value)
   }
 
-  // Prevent exported values from being interpreted as spreadsheet formulas.
   if (/^[\s]*[=+\-@]/.test(text)) {
     text = `'${text}`
   }
@@ -312,13 +293,11 @@ function downloadRoadsCsv(features) {
   const rows = features.map((feature) => {
     const properties = feature.properties || {}
 
-    return headers.map((key) => {
-      if (key === 'risk_proxy_score') {
-        return csvCell(getRoadRisk(feature))
-      }
-
-      return csvCell(properties[key])
-    })
+    return headers.map((key) =>
+      key === 'risk_proxy_score'
+        ? csvCell(getRoadRisk(feature))
+        : csvCell(properties[key]),
+    )
   })
 
   const csv = [
@@ -339,7 +318,6 @@ function downloadRoadsCsv(features) {
   link.click()
   link.remove()
 
-  // Revoke after the browser has had a moment to start the download.
   window.setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
 
@@ -354,18 +332,20 @@ export default function RoadRiskMap() {
   const [loadError, setLoadError] = useState('')
   const [loading, setLoading] = useState(true)
 
-  // Road search, filtering, and selection.
   const [roadSearch, setRoadSearch] = useState('')
   const [riskFilter, setRiskFilter] = useState('all')
   const [selectedRoad, setSelectedRoad] = useState(null)
 
-  // Hospital search, location, and routing.
   const [hospitalSearch, setHospitalSearch] = useState('')
   const [selectedHospital, setSelectedHospital] = useState(null)
   const [currentLocation, setCurrentLocation] = useState(null)
   const [locationMessage, setLocationMessage] = useState('')
   const [routeStatus, setRouteStatus] = useState('')
   const [showRoute, setShowRoute] = useState(false)
+  const [routeComparison, setRouteComparison] = useState(null)
+
+  // Multiple simulated closed connections.
+  const [closedEdgeKeys, setClosedEdgeKeys] = useState([])
 
   useEffect(() => {
     let cancelled = false
@@ -462,9 +442,7 @@ export default function RoadRiskMap() {
         .join(' ')
         .toLowerCase()
 
-      const matchesSearch =
-        !query || searchableText.includes(query)
-
+      const matchesSearch = !query || searchableText.includes(query)
       const matchesRisk =
         riskFilter === 'all' || category === riskFilter
 
@@ -536,6 +514,13 @@ export default function RoadRiskMap() {
       .slice(0, 5)
   }, [currentLocation, validFacilities])
 
+  // Snap the selected hospital to its nearest graph endpoint.
+  const destinationNodeId = useMemo(() => {
+    if (!selectedHospital || !roads) return null
+
+    return findNearestGraphNode(roads, selectedHospital.position)
+  }, [roads, selectedHospital])
+
   const resetRoadFilters = () => {
     setRoadSearch('')
     setRiskFilter('all')
@@ -591,6 +576,10 @@ export default function RoadRiskMap() {
     setRouteStatus(message)
   }, [])
 
+  const handleRouteComparison = useCallback((comparison) => {
+    setRouteComparison(comparison)
+  }, [])
+
   const selectRoad = useCallback((feature) => {
     setSelectedRoad({
       feature,
@@ -599,7 +588,37 @@ export default function RoadRiskMap() {
     })
   }, [])
 
-  // Clear a road selection if the selected feature is filtered out.
+  const toggleRoadClosure = useCallback((feature) => {
+    const key = getEdgeKey(feature)
+
+    if (!key) {
+      setRouteStatus(
+        'This road cannot be included in the closure simulation because its road data is incomplete.',
+      )
+      return
+    }
+
+    setClosedEdgeKeys((previous) => {
+      const isAlreadyClosed = previous.includes(key)
+
+      return isAlreadyClosed
+        ? previous.filter((item) => item !== key)
+        : [...previous, key]
+    })
+
+    setShowRoute(true)
+    setRouteStatus('')
+  }, [])
+
+  const reopenRoad = useCallback((key) => {
+    setClosedEdgeKeys((previous) =>
+      previous.filter((item) => item !== key),
+    )
+    setShowRoute(true)
+    setRouteStatus('')
+  }, [])
+
+  // Clear selection if filtering removes its road.
   useEffect(() => {
     if (!selectedRoad || !filteredRoads?.features) return
 
@@ -612,11 +631,17 @@ export default function RoadRiskMap() {
     const p = feature.properties || {}
     const risk = getRoadRisk(feature)
 
-    const slope =
-      p.slope_mean ?? p.mean_slope ?? p.slope
+    const slope = p.slope_mean ?? p.mean_slope ?? p.slope
+    const length = p.length_m ?? p.length ?? p.length_metres
+    const edgeKey = getEdgeKey(feature)
+    const isClosed = edgeKey && closedEdgeKeys.includes(edgeKey)
 
-    const length =
-      p.length_m ?? p.length ?? p.length_metres
+    layer.setStyle({
+      ...roadStyle(feature),
+      ...(isClosed
+        ? { color: '#242424', weight: 5, dashArray: '6 5', opacity: 1 }
+        : {}),
+    })
 
     const popup = document.createElement('div')
     popup.className = 'landsafe-road-popup'
@@ -628,6 +653,7 @@ export default function RoadRiskMap() {
     const details = [
       `Estimated risk score: ${risk === null ? 'Unavailable' : risk.toFixed(3)}`,
       `Risk category: ${getRiskLabel(risk)}`,
+      `Simulated status: ${isClosed ? 'CLOSED' : 'Not marked closed'}`,
       ...(slope !== undefined && slope !== null
         ? [`Mean slope: ${slope}`]
         : []),
@@ -651,15 +677,43 @@ export default function RoadRiskMap() {
     selectButton.addEventListener('click', () => selectRoad(feature))
     popup.appendChild(selectButton)
 
+    const closureButton = document.createElement('button')
+    closureButton.type = 'button'
+    closureButton.className = 'road-popup-select'
+    closureButton.textContent = isClosed
+      ? 'Reopen this road'
+      : 'Mark road closed'
+
+    closureButton.addEventListener('click', () => {
+      selectRoad(feature)
+      toggleRoadClosure(feature)
+      layer.closePopup()
+    })
+
+    popup.appendChild(closureButton)
     layer.bindPopup(popup)
 
     layer.on({
       click: () => selectRoad(feature),
       mouseover: (event) => {
-        event.target.setStyle({ weight: 6, opacity: 1 })
+        if (!closedEdgeKeys.includes(getEdgeKey(feature))) {
+          event.target.setStyle({ weight: 6, opacity: 1 })
+        }
       },
       mouseout: (event) => {
-        event.target.setStyle(roadStyle(feature))
+        const closed = closedEdgeKeys.includes(getEdgeKey(feature))
+
+        event.target.setStyle({
+          ...roadStyle(feature),
+          ...(closed
+            ? {
+                color: '#242424',
+                weight: 5,
+                dashArray: '6 5',
+                opacity: 1,
+              }
+            : {}),
+        })
       },
     })
   }
@@ -667,11 +721,13 @@ export default function RoadRiskMap() {
   return (
     <section className="road-risk-page">
       <header className="road-risk-heading">
-        <span className="road-risk-eyebrow">LANDSLIDE RESILIENCE RESEARCH</span>
+        <span className="road-risk-eyebrow">
+          LANDSLIDE RESILIENCE RESEARCH
+        </span>
         <h2>LANDSAFE Road Risk &amp; Healthcare Access</h2>
         <p>
           Explore modelled road risk, inspect available road attributes,
-          and find mapped healthcare facilities in the study area.
+          and compare routes when selected roads are marked closed.
         </p>
       </header>
 
@@ -817,7 +873,9 @@ export default function RoadRiskMap() {
           <div className="map-layout">
             <aside className="hospital-sidebar">
               <h3>Healthcare facilities</h3>
-              <p>{filteredHospitals.length} matching mapped facilities</p>
+              <p>
+                {filteredHospitals.length} matching mapped facilities
+              </p>
 
               <div className="hospital-results">
                 {filteredHospitals.length === 0 && (
@@ -860,19 +918,32 @@ export default function RoadRiskMap() {
                   <button
                     type="button"
                     className="road-filter-reset"
-                    disabled={!currentLocation}
+                    disabled={!currentLocation || !destinationNodeId}
                     onClick={() => {
                       if (!currentLocation) {
                         setRouteStatus('Find your current location first.')
                         return
                       }
 
+                      if (!destinationNodeId) {
+                        setRouteStatus(
+                          'Could not connect this facility to the supplied road graph.',
+                        )
+                        return
+                      }
+
                       setShowRoute(true)
-                      setRouteStatus('Preparing route...')
+                      setRouteStatus('Calculating route...')
                     }}
                   >
-                    Route from my location
+                    Calculate route
                   </button>
+
+                  {destinationNodeId && (
+                    <p className="map-status-message">
+                      Road network connection ID: {destinationNodeId}
+                    </p>
+                  )}
 
                   <button
                     type="button"
@@ -894,6 +965,94 @@ export default function RoadRiskMap() {
                 </p>
               )}
 
+              {selectedHospital && (
+                <section className="journey-summary" aria-live="polite">
+                  <div className="journey-summary-heading">
+                    <span className="journey-summary-icon" aria-hidden="true">＋</span>
+                    <div>
+                      <h4>Hospital journey</h4>
+                      <p>Review your selected destination and route status.</p>
+                    </div>
+                  </div>
+                  <div className="journey-summary-details">
+                    <div className="journey-summary-item">
+                      <span>Starting point</span>
+                      <strong>{currentLocation ? 'Your current location' : 'Location not set'}</strong>
+                    </div>
+                    <div className="journey-summary-item">
+                      <span>Destination</span>
+                      <strong>{selectedHospital.name}</strong>
+                    </div>
+                    <div className="journey-summary-item">
+                      <span>Roads marked closed</span>
+                      <strong>{closedEdgeKeys.length}</strong>
+                    </div>
+                    <div className="journey-summary-item">
+                      <span>Route status</span>
+                      <strong>{!currentLocation ? 'Set your location to begin' : !showRoute ? 'Ready to calculate' : routeComparison?.alternative ? 'Route available in simulation' : routeStatus || 'Checking route...'}</strong>
+                    </div>
+                  </div>
+                  {!currentLocation && (
+                    <p className="journey-summary-hint">Select “Use my location” to set your starting point before calculating a route.</p>
+                  )}
+                </section>
+              )}
+
+              {showRoute && routeComparison && (
+                <section className="route-comparison" aria-live="polite">
+                  <h4>Route comparison</h4>
+                  <p className="route-comparison-intro">
+                    Compare the usual route with the route calculated after
+                    excluding the roads marked closed.
+                  </p>
+                  <div className="route-comparison-grid">
+                    <article className="route-comparison-card">
+                      <span>Usual route</span>
+                      <strong>
+                        {routeComparison.original
+                          ? `${(routeComparison.original.distanceMetres / 1000).toFixed(2)} km`
+                          : 'Not available'}
+                      </strong>
+                      {routeComparison.original && (
+                        <small>{routeComparison.original.edgeCount} road segments</small>
+                      )}
+                    </article>
+                    <article className="route-comparison-card">
+                      <span>Route avoiding closed roads</span>
+                      <strong>
+                        {routeComparison.alternative
+                          ? `${(routeComparison.alternative.distanceMetres / 1000).toFixed(2)} km`
+                          : 'No route found'}
+                      </strong>
+                      {routeComparison.alternative && (
+                        <small>{routeComparison.alternative.edgeCount} road segments</small>
+                      )}
+                    </article>
+                    <article className="route-comparison-card route-comparison-extra">
+                      <span>Extra distance</span>
+                      <strong>
+                        {routeComparison.additionalDistanceMetres === null
+                          ? 'Unavailable'
+                          : `${(routeComparison.additionalDistanceMetres / 1000).toFixed(2)} km`}
+                      </strong>
+                      <small>
+                        {routeComparison.closedCount} road connection(s) marked closed
+                      </small>
+                    </article>
+                  </div>
+                  {!routeComparison.alternative && routeComparison.closedCount > 0 && (
+                    <p className="route-comparison-warning">
+                      No available route reaches this facility while the selected
+                      roads remain closed. Try reopening one or more roads.
+                    </p>
+                  )}
+                  <p className="route-comparison-note">
+                    Distances are calculated from the supplied road data. This is
+                    a demonstration and does not confirm current road conditions.
+                  </p>
+                </section>
+              )}
+
               {nearestHospitals.length > 0 && (
                 <div className="nearest-hospitals">
                   <h4>Nearest facilities</h4>
@@ -910,6 +1069,45 @@ export default function RoadRiskMap() {
                   ))}
                 </div>
               )}
+
+              <section className="closed-roads-panel">
+                <h3>Simulated road closures</h3>
+                <p>
+                  {closedEdgeKeys.length} road connection(s) marked closed
+                </p>
+
+                {closedEdgeKeys.length > 0 ? (
+                  <>
+                    <ul>
+                      {closedEdgeKeys.map((key) => (
+                        <li key={key}>
+                          <span>{key}</span>
+                          <button
+                            type="button"
+                            onClick={() => reopenRoad(key)}
+                          >
+                            Reopen
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <button
+                      type="button"
+                      className="clear-selection-button"
+                      onClick={() => {
+                        setClosedEdgeKeys([])
+                        setShowRoute(true)
+                        setRouteStatus('')
+                      }}
+                    >
+                      Reopen all roads
+                    </button>
+                  </>
+                ) : (
+                  <p>No roads are currently marked closed.</p>
+                )}
+              </section>
             </aside>
 
             <div className="road-map-wrapper">
@@ -926,9 +1124,24 @@ export default function RoadRiskMap() {
 
                 {filteredRoads && (
                   <GeoJSON
-                    key={`roads-${roadSearch}-${riskFilter}`}
+                    key={`roads-${roadSearch}-${riskFilter}-${closedEdgeKeys.join(',')}`}
                     data={filteredRoads}
-                    style={roadStyle}
+                    style={(feature) => {
+                      const key = getEdgeKey(feature)
+                      const closed = key && closedEdgeKeys.includes(key)
+
+                      return {
+                        ...roadStyle(feature),
+                        ...(closed
+                          ? {
+                              color: '#242424',
+                              weight: 5,
+                              dashArray: '6 5',
+                              opacity: 1,
+                            }
+                          : {}),
+                      }
+                    }}
                     onEachFeature={roadOnEachFeature}
                   />
                 )}
@@ -969,20 +1182,42 @@ export default function RoadRiskMap() {
                 )}
 
                 {showRoute && currentLocation && selectedHospital && (
-                  <HospitalRoute
+                  <GraphTheoryRoute
+                    roads={roads}
                     start={currentLocation}
-                    destination={selectedHospital.position}
+                    destinationNodeId={destinationNodeId}
+                    closedEdgeKeys={closedEdgeKeys}
                     onStatus={handleRouteStatus}
+                    onComparison={handleRouteComparison}
                   />
                 )}
               </MapContainer>
 
               <div className="risk-legend">
                 <h4>Estimated road risk</h4>
-                <span><i className="legend-dot low-risk" />Lower (&lt; 0.45)</span>
-                <span><i className="legend-dot medium-risk" />Moderate (0.45–0.649)</span>
-                <span><i className="legend-dot high-risk" />Higher (≥ 0.65)</span>
-                <span><i className="legend-dot unknown-risk" />Unavailable</span>
+                <span>
+                  <i className="legend-dot low-risk" />
+                  Lower (&lt; 0.45)
+                </span>
+                <span>
+                  <i className="legend-dot medium-risk" />
+                  Moderate (0.45–0.649)
+                </span>
+                <span>
+                  <i className="legend-dot high-risk" />
+                  Higher (≥ 0.65)
+                </span>
+                <span>
+                  <i className="legend-dot unknown-risk" />
+                  Unavailable
+                </span>
+                <span>
+                  <i
+                    className="legend-dot"
+                    style={{ background: '#242424' }}
+                  />
+                  Simulated closed connection
+                </span>
               </div>
             </div>
           </div>
@@ -995,10 +1230,12 @@ export default function RoadRiskMap() {
             >
               <div className="selected-road-header">
                 <div>
-                  <span className="selected-road-eyebrow">ROAD EXPLORER</span>
+                  <span className="selected-road-eyebrow">
+                    ROAD EXPLORER
+                  </span>
                   <h3>{getRoadTitle(selectedRoad.feature)}</h3>
                   <p>
-                    Inspect the road attributes available in the dataset.
+                    Inspect road attributes and simulate a road closure.
                   </p>
                 </div>
 
@@ -1034,6 +1271,34 @@ export default function RoadRiskMap() {
                 </article>
               </div>
 
+              <div className="road-closure-controls">
+                <h4>Road closure simulation</h4>
+                <p>
+                  This removes the selected road from the route calculation. It does not report a verified
+                  real-world road closure.
+                </p>
+
+                {getEdgeKey(selectedRoad.feature) ? (
+                  <button
+                    type="button"
+                    className="road-filter-reset"
+                    onClick={() =>
+                      toggleRoadClosure(selectedRoad.feature)
+                    }
+                  >
+                    {closedEdgeKeys.includes(
+                      getEdgeKey(selectedRoad.feature),
+                    )
+                      ? 'Reopen this road'
+                      : 'Mark road closed'}
+                  </button>
+                ) : (
+                  <p>
+                    This road has incomplete connection data and cannot be included in the closure simulation.
+                  </p>
+                )}
+              </div>
+
               <h4>Available road attributes</h4>
 
               <div className="selected-road-attributes">
@@ -1062,10 +1327,11 @@ export default function RoadRiskMap() {
             <p>
               Road colours represent modelled risk scores in the project
               dataset. They are not live landslide alerts, official
-              road-closure notices, or guarantees of road safety. Healthcare
-              locations and routes may be incomplete. Route distance and
-              time are estimates from an external routing service and do
-              not account for verified landslide closures.
+              road-closure notices, or guarantees of road safety. Black
+              dashed roads indicate manually simulated graph closures.
+              Healthcare locations may be incomplete. Routes
+              are calculated from the supplied road network and do not
+              verify real-world road conditions.
             </p>
           </div>
         </>
