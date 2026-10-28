@@ -791,757 +791,8 @@
   }
 }
 
-function ResearchPage() {
-  const [results, setResults] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [selectedFailure, setSelectedFailure] = useState('5')
 
-  useEffect(() => {
-    let cancelled = false
-
-    async function loadResults() {
-      try {
-        const response = await fetch('/data/research-results.json')
-
-        if (!response.ok) {
-          throw new Error('Could not load the research results file.')
-        }
-
-        const data = await response.json()
-
-        if (
-          !data.summary ||
-          !Array.isArray(data.strategies) ||
-          !Array.isArray(data.connectivity)
-        ) {
-          throw new Error('The research results file has an invalid format.')
-        }
-
-        if (!cancelled) {
-          setResults(data)
-          setError('')
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError(err.message || 'An unexpected error occurred.')
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false)
-        }
-      }
-    }
-
-    loadResults()
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  if (loading) {
-    return (
-      <section className="research-dashboard">
-        <h1>Research &amp; Analysis</h1>
-        <p>Loading research results...</p>
-      </section>
-    )
-  }
-
-  if (error || !results) {
-    return (
-      <section className="research-dashboard">
-        <h1>Research &amp; Analysis</h1>
-        <p role="alert">
-          {error || 'Research results are unavailable.'}
-        </p>
-        <p>
-          Check that the file exists at{' '}
-          <code>dashboard/public/data/research-results.json</code>.
-        </p>
-      </section>
-    )
-  }
-
-  const {
-    summary,
-    strategies,
-    connectivity,
-    notes = {},
-    optimization,
-    randomTrialComparison = [],
-    sensitivity = [],
-  } = results
-
-  const formatPercent = (value, digits = 3) => {
-    if (
-      value == null ||
-      value === '' ||
-      !Number.isFinite(Number(value))
-    ) {
-      return '—'
-    }
-
-    return `${Number(value).toFixed(digits)}%`
-  }
-
-  const formatNumber = (value, digits = 2) => {
-    if (
-      value == null ||
-      value === '' ||
-      !Number.isFinite(Number(value))
-    ) {
-      return '—'
-    }
-
-    return Number(value).toFixed(digits)
-  }
-
-  const formatCount = (value) => {
-    if (
-      value == null ||
-      value === '' ||
-      !Number.isFinite(Number(value))
-    ) {
-      return '—'
-    }
-
-    return Number(value).toLocaleString()
-  }
-
-  // Identify strategies with comparable fixed-failure results.
-  const comparableStrategies = strategies.filter(
-    (strategy) =>
-      strategy.name !== 'No protection' &&
-      strategy.reachabilityPercent != null &&
-      strategy.reachabilityPercent !== '' &&
-      Number.isFinite(Number(strategy.reachabilityPercent))
-  )
-
-  const bestStrategy = comparableStrategies.reduce(
-    (best, strategy) =>
-      !best ||
-      Number(strategy.reachabilityPercent) >
-        Number(best.reachabilityPercent)
-        ? strategy
-        : best,
-    null
-  )
-
-  const designFailurePercent =
-    summary.designFailurePercent ?? summary.disruptionPercent
-
-  // Find all failure levels available in the random-trial dataset.
-  const failureLevels = [
-    ...new Set(
-      randomTrialComparison
-        .map((item) => Number(item.failurePercent))
-        .filter(Number.isFinite)
-    ),
-  ].sort((a, b) => a - b)
-
-  const activeFailure = failureLevels.some(
-    (level) => String(level) === selectedFailure
-  )
-    ? selectedFailure
-    : String(
-        failureLevels.includes(5)
-          ? 5
-          : failureLevels[0] ?? ''
-      )
-
-  // Group chart bars by strategy for the selected failure level.
-  const chartData = randomTrialComparison
-    .filter(
-      (item) => String(item.failurePercent) === activeFailure
-    )
-    .map((item) => ({
-      strategy: item.strategy,
-      meanReachablePercent: Number(item.meanReachablePercent),
-    }))
-    .filter((item) =>
-      Number.isFinite(item.meanReachablePercent)
-    )
-
-  return (
-    <section className="research-dashboard">
-      <PageHeader
-        eyebrow="GRAPH THEORY RESEARCH"
-        title="Research &amp; Analysis"
-        description="Compare road-protection strategies under modelled road-disruption scenarios."
-      />
-
-      <div className="research-notice">
-        <strong>Research prototype:</strong> these results represent
-        simulated scenarios, not live landslide warnings or guaranteed
-        road-access information.
-        <p>
-          {notes.interpretation ||
-            'Check official warnings and road conditions before travelling.'}
-        </p>
-      </div>
-
-      {/* Research summary */}
-      <section className="research-stat-grid">
-        <article className="research-stat">
-          <span>Unique road segments</span>
-          <strong>{formatCount(summary.roadSegments)}</strong>
-        </article>
-
-        <article className="research-stat">
-          <span>Mapped healthcare facilities</span>
-          <strong>{formatCount(summary.healthcareFacilities)}</strong>
-        </article>
-
-        <article className="research-stat">
-          <span>Road-length budget</span>
-          <strong>{formatPercent(summary.budgetPercent, 1)}</strong>
-          <p>{formatNumber(summary.budgetLengthKm, 1)} km</p>
-        </article>
-
-        <article className="research-stat">
-          <span>Optimization design-failure scenario</span>
-          <strong>{formatPercent(designFailurePercent, 1)}</strong>
-          <p>
-            {summary.designFailedRoadCount != null
-              ? `${formatCount(summary.designFailedRoadCount)} roads failed in the design scenario`
-              : 'Simulated road disruption'}
-          </p>
-        </article>
-      </section>
-
-      {/* Strategy comparison */}
-      <section className="research-panel">
-        <h2>Strategy comparison</h2>
-        <p>
-          Road selections are compared with the fixed-failure-set
-          evaluation where matching results are available. A dash means
-          that a comparable result is unavailable.
-        </p>
-
-        <div className="research-table-wrapper">
-          <table className="research-table">
-            <thead>
-              <tr>
-                <th>Strategy</th>
-                <th>Roads selected</th>
-                <th>Selected length</th>
-                <th>Mean risk</th>
-                <th>Centrality</th>
-                <th>Reachability</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {strategies.map((strategy) => (
-                <tr key={strategy.name}>
-                  <td>{strategy.name}</td>
-                  <td>{formatCount(strategy.roadsSelected)}</td>
-                  <td>{formatNumber(strategy.lengthKm)} km</td>
-                  <td>
-                    {strategy.meanRisk == null
-                      ? '—'
-                      : formatNumber(strategy.meanRisk, 3)}
-                  </td>
-                  <td>
-                    {strategy.centrality == null
-                      ? '—'
-                      : formatNumber(strategy.centrality, 3)}
-                  </td>
-                  <td>{formatPercent(strategy.reachabilityPercent)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <p className="research-footnote">
-          {notes.budgetDefinition ||
-            'The budget is measured by selected road length, not monetary cost.'}
-        </p>
-      </section>
-
-      {/* Fixed-failure-set connectivity */}
-      <section className="research-panel">
-        <h2>Healthcare-network reachability</h2>
-        <p>
-          The same initial failed-road set is used to compare strategies.
-          This is separate from the optimization design scenario.
-        </p>
-
-        <div className="research-bars">
-          {connectivity.map((item) => {
-            const value = Number(item.reachabilityPercent)
-            const valid =
-              item.reachabilityPercent != null &&
-              item.reachabilityPercent !== '' &&
-              Number.isFinite(value)
-
-            return (
-              <div className="research-bar-row" key={item.name}>
-                <div className="research-bar-label">
-                  <span>{item.name}</span>
-                  <strong>
-                    {valid ? formatPercent(value) : '—'}
-                  </strong>
-                </div>
-
-                <div
-                  className="research-bar-track"
-                  role="img"
-                  aria-label={`${item.name}: ${
-                    valid ? formatPercent(value) : 'unavailable'
-                  } reachability`}
-                >
-                  <div
-                    className="research-bar-fill"
-                    style={{
-                      width: `${
-                        valid ? Math.max(0, Math.min(100, value)) : 0
-                      }%`,
-                    }}
-                  />
-                </div>
-              </div>
-            )
-          })}
-        </div>
-
-        <p className="research-footnote">
-          {notes.fairComparison ||
-            'Reachability is a modelled network measure, not a live road-status indicator.'}
-        </p>
-      </section>
-
-      {/* Optimization experiment */}
-      {optimization && (
-        <section className="research-panel">
-          <h2>Hospital-access optimization</h2>
-          <p>
-            This optimization experiment uses its own design-failure
-            scenario. Its result should not be directly compared with
-            the fixed-failure-set percentages above.
-          </p>
-
-          <div className="research-stat-grid">
-            <article className="research-stat">
-              <span>Modelled node reachability</span>
-              <strong>
-                {formatPercent(optimization.reachablePercent)}
-              </strong>
-              <p>
-                {formatCount(optimization.reachableNodeCount)}
-                {' '}reachable nodes
-              </p>
-            </article>
-
-            <article className="research-stat">
-              <span>Roads selected</span>
-              <strong>
-                {formatCount(optimization.selectedRoadCount)}
-              </strong>
-              <p>Selected by the optimization model</p>
-            </article>
-
-            <article className="research-stat">
-              <span>Protected road length</span>
-              <strong>
-                {formatNumber(optimization.protectedLengthKm)} km
-              </strong>
-              <p>
-                {formatNumber(optimization.budgetRemainingKm)} km
-                {' '}of budget length remaining
-              </p>
-            </article>
-
-            <article className="research-stat">
-              <span>Solver status</span>
-              <strong>{optimization.status || 'Not available'}</strong>
-              <p>
-                {optimization.optimalityProven
-                  ? 'Optimality proven by solver'
-                  : 'Optimality not confirmed'}
-              </p>
-            </article>
-          </div>
-
-          {optimization.limitation && (
-            <p className="research-footnote">
-              Limitation: {optimization.limitation}
-            </p>
-          )}
-        </section>
-      )}
-
-      {/* Findings */}
-      <section className="research-panel">
-        <h2>Key findings</h2>
-
-        {comparableStrategies.length > 0 ? (
-          <>
-            <ul>
-              {comparableStrategies
-                .slice()
-                .sort(
-                  (a, b) =>
-                    Number(b.reachabilityPercent) -
-                    Number(a.reachabilityPercent)
-                )
-                .map((strategy) => (
-                  <li key={strategy.name}>
-                    <strong>{strategy.name}:</strong>{' '}
-                    {formatPercent(strategy.reachabilityPercent)}
-                    {' '}modelled reachability, selecting{' '}
-                    {formatCount(strategy.roadsSelected)}
-                    {' '}road segments.
-                  </li>
-                ))}
-            </ul>
-
-            {bestStrategy && (
-              <p>
-                In the fixed-failure-set comparison,{' '}
-                <strong>{bestStrategy.name}</strong> has the highest
-                reported reachability (
-                {formatPercent(bestStrategy.reachabilityPercent)}).
-                This does not guarantee real-world performance.
-              </p>
-            )}
-          </>
-        ) : (
-          <p>
-            No comparable strategy reachability results are available.
-          </p>
-        )}
-      </section>
-
-      {/* Random-trial chart and table */}
-      {randomTrialComparison.length > 0 && (
-        <section className="research-panel">
-          <h2>Random-trial comparison</h2>
-          <p>
-            Compare mean reachability across repeated simulations.
-            Select a failure level to compare strategies under the
-            same simulated disruption percentage.
-          </p>
-
-          <div className="research-chart-controls">
-            <label htmlFor="research-failure-level">
-              Simulated road-failure percentage
-            </label>
-
-            <select
-              id="research-failure-level"
-              value={activeFailure}
-              onChange={(event) =>
-                setSelectedFailure(event.target.value)
-              }
-            >
-              {failureLevels.map((level) => (
-                <option key={level} value={String(level)}>
-                  {level}% failure
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {chartData.length > 0 ? (
-            <div className="research-chart">
-              <ResponsiveContainer width="100%" height={340}>
-                <BarChart
-                  data={chartData}
-                  margin={{
-                    top: 15,
-                    right: 15,
-                    left: 5,
-                    bottom: 55,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-
-                  <XAxis
-                    dataKey="strategy"
-                    angle={-20}
-                    textAnchor="end"
-                    interval={0}
-                    height={80}
-                    tick={{ fontSize: 11 }}
-                  />
-
-                  <YAxis
-                    domain={[0, 100]}
-                    tickFormatter={(value) => `${value}%`}
-                  />
-
-                  <Tooltip
-                    formatter={(value) => [
-                      `${Number(value).toFixed(2)}%`,
-                      'Mean reachability',
-                    ]}
-                  />
-
-                  <Legend />
-
-                  <Bar
-                    dataKey="meanReachablePercent"
-                    name="Mean reachability"
-                    fill="#21a68a"
-                    radius={[5, 5, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <p>
-              No valid chart results are available for this failure level.
-            </p>
-          )}
-
-          <p className="research-footnote">
-            The chart shows reported mean reachability for each strategy
-            at the selected failure level. It does not represent live
-            road conditions.
-          </p>
-
-          <div className="research-table-wrapper">
-            <table className="research-table">
-              <thead>
-                <tr>
-                  <th>Failure scenario</th>
-                  <th>Strategy</th>
-                  <th>Trials</th>
-                  <th>Mean reachability</th>
-                  <th>Standard deviation</th>
-                  <th>Mean distance</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {randomTrialComparison.map((item, index) => (
-                  <tr
-                    key={`${item.failurePercent}-${item.strategy}-${index}`}
-                  >
-                    <td>{item.failurePercent}%</td>
-                    <td>{item.strategy}</td>
-                    <td>{formatCount(item.trials)}</td>
-                    <td>{formatPercent(item.meanReachablePercent)}</td>
-                    <td>{formatNumber(item.sdReachablePercent, 3)}</td>
-                    <td>{formatNumber(item.meanDistanceKm)} km</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
-
-      {/* Sensitivity analysis */}
-      {sensitivity.length > 0 && (
-        <section className="research-panel">
-          <h2>Sensitivity analysis</h2>
-          <p>
-            Examine how network reachability changes at different
-            simulated road-failure percentages.
-          </p>
-
-          <div className="research-table-wrapper">
-            <table className="research-table">
-              <thead>
-                <tr>
-                  <th>Failure scenario</th>
-                  <th>Strategy</th>
-                  <th>Roads closed</th>
-                  <th>Reachable nodes</th>
-                  <th>Reachability</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {sensitivity.map((item, index) => (
-                  <tr
-                    key={`${item.failurePercent}-${item.strategy}-${index}`}
-                  >
-                    <td>{item.failurePercent}%</td>
-                    <td>{item.strategy}</td>
-                    <td>{formatCount(item.closedRoads)}</td>
-                    <td>
-                      {formatCount(item.reachableNodes)}
-                      {' / '}
-                      {formatCount(item.totalNodes)}
-                    </td>
-                    <td>{formatPercent(item.reachabilityPercent)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
-
-      {/* Data-driven recommendation */}
-      <section className="research-panel research-recommendation">
-        <h2>Research Recommendation</h2>
-
-        {bestStrategy ? (
-          <>
-            <p>
-              Based on the fixed-failure-set evaluation, the strategy
-              with the highest reported modelled reachability is:
-            </p>
-
-            <div className="recommendation-result">
-              <span>Best reported strategy</span>
-              <h3>{bestStrategy.name}</h3>
-              <strong>
-                {formatPercent(bestStrategy.reachabilityPercent)}
-              </strong>
-              <span>Modelled network reachability</span>
-            </div>
-
-            <p>
-              This result suggests that the selected strategy may help
-              preserve network access under the evaluated disruption
-              scenario. Further testing across additional failure
-              scenarios is needed before making a real-world recommendation.
-            </p>
-
-            <ul>
-              <li>
-                <strong>Budget constraint:</strong> road protection is
-                limited by the model's road-length budget.
-              </li>
-              <li>
-                <strong>Evaluation:</strong> this finding uses the
-                fixed-failure-set results, not the separate optimization
-                experiment.
-              </li>
-              <li>
-                <strong>Practical limitation:</strong> modelled
-                reachability does not guarantee that roads are safe,
-                open, or accessible in real conditions.
-              </li>
-            </ul>
-          </>
-        ) : (
-          <p>
-            A recommendation is unavailable because no comparable
-            strategy reachability results were found.
-          </p>
-        )}
-      </section>
-
-      {/* Limitations and future improvements */}
-      <section className="research-limitations">
-        <h2>Research Limitations &amp; Future Improvements</h2>
-
-        <p>
-          LANDSAFE provides a graph-theoretical approach to exploring
-          road-network resilience and healthcare accessibility under
-          simulated landslide-related disruptions. The findings should
-          be interpreted in light of the following limitations.
-        </p>
-
-        <h3>1. Road-risk estimation</h3>
-        <p>
-          Road-risk scores are model-based estimates derived from
-          available road and terrain features. They are not official
-          landslide susceptibility assessments or live warnings.
-          The scores may not represent every factor contributing to
-          an actual landslide.
-        </p>
-
-        <h3>2. Simulated road failures</h3>
-        <p>
-          The evaluation uses simulated road disruptions rather than
-          a fully calibrated model of real landslide occurrence.
-          Randomly selected failed roads may not reflect the actual
-          location, timing, frequency, or severity of future landslides.
-        </p>
-
-        <h3>3. Healthcare facility coverage</h3>
-        <p>
-          The analysis uses mapped healthcare facilities available
-          in the project dataset. Some facilities may be missing,
-          incorrectly mapped, or unavailable for emergency services.
-          Therefore, the results may not represent access to every
-          healthcare facility in the study area.
-        </p>
-
-        <h3>4. Network reachability</h3>
-        <p>
-          Reachability measures the proportion of road-network nodes
-          that remain connected to a mapped healthcare facility under
-          a modelled scenario. Reachable nodes are a proxy for access;
-          they do not directly measure the population served, travel
-          time, ambulance availability, or actual road safety.
-        </p>
-
-        <h3>5. Road-length budget</h3>
-        <p>
-          The protection budget is constrained by road length rather
-          than actual construction, maintenance, or landslide-mitigation
-          costs. Roads of equal length may have different protection
-          costs, engineering requirements, and practical feasibility.
-        </p>
-
-        <h3>6. Optimization assumptions</h3>
-        <p>
-          The hospital-access optimization results depend on the
-          selected design-failure scenario, graph representation,
-          objective function, and budget constraint. The reported
-          solution does not guarantee optimal performance under every
-          possible disruption scenario or real-world condition.
-        </p>
-
-        <h3>7. Data quality and completeness</h3>
-        <p>
-          The analysis depends on the completeness and accuracy of
-          available road-network, terrain, and healthcare data.
-          Missing road attributes, mapping errors, and infrastructure
-          changes may affect risk estimates and network results.
-        </p>
-
-        <h3>Future improvements</h3>
-        <ul>
-          <li>
-            Incorporate verified historical landslide inventories and
-            rainfall observations to improve risk estimation.
-          </li>
-          <li>
-            Validate predicted road risks against observed landslide
-            events and official hazard information.
-          </li>
-          <li>
-            Test protection strategies across multiple failure
-            scenarios and different budget levels.
-          </li>
-          <li>
-            Include population distribution, travel time, and
-            emergency-service requirements when suitable data are
-            available.
-          </li>
-          <li>
-            Extend the budget model to include estimated mitigation
-            costs and engineering feasibility.
-          </li>
-          <li>
-            Update road and healthcare datasets regularly and compare
-            model outputs with local authority information.
-          </li>
-        </ul>
-
-        <p className="research-footnote">
-          LANDSAFE is a research prototype intended to support
-          exploration of road-network resilience. Its outputs should
-          not be used as a substitute for official landslide warnings,
-          verified road conditions, or professional engineering
-          assessments.
-        </p>
-      </section>
-    </section>
-  )
-}
+    
 
 /* =========================================
    LANDSAFE HOME PAGE - MODERN RESPONSIVE UI
@@ -4171,5 +3422,89 @@ function ResearchPage() {
 
   .research-hero-overlay p {
     font-size: 13px;
+  }
+}
+
+.graph-visuals {
+  margin-top: 24px;
+}
+
+.graph-visual-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.graph-visual-card {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 5px 18px rgba(15, 23, 42, 0.05);
+}
+
+.graph-visual-card-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.graph-visual-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #ccfbf1;
+  color: #115e59;
+  font-weight: 700;
+}
+
+.graph-visual-card h3 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+
+.graph-visual-card p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.graph-visual-chart {
+  width: 100%;
+  min-width: 0;
+  min-height: 260px;
+}
+
+.graph-visual-chart select {
+  margin: 10px 0 16px;
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.research-footnote {
+  margin-top: 14px;
+  color: #64748b;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 800px) {
+  .graph-visual-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .graph-visual-card {
+    padding: 14px;
   }
 }
