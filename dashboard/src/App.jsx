@@ -1153,7 +1153,7 @@ function ResearchPage() {
         const response = await fetch('/data/research-results.json')
 
         if (!response.ok) {
-          throw new Error('Could not load research results.')
+          throw new Error('Could not load the research results file.')
         }
 
         const data = await response.json()
@@ -1172,14 +1172,17 @@ function ResearchPage() {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err.message || 'Unable to load research results.')
+          setError(err.message || 'An unexpected error occurred.')
         }
       } finally {
-        if (!cancelled) setLoading(false)
+        if (!cancelled) {
+          setLoading(false)
+        }
       }
     }
 
     loadResults()
+
     return () => {
       cancelled = true
     }
@@ -1198,7 +1201,9 @@ function ResearchPage() {
     return (
       <section className="research-dashboard">
         <h1>Research &amp; Analysis</h1>
-        <p role="alert">{error || 'Research results are unavailable.'}</p>
+        <p role="alert">
+          {error || 'Research results are unavailable.'}
+        </p>
         <p>
           Check that the file exists at{' '}
           <code>dashboard/public/data/research-results.json</code>.
@@ -1217,53 +1222,62 @@ function ResearchPage() {
     sensitivity = [],
   } = results
 
-  const COLORS = [
-    '#0F766E',
-    '#2563EB',
-    '#EA580C',
-    '#7C3AED',
-    '#DB2777',
-    '#0891B2',
-    '#65A30D',
-  ]
-
-  const formatPercent = (value, digits = 2) => {
-    if (value == null || value === '' || !Number.isFinite(Number(value))) {
+  const formatPercent = (value, digits = 3) => {
+    if (
+      value == null ||
+      value === '' ||
+      !Number.isFinite(Number(value))
+    ) {
       return '—'
     }
+
     return `${Number(value).toFixed(digits)}%`
   }
 
   const formatNumber = (value, digits = 2) => {
-    if (value == null || value === '' || !Number.isFinite(Number(value))) {
+    if (
+      value == null ||
+      value === '' ||
+      !Number.isFinite(Number(value))
+    ) {
       return '—'
     }
+
     return Number(value).toFixed(digits)
   }
 
   const formatCount = (value) => {
-    if (value == null || value === '' || !Number.isFinite(Number(value))) {
+    if (
+      value == null ||
+      value === '' ||
+      !Number.isFinite(Number(value))
+    ) {
       return '—'
     }
+
     return Number(value).toLocaleString()
   }
 
   const comparableStrategies = strategies.filter(
-    (item) =>
-      item.name !== 'No protection' &&
-      item.reachabilityPercent != null &&
-      Number.isFinite(Number(item.reachabilityPercent))
+    (strategy) =>
+      strategy.name !== 'No protection' &&
+      strategy.reachabilityPercent != null &&
+      strategy.reachabilityPercent !== '' &&
+      Number.isFinite(Number(strategy.reachabilityPercent))
   )
 
   const bestStrategy = comparableStrategies.reduce(
-    (best, item) =>
+    (best, strategy) =>
       !best ||
-      Number(item.reachabilityPercent) >
+      Number(strategy.reachabilityPercent) >
         Number(best.reachabilityPercent)
-        ? item
+        ? strategy
         : best,
     null
   )
+
+  const designFailurePercent =
+    summary.designFailurePercent ?? summary.disruptionPercent
 
   const failureLevels = [
     ...new Set(
@@ -1277,132 +1291,50 @@ function ResearchPage() {
     (level) => String(level) === selectedFailure
   )
     ? selectedFailure
-    : String(failureLevels.includes(5) ? 5 : failureLevels[0] ?? '')
-
-  const randomAtSelectedFailure = randomTrialComparison
-    .filter((item) => Number(item.failurePercent) === Number(activeFailure))
-    .filter((item) => Number.isFinite(Number(item.meanReachablePercent)))
-
-  const strategyChartData = strategies
-    .filter((item) => Number.isFinite(Number(item.roadsSelected)))
-    .map((item) => ({
-      name: item.name,
-      roads: Number(item.roadsSelected),
-      length: Number(item.lengthKm),
-      reachability:
-        item.reachabilityPercent == null
-          ? null
-          : Number(item.reachabilityPercent),
-    }))
-
-  const connectivityChartData = connectivity
-    .filter(
-      (item) =>
-        item.reachabilityPercent != null &&
-        Number.isFinite(Number(item.reachabilityPercent))
-    )
-    .map((item) => ({
-      name: item.name,
-      reachability: Number(item.reachabilityPercent),
-    }))
-
-  const sensitivityStrategies = [
-    ...new Set(sensitivity.map((item) => item.strategy).filter(Boolean)),
-  ]
-
-  const sensitivityLevels = [
-    ...new Set(
-      sensitivity
-        .map((item) => Number(item.failurePercent))
-        .filter(Number.isFinite)
-    ),
-  ].sort((a, b) => a - b)
-
-  const sensitivityChartData = sensitivityLevels.map((level) => {
-    const row = { failure: level }
-
-    sensitivityStrategies.forEach((strategy) => {
-      const match = sensitivity.find(
-        (item) =>
-          Number(item.failurePercent) === level &&
-          item.strategy === strategy
+    : String(
+        failureLevels.includes(5)
+          ? 5
+          : failureLevels[0] ?? ''
       )
 
-      if (
-        match &&
-        match.reachabilityPercent != null &&
-        Number.isFinite(Number(match.reachabilityPercent))
-      ) {
-        row[strategy] = Number(match.reachabilityPercent)
-      }
-    })
-
-    return row
-  })
-
-  const randomTrialChartData = randomTrialComparison
+  const chartData = randomTrialComparison
     .filter(
-      (item) =>
-        item.meanReachablePercent != null &&
-        Number.isFinite(Number(item.meanReachablePercent))
+      (item) => String(item.failurePercent) === activeFailure
     )
     .map((item) => ({
-      failure: Number(item.failurePercent),
       strategy: item.strategy,
-      meanReachability: Number(item.meanReachablePercent),
+      meanReachablePercent: Number(item.meanReachablePercent),
     }))
-
-  const optimizationBudgetData = optimization
-    ? [
-        {
-          name: 'Protected',
-          length: Number(optimization.protectedLengthKm),
-        },
-        {
-          name: 'Remaining',
-          length: Number(optimization.budgetRemainingKm),
-        },
-      ].filter((item) => Number.isFinite(item.length))
-    : []
-
-  const GraphCard = ({ number, title, description, children }) => (
-    <article className="graph-visual-card">
-      <div className="graph-visual-card-heading">
-        <span className="graph-visual-number">
-          {String(number).padStart(2, '0')}
-        </span>
-        <div>
-          <h3>{title}</h3>
-          <p>{description}</p>
-        </div>
-      </div>
-      <div className="graph-visual-chart">{children}</div>
-    </article>
-  )
+    .filter((item) =>
+      Number.isFinite(item.meanReachablePercent)
+    )
 
   return (
     <section className="research-dashboard">
       <PageHeader
         eyebrow="GRAPH THEORY RESEARCH"
-        title="Research & Analysis"
+        title="Research &amp; Analysis"
         description="Compare road-protection strategies under modelled road-disruption scenarios."
       />
 
+      {/* Research picture banner */}
       <section className="research-hero-image">
         <img
           src="https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1400&q=85"
           alt="Mountain terrain representing landslide resilience research"
         />
+
         <div className="research-hero-overlay">
           <span>LANDSAFE · RESEARCH &amp; ANALYSIS</span>
           <h2>Building Resilient Road Networks</h2>
           <p>
-            Explore graph theory, road-risk analysis, and strategies for
-            protecting access to healthcare.
+            Explore graph theory, road-risk analysis, and
+            strategies for protecting access to healthcare.
           </p>
         </div>
       </section>
 
+      {/* Research notice */}
       <div className="research-notice">
         <strong>Research prototype:</strong> these results represent
         simulated scenarios, not live landslide warnings or guaranteed
@@ -1421,36 +1353,34 @@ function ResearchPage() {
         </article>
 
         <article className="research-stat">
-          <span>Healthcare facilities</span>
+          <span>Mapped healthcare facilities</span>
           <strong>{formatCount(summary.healthcareFacilities)}</strong>
         </article>
 
         <article className="research-stat">
           <span>Road-length budget</span>
           <strong>{formatPercent(summary.budgetPercent, 1)}</strong>
-          <p>{formatNumber(summary.budgetLengthKm, 2)} km</p>
+          <p>{formatNumber(summary.budgetLengthKm, 1)} km</p>
         </article>
 
         <article className="research-stat">
-          <span>Design-failure scenario</span>
-          <strong>
-            {formatPercent(
-              summary.designFailurePercent ?? summary.disruptionPercent,
-              1
-            )}
-          </strong>
+          <span>Optimization design-failure scenario</span>
+          <strong>{formatPercent(designFailurePercent, 1)}</strong>
           <p>
-            {formatCount(summary.designFailedRoadCount)} failed roads
+            {summary.designFailedRoadCount != null
+              ? `${formatCount(summary.designFailedRoadCount)} roads failed in the design scenario`
+              : 'Simulated road disruption'}
           </p>
         </article>
       </section>
 
-      {/* Strategy comparison table */}
+      {/* Strategy comparison */}
       <section className="research-panel">
         <h2>Strategy comparison</h2>
         <p>
-          Reachability results are from the fixed-failure-set evaluation.
-          Missing values are displayed as unavailable rather than estimated.
+          Road selections are compared with the fixed-failure-set
+          evaluation where matching results are available. A dash means
+          that a comparable result is unavailable.
         </p>
 
         <div className="research-table-wrapper">
@@ -1459,21 +1389,29 @@ function ResearchPage() {
               <tr>
                 <th>Strategy</th>
                 <th>Roads selected</th>
-                <th>Length</th>
+                <th>Selected length</th>
                 <th>Mean risk</th>
                 <th>Centrality</th>
                 <th>Reachability</th>
               </tr>
             </thead>
             <tbody>
-              {strategies.map((item) => (
-                <tr key={item.name}>
-                  <td>{item.name}</td>
-                  <td>{formatCount(item.roadsSelected)}</td>
-                  <td>{formatNumber(item.lengthKm)} km</td>
-                  <td>{formatNumber(item.meanRisk, 3)}</td>
-                  <td>{formatNumber(item.centrality, 3)}</td>
-                  <td>{formatPercent(item.reachabilityPercent, 3)}</td>
+              {strategies.map((strategy) => (
+                <tr key={strategy.name}>
+                  <td>{strategy.name}</td>
+                  <td>{formatCount(strategy.roadsSelected)}</td>
+                  <td>{formatNumber(strategy.lengthKm)} km</td>
+                  <td>
+                    {strategy.meanRisk == null
+                      ? '—'
+                      : formatNumber(strategy.meanRisk, 3)}
+                  </td>
+                  <td>
+                    {strategy.centrality == null
+                      ? '—'
+                      : formatNumber(strategy.centrality, 3)}
+                  </td>
+                  <td>{formatPercent(strategy.reachabilityPercent)}</td>
                 </tr>
               ))}
             </tbody>
@@ -1486,260 +1424,496 @@ function ResearchPage() {
         </p>
       </section>
 
-      {/* Seven visualizations */}
+      {/* Healthcare-network reachability */}
+      <section className="research-panel">
+        <h2>Healthcare-network reachability</h2>
+        <p>
+          The same initial failed-road set is used to compare strategies.
+          This is separate from the optimization design scenario.
+        </p>
+
+        <div className="research-bars">
+          {connectivity.map((item) => {
+            const value = Number(item.reachabilityPercent)
+            const valid =
+              item.reachabilityPercent != null &&
+              item.reachabilityPercent !== '' &&
+              Number.isFinite(value)
+
+            return (
+              <div className="research-bar-row" key={item.name}>
+                <div className="research-bar-label">
+                  <span>{item.name}</span>
+                  <strong>
+                    {valid ? formatPercent(value) : '—'}
+                  </strong>
+                </div>
+
+                <div
+                  className="research-bar-track"
+                  role="img"
+                  aria-label={`${item.name}: ${
+                    valid ? formatPercent(value) : 'unavailable'
+                  } reachability`}
+                >
+                  <div
+                    className="research-bar-fill"
+                    style={{
+                      width: `${
+                        valid ? Math.max(0, Math.min(100, value)) : 0
+                      }%`,
+                    }}
+                  />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        <p className="research-footnote">
+          {notes.fairComparison ||
+            'Reachability is a modelled network measure, not a live road-status indicator.'}
+        </p>
+      </section>
+
+      {/* Interactive Graph Theory Research Visualizations */}
       <section className="research-panel graph-theory-visuals">
         <h2>Interactive Graph Theory Visualizations</h2>
         <p>
-          These charts summarize the supplied road-network experiments.
-          They do not predict live landslides or current road conditions.
+          Explore how road protection, simulated road failures, and
+          network connectivity relate to healthcare access in the
+          Ratnapura study area. These are research results, not live
+          road conditions.
         </p>
 
-        <div className="graph-visual-grid">
-          <GraphCard
-            number={1}
-            title="Roads selected by strategy"
-            description="Compare the number of selected road segments."
-          >
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={strategyChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-15} textAnchor="end" height={75} tick={{ fontSize: 11 }} />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="roads" name="Road segments" radius={[6, 6, 0, 0]}>
-                  {strategyChartData.map((item, index) => (
-                    <Cell key={item.name} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </GraphCard>
+        {(() => {
+          const COLORS = [
+            '#0F766E',
+            '#2563EB',
+            '#EA580C',
+            '#7C3AED',
+            '#DB2777',
+            '#0891B2',
+            '#65A30D',
+          ]
 
-          <GraphCard
-            number={2}
-            title="Fixed-scenario reachability"
-            description="Compare reachable network nodes in the same evaluation scenario."
-          >
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={connectivityChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-15} textAnchor="end" height={75} tick={{ fontSize: 11 }} />
-                <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
-                <Tooltip formatter={(v) => [`${Number(v).toFixed(3)}%`, 'Reachability']} />
-                <Bar dataKey="reachability" name="Reachability" radius={[6, 6, 0, 0]}>
-                  {connectivityChartData.map((item, index) => (
-                    <Cell key={item.name} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </GraphCard>
+          const validStrategies = strategies.filter(
+            (item) =>
+              Number.isFinite(Number(item.roadsSelected)) &&
+              item.roadsSelected != null
+          )
 
-          <GraphCard
-            number={3}
-            title="Selected road length"
-            description="Compare the reported selected length for each strategy."
-          >
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={strategyChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-15} textAnchor="end" height={75} tick={{ fontSize: 11 }} />
-                <YAxis />
-                <Tooltip formatter={(v) => [`${Number(v).toFixed(2)} km`, 'Selected length']} />
-                <Bar dataKey="length" name="Length (km)" radius={[6, 6, 0, 0]}>
-                  {strategyChartData.map((item, index) => (
-                    <Cell key={item.name} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </GraphCard>
+          const roadSelectionData = validStrategies.map((item) => ({
+            name: item.name,
+            roads: Number(item.roadsSelected),
+          }))
 
-          <GraphCard
-            number={4}
-            title="Reachability sensitivity"
-            description="Compare strategies separately across the available failure levels."
-          >
-            {sensitivityChartData.length ? (
-              <ResponsiveContainer width="100%" height={320}>
-                <LineChart data={sensitivityChartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="failure" tickFormatter={(v) => `${v}%`} />
-                  <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
-                  <Tooltip
-                    labelFormatter={(v) => `Failed-road level: ${v}%`}
-                    formatter={(v) => [`${Number(v).toFixed(3)}%`, 'Reachability']}
-                  />
-                  <Legend />
-                  {sensitivityStrategies.map((strategy, index) => (
-                    <Line
-                      key={strategy}
-                      type="monotone"
-                      dataKey={strategy}
-                      name={strategy}
-                      stroke={COLORS[index % COLORS.length]}
-                      strokeWidth={2}
-                      connectNulls={false}
-                      dot={{ r: 3 }}
-                    />
-                  ))}
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <p>No sensitivity data available.</p>
-            )}
-          </GraphCard>
+          const riskData = validStrategies
+            .filter((item) => item.meanRisk != null)
+            .map((item) => ({
+              name: item.name,
+              risk: Number(item.meanRisk),
+              centrality: Number(item.centrality || 0),
+            }))
 
-          <GraphCard
-            number={5}
-            title="Repeated simulation results"
-            description="Each point shows a reported mean reachability for a strategy and failure level."
-          >
-            {randomTrialChartData.length ? (
-              <ResponsiveContainer width="100%" height={320}>
-                <ScatterChart>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    type="number"
-                    dataKey="failure"
-                    name="Failure level"
-                    tickFormatter={(v) => `${v}%`}
-                  />
-                  <YAxis
-                    type="number"
-                    dataKey="meanReachability"
-                    name="Mean reachability"
-                    domain={[0, 100]}
-                    tickFormatter={(v) => `${v}%`}
-                  />
-                  <Tooltip
-                    formatter={(v, name) => [
-                      `${Number(v).toFixed(3)}%`,
-                      name,
-                    ]}
-                    labelFormatter={() => 'Simulation result'}
-                  />
-                  <Legend />
-                  {[...new Set(randomTrialChartData.map((item) => item.strategy))]
-                    .map((strategy, index) => (
-                      <Scatter
-                        key={strategy}
-                        name={strategy}
-                        data={randomTrialChartData.filter((item) => item.strategy === strategy)}
-                        fill={COLORS[index % COLORS.length]}
+          const reachabilityData = connectivity
+            .filter(
+              (item) =>
+                item.reachabilityPercent != null &&
+                Number.isFinite(Number(item.reachabilityPercent))
+            )
+            .map((item) => ({
+              name: item.name,
+              reachability: Number(item.reachabilityPercent),
+            }))
+
+          const failureData = sensitivity
+            .filter(
+              (item) =>
+                item.failurePercent != null &&
+                item.reachabilityPercent != null &&
+                Number.isFinite(Number(item.reachabilityPercent))
+            )
+            .map((item) => ({
+              failure: Number(item.failurePercent),
+              strategy: item.strategy,
+              reachability: Number(item.reachabilityPercent),
+            }))
+
+          const randomData = randomTrialComparison
+            .filter(
+              (item) =>
+                item.failurePercent != null &&
+                item.meanReachablePercent != null &&
+                Number.isFinite(Number(item.meanReachablePercent))
+            )
+            .map((item) => ({
+              failure: Number(item.failurePercent),
+              strategy: item.strategy,
+              meanReachability: Number(item.meanReachablePercent),
+              distance: Number(item.meanDistanceKm || 0),
+            }))
+
+          const optimizationData = optimization
+            ? [
+                {
+                  name: 'Budget used',
+                  value:
+                    Number(optimization.protectedLengthKm || 0) +
+                      Number(optimization.budgetRemainingKm || 0) > 0
+                      ? (Number(optimization.protectedLengthKm || 0) /
+                          (Number(optimization.protectedLengthKm || 0) +
+                            Number(optimization.budgetRemainingKm || 0))) *
+                        100
+                      : 0,
+                },
+                {
+                  name: 'Budget remaining',
+                  value:
+                    Number(optimization.protectedLengthKm || 0) +
+                      Number(optimization.budgetRemainingKm || 0) > 0
+                      ? (Number(optimization.budgetRemainingKm || 0) /
+                          (Number(optimization.protectedLengthKm || 0) +
+                            Number(optimization.budgetRemainingKm || 0))) *
+                        100
+                      : 0,
+                },
+              ]
+            : []
+
+          const graphCard = (number, title, description, chart) => (
+            <article className="graph-visual-card" key={number}>
+              <div className="graph-visual-card-heading">
+                <span className="graph-visual-number">
+                  {String(number).padStart(2, '0')}
+                </span>
+                <div>
+                  <h3>{title}</h3>
+                  <p>{description}</p>
+                </div>
+              </div>
+              <div className="graph-visual-chart">{chart}</div>
+            </article>
+          )
+
+          return (
+            <div className="graph-visual-grid">
+              {graphCard(
+                1,
+                'Roads selected by strategy',
+                'Compare how many road segments each strategy selects.',
+                roadSelectionData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={roadSelectionData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="name"
+                        angle={-15}
+                        textAnchor="end"
+                        height={75}
+                        tick={{ fontSize: 11 }}
                       />
-                    ))}
-                </ScatterChart>
-              </ResponsiveContainer>
-            ) : (
-              <p>No repeated-simulation data available.</p>
-            )}
-          </GraphCard>
+                      <YAxis />
+                      <Tooltip />
+                      <Bar
+                        dataKey="roads"
+                        name="Road segments"
+                        radius={[7, 7, 0, 0]}
+                      >
+                        {roadSelectionData.map((item, index) => (
+                          <Cell
+                            key={item.name}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : <p>No road-selection data available.</p>
+              )}
 
-          <GraphCard
-            number={6}
-            title="Reachability at selected failure level"
-            description="Choose a failure percentage to compare the random-trial averages."
-          >
-            <label htmlFor="research-failure-level">
-              Simulated road-failure percentage
-            </label>
-            <select
-              id="research-failure-level"
-              value={activeFailure}
-              onChange={(event) => setSelectedFailure(event.target.value)}
-            >
-              {failureLevels.map((level) => (
-                <option key={level} value={String(level)}>
-                  {level}% failure
-                </option>
-              ))}
-            </select>
+              {graphCard(
+                2,
+                'Strategy reachability',
+                'Compare the percentage of network nodes that remain reachable.',
+                reachabilityData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={reachabilityData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="name"
+                        angle={-15}
+                        textAnchor="end"
+                        height={75}
+                        tick={{ fontSize: 11 }}
+                      />
+                      <YAxis
+                        domain={[0, 100]}
+                        tickFormatter={(value) => `${value}%`}
+                      />
+                      <Tooltip
+                        formatter={(value) =>
+                          `${Number(value).toFixed(2)}%`
+                        }
+                      />
+                      <Bar
+                        dataKey="reachability"
+                        name="Reachability"
+                        radius={[7, 7, 0, 0]}
+                      >
+                        {reachabilityData.map((item, index) => (
+                          <Cell
+                            key={item.name}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : <p>No comparable reachability data available.</p>
+              )}
 
-            {randomAtSelectedFailure.length ? (
-              <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={randomAtSelectedFailure}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="strategy" angle={-15} textAnchor="end" height={75} tick={{ fontSize: 11 }} />
-                  <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
-                  <Tooltip formatter={(v) => [`${Number(v).toFixed(3)}%`, 'Mean reachability']} />
-                  <Bar dataKey="meanReachablePercent" name="Mean reachability" radius={[6, 6, 0, 0]}>
-                    {randomAtSelectedFailure.map((item, index) => (
-                      <Cell key={item.strategy} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <p>No random-trial results for this failure level.</p>
-            )}
-          </GraphCard>
+              {graphCard(
+                3,
+                'Road risk by strategy',
+                'Compare the reported average risk score for each strategy.',
+                riskData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <AreaChart data={riskData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="name"
+                        angle={-15}
+                        textAnchor="end"
+                        height={75}
+                        tick={{ fontSize: 11 }}
+                      />
+                      <YAxis />
+                      <Tooltip />
+                      <Area
+                        type="monotone"
+                        dataKey="risk"
+                        name="Mean risk"
+                        stroke="#EA580C"
+                        fill="#FDBA74"
+                        strokeWidth={3}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="centrality"
+                        name="Centrality"
+                        stroke="#7C3AED"
+                        fill="#C4B5FD"
+                        strokeWidth={3}
+                      />
+                      <Legend />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : <p>No risk-score data available.</p>
+              )}
 
-          <GraphCard
-            number={7}
-            title="Optimization budget"
-            description="Compare the optimization's protected road length with its remaining budget."
-          >
-            {optimizationBudgetData.length ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={optimizationBudgetData}
-                    dataKey="length"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={90}
-                    label={({ name, value }) => `${name}: ${Number(value).toFixed(2)} km`}
-                  >
-                    {optimizationBudgetData.map((item, index) => (
-                      <Cell key={item.name} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(v) => [`${Number(v).toFixed(2)} km`, 'Road length']} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <p>Optimization budget data is unavailable.</p>
-            )}
-          </GraphCard>
-        </div>
+              {graphCard(
+                4,
+                'Road selection distribution',
+                'See how selected road segments are distributed across strategies.',
+                roadSelectionData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={roadSelectionData}
+                        dataKey="roads"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={95}
+                        label={({ name, percent }) =>
+                          `${name}: ${(percent * 100).toFixed(0)}%`
+                        }
+                      >
+                        {roadSelectionData.map((item, index) => (
+                          <Cell
+                            key={item.name}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : <p>No road-selection data available.</p>
+              )}
+
+              {graphCard(
+                5,
+                'Reachability under road failures',
+                'Explore how reachability changes as the simulated failure percentage changes.',
+                failureData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={failureData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="failure"
+                        type="number"
+                        domain={['dataMin', 'dataMax']}
+                        tickFormatter={(value) => `${value}%`}
+                      />
+                      <YAxis
+                        domain={[0, 100]}
+                        tickFormatter={(value) => `${value}%`}
+                      />
+                      <Tooltip
+                        labelFormatter={(value) =>
+                          `Failure level: ${value}%`
+                        }
+                        formatter={(value, name) => [
+                          `${Number(value).toFixed(2)}%`,
+                          name,
+                        ]}
+                      />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="reachability"
+                        name="Reachability"
+                        stroke="#2563EB"
+                        strokeWidth={3}
+                        dot={{ r: 4 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : <p>No sensitivity data available.</p>
+              )}
+
+              {graphCard(
+                6,
+                'Repeated simulation results',
+                'Compare average reachability from the available random trials.',
+                randomData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <ScatterChart>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        type="number"
+                        dataKey="failure"
+                        name="Failure percentage"
+                        tickFormatter={(value) => `${value}%`}
+                      />
+                      <YAxis
+                        type="number"
+                        dataKey="meanReachability"
+                        name="Mean reachability"
+                        domain={[0, 100]}
+                        tickFormatter={(value) => `${value}%`}
+                      />
+                      <Tooltip
+                        cursor={{ strokeDasharray: '3 3' }}
+                        formatter={(value, name) => [
+                          Number(value).toFixed(2),
+                          name,
+                        ]}
+                      />
+                      <Legend />
+                      {Array.from(
+                        new Set(randomData.map((item) => item.strategy))
+                      ).map((strategy, index) => (
+                        <Scatter
+                          key={strategy}
+                          name={strategy}
+                          data={randomData.filter(
+                            (item) => item.strategy === strategy
+                          )}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                    </ScatterChart>
+                  </ResponsiveContainer>
+                ) : <p>No random-trial data available.</p>
+              )}
+
+              {graphCard(
+                7,
+                'Optimization budget use',
+                'View the proportion of the selected road-length budget used and remaining.',
+                optimizationData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={optimizationData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={95}
+                        label={({ name, value }) =>
+                          `${name}: ${Number(value).toFixed(1)}%`
+                        }
+                      >
+                        <Cell fill="#0F766E" />
+                        <Cell fill="#F59E0B" />
+                      </Pie>
+                      <Tooltip
+                        formatter={(value) =>
+                          `${Number(value).toFixed(2)}%`
+                        }
+                      />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : <p>Optimization budget data is unavailable.</p>
+              )}
+            </div>
+          )
+        })()}
       </section>
 
-      {/* Optimization results */}
+      {/* Optimization experiment */}
       {optimization && (
         <section className="research-panel">
           <h2>Hospital-access optimization</h2>
           <p>
-            This experiment uses its own design-failure scenario and should
-            not be directly compared with the fixed-failure-set percentages.
+            This optimization experiment uses its own design-failure
+            scenario. Its result should not be directly compared with
+            the fixed-failure-set percentages above.
           </p>
 
           <div className="research-stat-grid">
             <article className="research-stat">
-              <span>Modelled reachable nodes</span>
-              <strong>{formatPercent(optimization.reachablePercent)}</strong>
-              <p>{formatCount(optimization.reachableNodeCount)} nodes</p>
+              <span>Modelled node reachability</span>
+              <strong>
+                {formatPercent(optimization.reachablePercent)}
+              </strong>
+              <p>
+                {formatCount(optimization.reachableNodeCount)}
+                {' '}reachable nodes
+              </p>
             </article>
 
             <article className="research-stat">
               <span>Roads selected</span>
-              <strong>{formatCount(optimization.selectedRoadCount)}</strong>
+              <strong>
+                {formatCount(optimization.selectedRoadCount)}
+              </strong>
+              <p>Selected by the optimization model</p>
             </article>
 
             <article className="research-stat">
-              <span>Protected length</span>
-              <strong>{formatNumber(optimization.protectedLengthKm)} km</strong>
-              <p>{formatNumber(optimization.budgetRemainingKm)} km remaining</p>
+              <span>Protected road length</span>
+              <strong>
+                {formatNumber(optimization.protectedLengthKm)} km
+              </strong>
+              <p>
+                {formatNumber(optimization.budgetRemainingKm)} km
+                {' '}of budget length remaining
+              </p>
             </article>
 
             <article className="research-stat">
               <span>Solver status</span>
-              <strong>{optimization.status || 'Unavailable'}</strong>
+              <strong>{optimization.status || 'Not available'}</strong>
               <p>
                 {optimization.optimalityProven
-                  ? 'Solver reports optimality proven'
+                  ? 'Optimality proven by solver'
                   : 'Optimality not confirmed'}
               </p>
             </article>
@@ -1757,101 +1931,148 @@ function ResearchPage() {
       <section className="research-panel">
         <h2>Key findings</h2>
 
-        {comparableStrategies.length ? (
+        {comparableStrategies.length > 0 ? (
           <>
             <ul>
               {comparableStrategies
                 .slice()
-                .sort((a, b) => Number(b.reachabilityPercent) - Number(a.reachabilityPercent))
-                .map((item) => (
-                  <li key={item.name}>
-                    <strong>{item.name}:</strong>{' '}
-                    {formatPercent(item.reachabilityPercent, 3)} reachability,
-                    with {formatCount(item.roadsSelected)} selected roads.
+                .sort(
+                  (a, b) =>
+                    Number(b.reachabilityPercent) -
+                    Number(a.reachabilityPercent)
+                )
+                .map((strategy) => (
+                  <li key={strategy.name}>
+                    <strong>{strategy.name}:</strong>{' '}
+                    {formatPercent(strategy.reachabilityPercent)}
+                    {' '}modelled reachability, selecting{' '}
+                    {formatCount(strategy.roadsSelected)}
+                    {' '}road segments.
                   </li>
                 ))}
             </ul>
 
             {bestStrategy && (
               <p>
-                In this fixed-failure-set evaluation,{' '}
-                <strong>{bestStrategy.name}</strong> has the highest reported
-                reachability ({formatPercent(bestStrategy.reachabilityPercent, 3)}).
-                This is a modelled result, not a guarantee of real-world access.
+                In the fixed-failure-set comparison,{' '}
+                <strong>{bestStrategy.name}</strong> has the highest
+                reported reachability (
+                {formatPercent(bestStrategy.reachabilityPercent)}).
+                This does not guarantee real-world performance.
               </p>
             )}
           </>
         ) : (
-          <p>No comparable strategy reachability results are available.</p>
+          <p>
+            No comparable strategy reachability results are available.
+          </p>
         )}
       </section>
 
-      {/* Sensitivity table */}
-      {sensitivity.length > 0 && (
-        <section className="research-panel">
-          <h2>Sensitivity analysis data</h2>
-          <p>
-            These results represent separate simulated failure levels,
-            not live landslide probabilities.
-          </p>
-          <div className="research-table-wrapper">
-            <table className="research-table">
-              <thead>
-                <tr>
-                  <th>Failure level</th>
-                  <th>Strategy</th>
-                  <th>Roads closed</th>
-                  <th>Reachable nodes</th>
-                  <th>Reachability</th>
-                  <th>Mean distance</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sensitivity.map((item, index) => (
-                  <tr key={`${item.failurePercent}-${item.strategy}-${index}`}>
-                    <td>{item.failurePercent}%</td>
-                    <td>{item.strategy}</td>
-                    <td>{formatCount(item.closedRoads)}</td>
-                    <td>
-                      {formatCount(item.reachableNodes)} / {formatCount(item.totalNodes)}
-                    </td>
-                    <td>{formatPercent(item.reachabilityPercent, 3)}</td>
-                    <td>{formatNumber(item.meanDistanceKm)} km</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
-
-      {/* Random trial table */}
+      {/* Random-trial comparison */}
       {randomTrialComparison.length > 0 && (
         <section className="research-panel">
-          <h2>Random-trial comparison data</h2>
+          <h2>Random-trial comparison</h2>
           <p>
-            Means and standard deviations summarize the repeated simulations
-            reported in the research-results file.
+            Compare mean reachability across repeated simulations.
+            Select a failure level to compare strategies under the
+            same simulated disruption percentage.
           </p>
+
+          <div className="research-chart-controls">
+            <label htmlFor="research-failure-level">
+              Simulated road-failure percentage
+            </label>
+
+            <select
+              id="research-failure-level"
+              value={activeFailure}
+              onChange={(event) =>
+                setSelectedFailure(event.target.value)
+              }
+            >
+              {failureLevels.map((level) => (
+                <option key={level} value={String(level)}>
+                  {level}% failure
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {chartData.length > 0 ? (
+            <div className="research-chart">
+              <ResponsiveContainer width="100%" height={340}>
+                <BarChart
+                  data={chartData}
+                  margin={{
+                    top: 15,
+                    right: 15,
+                    left: 5,
+                    bottom: 55,
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="strategy"
+                    angle={-20}
+                    textAnchor="end"
+                    interval={0}
+                    height={80}
+                    tick={{ fontSize: 11 }}
+                  />
+                  <YAxis
+                    domain={[0, 100]}
+                    tickFormatter={(value) => `${value}%`}
+                  />
+                  <Tooltip
+                    formatter={(value) => [
+                      `${Number(value).toFixed(2)}%`,
+                      'Mean reachability',
+                    ]}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="meanReachablePercent"
+                    name="Mean reachability"
+                    fill="#21a68a"
+                    radius={[5, 5, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <p>
+              No valid chart results are available for this failure level.
+            </p>
+          )}
+
+          <p className="research-footnote">
+            The chart shows reported mean reachability for each strategy
+            at the selected failure level. It does not represent live
+            road conditions.
+          </p>
+
           <div className="research-table-wrapper">
             <table className="research-table">
               <thead>
                 <tr>
-                  <th>Failure level</th>
+                  <th>Failure scenario</th>
                   <th>Strategy</th>
                   <th>Trials</th>
                   <th>Mean reachability</th>
-                  <th>SD reachability</th>
+                  <th>Standard deviation</th>
                   <th>Mean distance</th>
                 </tr>
               </thead>
               <tbody>
                 {randomTrialComparison.map((item, index) => (
-                  <tr key={`${item.failurePercent}-${item.strategy}-${index}`}>
+                  <tr
+                    key={`${item.failurePercent}-${item.strategy}-${index}`}
+                  >
                     <td>{item.failurePercent}%</td>
                     <td>{item.strategy}</td>
                     <td>{formatCount(item.trials)}</td>
-                    <td>{formatPercent(item.meanReachablePercent, 3)}</td>
+                    <td>{formatPercent(item.meanReachablePercent)}</td>
                     <td>{formatNumber(item.sdReachablePercent, 3)}</td>
                     <td>{formatNumber(item.meanDistanceKm)} km</td>
                   </tr>
@@ -1862,74 +2083,444 @@ function ResearchPage() {
         </section>
       )}
 
-      {/* Research limitations */}
+      {/* Road-selection chart */}
+      <section className="research-panel">
+        <h2>Roads Selected by Strategy</h2>
+        <p>Compare how many road segments each strategy selects.</p>
+        <div className="research-chart">
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={strategies}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis />
+              <Tooltip />
+              <Bar
+                dataKey="roadsSelected"
+                name="Roads selected"
+                radius={[6, 6, 0, 0]}
+              >
+                {strategies.map((item, index) => (
+                  <Cell
+                    key={item.name}
+                    fill={['#0d9488', '#6366f1', '#f59e0b', '#ec4899'][index % 4]}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
+
+      {/* Selected road length */}
+      <section className="research-panel">
+        <h2>Road Length Selected</h2>
+        <p>Compare the total road length selected under each strategy.</p>
+        <div className="research-chart">
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={strategies}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis />
+              <Tooltip
+                formatter={(value) => [
+                  `${Number(value).toFixed(2)} km`,
+                  'Selected length',
+                ]}
+              />
+              <Bar
+                dataKey="lengthKm"
+                name="Length (km)"
+                radius={[6, 6, 0, 0]}
+              >
+                {strategies.map((item, index) => (
+                  <Cell
+                    key={item.name}
+                    fill={['#2563eb', '#14b8a6', '#a855f7', '#f97316'][index % 4]}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
+
+      {/* Risk score */}
+      <section className="research-panel">
+        <h2>Average Road-Risk Score</h2>
+        <p>Compare the reported average risk score for each strategy.</p>
+        <div className="research-chart">
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={strategies.filter(
+                (item) =>
+                  item.meanRisk != null &&
+                  Number.isFinite(Number(item.meanRisk))
+              )}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis domain={[0, 1]} />
+              <Tooltip
+                formatter={(value) => [
+                  Number(value).toFixed(3),
+                  'Mean risk',
+                ]}
+              />
+              <Bar
+                dataKey="meanRisk"
+                name="Mean risk"
+                fill="#ef4444"
+                radius={[6, 6, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
+
+      {/* Reachability chart */}
+      <section className="research-panel">
+        <h2>Healthcare Network Reachability</h2>
+        <p>
+          Compare the percentage of network nodes that remain reachable.
+        </p>
+        <div className="research-chart">
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={connectivity.filter(
+                (item) =>
+                  item.reachabilityPercent != null &&
+                  item.reachabilityPercent !== '' &&
+                  Number.isFinite(Number(item.reachabilityPercent))
+              )}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis
+                domain={[0, 100]}
+                tickFormatter={(value) => `${value}%`}
+              />
+              <Tooltip
+                formatter={(value) => [
+                  `${Number(value).toFixed(3)}%`,
+                  'Reachability',
+                ]}
+              />
+              <Bar
+                dataKey="reachabilityPercent"
+                name="Reachability"
+                radius={[6, 6, 0, 0]}
+              >
+                {connectivity.map((item, index) => (
+                  <Cell
+                    key={`${item.name}-${index}`}
+                    fill={['#16a34a', '#0ea5e9', '#8b5cf6', '#f59e0b'][index % 4]}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
+
+      {/* Sensitivity chart */}
+      {sensitivity.length > 0 && (
+        <section className="research-panel">
+          <h2>Effect of Increasing Road Failures</h2>
+          <p>
+            Explore how modelled reachability changes as more roads fail.
+          </p>
+          <div className="research-chart">
+            <ResponsiveContainer width="100%" height={340}>
+              <LineChart data={sensitivity}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="failurePercent"
+                  tickFormatter={(value) => `${value}%`}
+                />
+                <YAxis
+                  domain={[0, 100]}
+                  tickFormatter={(value) => `${value}%`}
+                />
+                <Tooltip
+                  formatter={(value) => [
+                    `${Number(value).toFixed(2)}%`,
+                    'Reachability',
+                  ]}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="reachabilityPercent"
+                  name="Reachability"
+                  stroke="#7c3aed"
+                  strokeWidth={3}
+                  dot={{ r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <p className="research-footnote">
+            Each point represents a row in the sensitivity dataset. If
+            several strategies share a failure level, the chart displays
+            those rows in dataset order.
+          </p>
+        </section>
+      )}
+
+      {/* Optimization budget */}
+      {optimization && (
+        <section className="research-panel">
+          <h2>Optimization Budget Use</h2>
+          <p>
+            Compare the road-length budget with selected and remaining lengths.
+          </p>
+          <div className="research-chart">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={[
+                  {
+                    name: 'Budget',
+                    length: Number(optimization.budgetLengthKm),
+                  },
+                  {
+                    name: 'Selected',
+                    length: Number(optimization.protectedLengthKm),
+                  },
+                  {
+                    name: 'Remaining',
+                    length: Number(optimization.budgetRemainingKm),
+                  },
+                ].filter((item) => Number.isFinite(item.length))}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip
+                  formatter={(value) => [
+                    `${Number(value).toFixed(2)} km`,
+                    'Road length',
+                  ]}
+                />
+                <Bar dataKey="length" name="Road length" radius={[6, 6, 0, 0]}>
+                  <Cell fill="#2563eb" />
+                  <Cell fill="#10b981" />
+                  <Cell fill="#f59e0b" />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </section>
+      )}
+
+      {/* Sensitivity analysis table */}
+      {sensitivity.length > 0 && (
+        <section className="research-panel">
+          <h2>Sensitivity analysis</h2>
+          <p>
+            Examine how network reachability changes at different
+            simulated road-failure percentages.
+          </p>
+
+          <div className="research-table-wrapper">
+            <table className="research-table">
+              <thead>
+                <tr>
+                  <th>Failure scenario</th>
+                  <th>Strategy</th>
+                  <th>Roads closed</th>
+                  <th>Reachable nodes</th>
+                  <th>Reachability</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sensitivity.map((item, index) => (
+                  <tr
+                    key={`${item.failurePercent}-${item.strategy}-${index}`}
+                  >
+                    <td>{item.failurePercent}%</td>
+                    <td>{item.strategy}</td>
+                    <td>{formatCount(item.closedRoads)}</td>
+                    <td>
+                      {formatCount(item.reachableNodes)}
+                      {' / '}
+                      {formatCount(item.totalNodes)}
+                    </td>
+                    <td>{formatPercent(item.reachabilityPercent)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {/* Data-driven recommendation */}
+      <section className="research-panel research-recommendation">
+        <h2>Research Recommendation</h2>
+
+        {bestStrategy ? (
+          <>
+            <p>
+              Based on the fixed-failure-set evaluation, the strategy
+              with the highest reported modelled reachability is:
+            </p>
+
+            <div className="recommendation-result">
+              <span>Best reported strategy</span>
+              <h3>{bestStrategy.name}</h3>
+              <strong>
+                {formatPercent(bestStrategy.reachabilityPercent)}
+              </strong>
+              <span>Modelled network reachability</span>
+            </div>
+
+            <p>
+              This result suggests that the selected strategy may help
+              preserve network access under the evaluated disruption
+              scenario. Further testing across additional failure
+              scenarios is needed before making a real-world recommendation.
+            </p>
+
+            <ul>
+              <li>
+                <strong>Budget constraint:</strong> road protection is
+                limited by the model's road-length budget.
+              </li>
+              <li>
+                <strong>Evaluation:</strong> this finding uses the
+                fixed-failure-set results, not the separate optimization
+                experiment.
+              </li>
+              <li>
+                <strong>Practical limitation:</strong> modelled
+                reachability does not guarantee that roads are safe,
+                open, or accessible in real conditions.
+              </li>
+            </ul>
+          </>
+        ) : (
+          <p>
+            A recommendation is unavailable because no comparable
+            strategy reachability results were found.
+          </p>
+        )}
+      </section>
+
+      {/* Limitations and future improvements */}
       <section className="research-limitations">
         <h2>Research Limitations &amp; Future Improvements</h2>
 
         <p>
-          LANDSAFE explores road-network resilience and healthcare access
-          using graph theory and modelled disruption scenarios. The results
-          should be interpreted with the following limitations.
+          LANDSAFE provides a graph-theoretical approach to exploring
+          road-network resilience and healthcare accessibility under
+          simulated landslide-related disruptions. The findings should
+          be interpreted in light of the following limitations.
         </p>
 
         <h3>1. Road-risk estimation</h3>
         <p>
-          Model-based road-risk scores are not official landslide susceptibility
-          assessments or live warnings. They may not include every factor that
-          contributes to an actual landslide.
+          Road-risk scores are model-based estimates derived from
+          available road and terrain features. They are not official
+          landslide susceptibility assessments or live warnings.
+          The scores may not represent every factor contributing to
+          an actual landslide.
         </p>
 
         <h3>2. Simulated road failures</h3>
         <p>
-          Simulated failed roads are not calibrated landslide probabilities.
-          Their locations may not reflect the timing, frequency, or severity
-          of real future landslides.
+          The evaluation uses simulated road disruptions rather than
+          a fully calibrated model of real landslide occurrence.
+          Randomly selected failed roads may not reflect the actual
+          location, timing, frequency, or severity of future landslides.
         </p>
 
         <h3>3. Healthcare facility coverage</h3>
         <p>
-          Results depend on the mapped healthcare facilities in the dataset.
-          Missing or incorrectly mapped facilities may affect the analysis.
+          The analysis uses mapped healthcare facilities available
+          in the project dataset. Some facilities may be missing,
+          incorrectly mapped, or unavailable for emergency services.
+          Therefore, the results may not represent access to every
+          healthcare facility in the study area.
         </p>
 
         <h3>4. Network reachability</h3>
         <p>
-          Reachable nodes are a proxy for access. They do not directly measure
-          population served, travel time, ambulance availability, or road safety.
+          Reachability measures the proportion of road-network nodes
+          that remain connected to a mapped healthcare facility under
+          a modelled scenario. Reachable nodes are a proxy for access;
+          they do not directly measure the population served, travel
+          time, ambulance availability, or actual road safety.
         </p>
 
         <h3>5. Road-length budget</h3>
         <p>
-          The budget is measured in road length rather than monetary cost.
-          Roads of equal length may have very different engineering and
-          mitigation costs.
+          The protection budget is constrained by road length rather
+          than actual construction, maintenance, or landslide-mitigation
+          costs. Roads of equal length may have different protection
+          costs, engineering requirements, and practical feasibility.
         </p>
 
         <h3>6. Optimization assumptions</h3>
         <p>
-          Optimization outcomes depend on the selected design-failure scenario,
-          graph representation, objective function, and budget constraint.
+          The hospital-access optimization results depend on the
+          selected design-failure scenario, graph representation,
+          objective function, and budget constraint. The reported
+          solution does not guarantee optimal performance under every
+          possible disruption scenario or real-world condition.
+        </p>
+
+        <h3>7. Data quality and completeness</h3>
+        <p>
+          The analysis depends on the completeness and accuracy of
+          available road-network, terrain, and healthcare data.
+          Missing road attributes, mapping errors, and infrastructure
+          changes may affect risk estimates and network results.
         </p>
 
         <h3>Future improvements</h3>
         <ul>
-          <li>Use verified historical landslide inventories and rainfall observations.</li>
-          <li>Validate modelled risks against observed landslide events.</li>
-          <li>Test strategies across multiple failure scenarios and budget levels.</li>
-          <li>Include population distribution and emergency travel time where data permit.</li>
-          <li>Incorporate estimated mitigation costs and engineering feasibility.</li>
-          <li>Update road and healthcare datasets regularly.</li>
+          <li>
+            Incorporate verified historical landslide inventories and
+            rainfall observations to improve risk estimation.
+          </li>
+          <li>
+            Validate predicted road risks against observed landslide
+            events and official hazard information.
+          </li>
+          <li>
+            Test protection strategies across multiple failure
+            scenarios and different budget levels.
+          </li>
+          <li>
+            Include population distribution, travel time, and
+            emergency-service requirements when suitable data are
+            available.
+          </li>
+          <li>
+            Extend the budget model to include estimated mitigation
+            costs and engineering feasibility.
+          </li>
+          <li>
+            Update road and healthcare datasets regularly and compare
+            model outputs with local authority information.
+          </li>
         </ul>
 
         <p className="research-footnote">
-          LANDSAFE is a research prototype. Its outputs are not a substitute
-          for official warnings, verified road conditions, or professional
-          engineering assessments.
+          LANDSAFE is a research prototype intended to support
+          exploration of road-network resilience. Its outputs should
+          not be used as a substitute for official landslide warnings,
+          verified road conditions, or professional engineering
+          assessments.
         </p>
       </section>
     </section>
   )
 }
+
+
+
+
 
 
 
